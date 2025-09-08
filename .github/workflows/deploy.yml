@@ -1,0 +1,99 @@
+name: Globber FE PROD Build, push docker image and deploy to server
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - feat/deployment-by-gcp
+    paths:
+      - "src/**"
+      - "package.json"
+      - "next.config.ts"
+      - ".github/workflows/deploy.yml"
+      - "Dockerfile"
+      - "docker-compose.yml"
+
+jobs:
+  build-and-push:
+    runs-on: self-hosted
+    environment: Docker
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build application
+        run: pnpm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build, Tag, and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: jiohjung/globber-fe:latest
+          build-args: |
+            NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}
+
+  deploy:
+    runs-on: self-hosted
+    needs: build-and-push
+    environment: Docker
+
+    steps:
+      - name: Run remote SSH commands
+        run: |
+          ssh jiohgpt@35.239.106.41 << EOF
+            echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+            docker pull jiohjung/globber-fe:latest
+
+            echo "Stopping container"
+            docker stop globber-fe || true
+
+            echo "Removing container"
+            docker rm globber-fe || true
+
+                    echo "Create custom bridge network (if not exists)"
+                    docker network inspect globber_fe_bridge >/dev/null 2>&1 || \
+                    docker network create \
+                      --driver bridge \
+                      --subnet=172.28.0.0/16 \
+                      globber_fe_bridge
+
+                    echo "Starting container"
+                    docker run -d \
+                      --name globber-fe \
+                      --network globber_fe_bridge \
+                      --ip 172.28.0.2 \
+                      -p 3000:80 \
+                      -e TZ=Asia/Seoul \
+                      -e NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL_PROD }} \
+                      jiohjung/globber-fe:latest
+          EOF
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
