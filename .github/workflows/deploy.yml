@@ -53,6 +53,8 @@ jobs:
           tags: jiohjung/globber-fe:latest
           build-args: |
             NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
     runs-on: ubuntu-latest
