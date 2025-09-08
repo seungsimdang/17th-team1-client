@@ -199,6 +199,13 @@ const GlobePrototype = () => {
 
   const currentPattern = travelPatterns[currentGlobeIndex];
 
+  // 라벨이 있는 국가들 (travelPatterns에 정의된 모든 국가) - 국가명 기반
+  const labeledCountries = new Set([
+    'Japan', 'South Korea', 'Taiwan', 'Thailand', 'Singapore',
+    'United States of America', 'France', 'Egypt', 'Brazil', 'Australia',
+    'Italy', 'Spain', 'United Kingdom', 'Germany', 'Switzerland'
+  ]);
+
   useEffect(() => {
     // Globe.gl 동적 로딩
     const loadGlobe = async () => {
@@ -229,9 +236,12 @@ const GlobePrototype = () => {
           .atmosphereAltitude(0.15);
 
         // 국가 데이터 로드
-        fetch("//unpkg.com/world-atlas/countries-50m.json")
+        fetch("//unpkg.com/world-atlas/countries-110m.json")
           .then((res) => res.json())
-          .then((countriesData) => {
+          .then(async (countries) => {
+            const { feature } = await import('topojson-client');
+            const geoData = feature(countries, countries.objects.countries);
+            
             // 현재 패턴의 국가 ISO 코드 추출
             const countryISOCodes = currentPattern.countries.map((c) => {
               // 국가별 ISO 코드 매핑
@@ -260,12 +270,16 @@ const GlobePrototype = () => {
             const uniqueISOCodes = [...new Set(countryISOCodes)];
 
             globe
-              .polygonsData(
-                countriesData.features.filter((d: any) =>
-                  uniqueISOCodes.includes(d.properties.ISO_A3)
-                )
-              )
+              .polygonsData((geoData as any).features) // 모든 국가를 포함
               .polygonCapColor((feat: any) => {
+                const countryName = feat.properties?.name || feat.properties?.NAME || feat.properties?.ADMIN || feat.properties?.NAME_LONG;
+                
+                // 라벨이 없는 국가는 마스킹 처리 (매우 연한 회색)
+                if (!labeledCountries.has(countryName)) {
+                  return 'rgba(100, 100, 100, 0.1)';
+                }
+                
+                const isoCode = feat.properties.ISO_A3;
                 const countryData = currentPattern.countries.find((c: any) => {
                   const isoMap: { [key: string]: string } = {
                     JPN: "JPN",
@@ -292,10 +306,31 @@ const GlobePrototype = () => {
                   ? countryData?.color || "#666666"
                   : "#666666";
               })
-              .polygonSideColor(() => "#333333")
-              .polygonStrokeColor(() => "#111111")
+              .polygonSideColor((feat: any) => {
+                const countryName = feat.properties?.name || feat.properties?.NAME || feat.properties?.ADMIN || feat.properties?.NAME_LONG;
+                // 라벨이 없는 국가는 마스킹 처리
+                if (!labeledCountries.has(countryName)) {
+                  return 'rgba(80, 80, 80, 0.1)';
+                }
+                return "#333333";
+              })
+              .polygonStrokeColor((feat: any) => {
+                const countryName = feat.properties?.name || feat.properties?.NAME || feat.properties?.ADMIN || feat.properties?.NAME_LONG;
+                // 라벨이 없는 국가는 마스킹 처리
+                if (!labeledCountries.has(countryName)) {
+                  return 'rgba(120, 120, 120, 0.1)';
+                }
+                return "#111111";
+              })
               .polygonAltitude(0.01)
-              .polygonLabel("")
+              .polygonLabel((feat: any) => {
+                const countryName = feat.properties?.name || feat.properties?.NAME || feat.properties?.ADMIN || feat.properties?.NAME_LONG;
+                // 라벨이 없는 국가는 라벨을 표시하지 않음
+                if (!labeledCountries.has(countryName)) {
+                  return '';
+                }
+                return `🌍 ${countryName}`;
+              })
               .onPolygonClick((polygon: any) => {
                 const countryId = polygon.properties.ISO_A3;
                 setSelectedCountry(countryId);
