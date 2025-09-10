@@ -823,11 +823,10 @@ const GlobePrototype = () => {
         const isCluster = d.count > 1;
         const displayText = isCluster ? `${d.count}개 도시` : d.name;
 
-        // 줌 레벨에 따른 라벨 크기 조절
-        const scaleFactor = Math.max(0.8, Math.min(1.5, 3 / zoomLevel));
-        const fontSize = Math.round(13 * scaleFactor);
-        const flagSize = Math.round(16 * scaleFactor);
-        const padding = Math.round(8 * scaleFactor);
+        // 라벨 크기 고정 (zoom에 영향받지 않음)
+        const fontSize = 13;
+        const flagSize = 16;
+        const padding = 8;
 
         el.innerHTML = `
           <div style="
