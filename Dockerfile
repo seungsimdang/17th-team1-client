@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 FROM base AS builder
 WORKDIR /app
@@ -30,7 +30,6 @@ COPY --from=builder /app/package.json .
 
 ARG NEXT_PUBLIC_BASE_URL
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
-ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
 ENV PORT=80
 CMD ["node", "server.js"]
