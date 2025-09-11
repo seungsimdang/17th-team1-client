@@ -196,6 +196,39 @@ const GlobePrototype = () => {
     return isoMap[countryId] || countryId;
   };
 
+  // 작은 국가 라벨 오프셋 처리용 설정
+  const SMALL_LABEL_ISOS = new Set([
+    'SGP', // 싱가포르
+    'TWN', // 대만
+    'HKG', // 홍콩
+    'MAC', // 마카오
+    'QAT', // 카타르
+    'BHR', // 바레인
+    'KWT', // 쿠웨이트
+    'LBN', // 레바논
+    'LUX', // 룩셈부르크
+    'MLT', // 몰타
+    'AND', // 안도라
+    'MCO', // 모나코
+    'LIE', // 리히텐슈타인
+    'SMR', // 산마리노
+    'VAT', // 바티칸
+  ]);
+
+  // 줌(=고도)에 따라 적당한 라벨 이동 거리(경도 기준 degree) 계산 및 적용
+  const computeDisplacedPosition = (
+    lat: number,
+    lng: number,
+    zoom: number
+  ): { lat: number; lng: number } => {
+    // 기본 이동 각도. 너무 멀면(zoom 큼) 조금, 가까우면 약간 더
+    const baseDeg = 3; // 대략 동쪽으로 3도 이동을 기준
+    const scale = Math.max(0.6, Math.min(1.2, 3 / (zoom + 0.5)));
+    const offsetDeg = baseDeg * scale;
+    const newLng = ((lng + offsetDeg + 540) % 360) - 180; // -180~180 보정
+    return { lat, lng: newLng };
+  };
+
   // 거리 기반 클러스터링 함수
   const clusterLocations = (locations: any[], distance: number) => {
     const clusters: any[] = [];
@@ -221,7 +254,7 @@ const GlobePrototype = () => {
 
         const dist = Math.sqrt(
           Math.pow(location.lat - otherLocation.lat, 2) +
-            Math.pow(location.lng - otherLocation.lng, 2)
+          Math.pow(location.lng - otherLocation.lng, 2)
         );
 
         if (dist < distance) {
@@ -407,9 +440,11 @@ const GlobePrototype = () => {
         console.log('Globe 인스턴스 생성 중...');
         const globe = new Globe(globeEl.current)
           // Blue Marble 고해상도 지구본 이미지 사용
-          .globeImageUrl(
-            '//unpkg.com/three-globe/example/img/earth-blue-marble.jpg'
-          )
+          // .globeImageUrl(
+          // '//unpkg.com/three-globe/example/img/earth-blue-marble.jpg'
+          // 'https://eoimages.gsfc.nasa.gov/images/imagerecords/8000/8108/ipcc_bluemarble_west_lrg.jpg'
+          // './globe-image.jpg'
+          // )
           .bumpImageUrl(
             '//unpkg.com/three-globe/example/img/earth-topology.png'
           )
@@ -491,8 +526,7 @@ const GlobePrototype = () => {
                 const isoCode = feat.id; // properties가 아니라 최상위 id 필드 사용
 
                 console.log(
-                  `🗺️ 국가 ${
-                    feat.properties?.name || 'Unknown'
+                  `🗺️ 국가 ${feat.properties?.name || 'Unknown'
                   }: ISO=${isoCode}`
                 );
 
@@ -751,8 +785,7 @@ const GlobePrototype = () => {
           );
 
           console.log(
-            `국가 ${isoCode}: hasLabel=${hasLabel}, 색상=${
-              hasLabel ? countryData.color : 'rgba(50,50,50,0.1)'
+            `국가 ${isoCode}: hasLabel=${hasLabel}, 색상=${hasLabel ? countryData.color : 'rgba(50,50,50,0.1)'
             }`
           );
 
@@ -792,8 +825,7 @@ const GlobePrototype = () => {
                 );
 
                 console.log(
-                  `[재시도] 국가 ${isoCode}: hasLabel=${hasLabel}, 색상=${
-                    hasLabel ? countryData.color : 'rgba(50,50,50,0.1)'
+                  `[재시도] 국가 ${isoCode}: hasLabel=${hasLabel}, 색상=${hasLabel ? countryData.color : 'rgba(50,50,50,0.1)'
                   }`
                 );
                 return hasLabel ? countryData.color : 'rgba(50,50,50,0.1)';
@@ -808,11 +840,64 @@ const GlobePrototype = () => {
 
   // 클러스터 데이터가 변경될 때 HTML 라벨 업데이트
   useEffect(() => {
-    if (!globeRef.current || clusteredData.length === 0) return;
+    if (!globeRef.current || clusteredData.length === 0) {
+      if (globeRef.current) {
+        globeRef.current.htmlElementsData([]);
+        globeRef.current.arcsData?.([]);
+      }
+      return;
+    }
+
+    // 작은 국가 라벨 오프셋 및 리더 라인 데이터 생성
+    const labelData = clusteredData.map((d: any) => {
+      const iso = getISOCode(d.id);
+      const isCluster = d.count > 1;
+      if (!isCluster && SMALL_LABEL_ISOS.has(iso)) {
+        const displaced = computeDisplacedPosition(d.lat, d.lng, zoomLevel);
+        return {
+          ...d,
+          originalLat: d.lat,
+          originalLng: d.lng,
+          lat: displaced.lat,
+          lng: displaced.lng,
+          isLeader: true,
+        };
+      }
+      return { ...d, isLeader: false };
+    });
+
+    // 리더 라인을 얇고, 완전 곡선 대신 꺾이는 두 세그먼트로 구성
+    // 리더 라인을 꺾이는 직선처럼 보이도록: 원점 -> 코너, 코너 -> 라벨 두 세그먼트
+    const leaderLines = labelData
+      .filter((d: any) => d.isLeader)
+      .flatMap((d: any) => {
+        // 코너 포인트 계산: 대각선 후 수평으로 가는 느낌
+        const lngDelta = d.lng - d.originalLng;
+        const cornerLngRaw = d.originalLng + lngDelta * 0.45;
+        const cornerLng = ((cornerLngRaw + 540) % 360) - 180;
+        const cornerLatBump = Math.min(1.0, Math.max(0.35, Math.abs(lngDelta) * 0.12));
+        const cornerLat = d.originalLat + cornerLatBump;
+
+        const seg1 = {
+          startLat: d.originalLat,
+          startLng: d.originalLng,
+          endLat: cornerLat,
+          endLng: cornerLng,
+          color: 'rgba(198, 212, 233, 0.95)',
+        };
+        const seg2 = {
+          startLat: cornerLat,
+          startLng: cornerLng,
+          endLat: d.lat,
+          endLng: d.lng,
+          color: 'rgba(198, 212, 233, 0.95)',
+        };
+        return [seg1, seg2];
+      });
 
     // HTML 라벨 업데이트
     globeRef.current
-      .htmlElementsData(clusteredData)
+      .htmlElementsData(labelData)
       .htmlLat((d: any) => d.lat)
       .htmlLng((d: any) => d.lng)
       .htmlAltitude(0.01)
@@ -830,11 +915,10 @@ const GlobePrototype = () => {
 
         el.innerHTML = `
           <div style="
-            background: ${
-              isCluster
-                ? 'rgba(74, 144, 226, 0.95)'
-                : 'rgba(255, 255, 255, 0.95)'
-            };
+            background: ${isCluster
+            ? 'rgba(74, 144, 226, 0.95)'
+            : 'rgba(255, 255, 255, 0.95)'
+          };
             color: ${isCluster ? 'white' : '#333'};
             padding: ${padding}px ${padding * 1.5}px;
             border-radius: 20px;
@@ -854,11 +938,10 @@ const GlobePrototype = () => {
             min-width: ${isCluster ? '60px' : 'auto'};
             justify-content: center;
           ">
-            ${
-              isCluster
-                ? `<span style="font-size: ${flagSize}px;">🌍</span>`
-                : `<span style="font-size: ${flagSize}px;">${d.flag}</span>`
-            }
+            ${isCluster
+            ? `<span style="font-size: ${flagSize}px;">🌍</span>`
+            : `<span style="font-size: ${flagSize}px;">${d.flag}</span>`
+          }
             <span>${displayText}</span>
           </div>
         `;
@@ -927,6 +1010,21 @@ const GlobePrototype = () => {
 
         return el;
       });
+
+    // 리더 라인: arcs 레이어로 두 세그먼트를 매우 낮은 고도로 표현 (직선에 가까운 인상)
+    if (globeRef.current.arcsData) {
+      globeRef.current
+        .arcsData(leaderLines)
+        .arcColor((d: any) => d.color)
+        .arcAltitude(0.0008)
+        .arcStroke(0.22)
+        .arcsTransitionDuration(180)
+        .arcDashGap(0.12)
+        .arcDashLength(0.32)
+        .arcDashInitialGap(0)
+        .arcDashAnimateTime(0)
+        .arcLabel(() => '');
+    }
   }, [clusteredData, selectedCountry]); // clusteredData와 selectedCountry만 의존성으로 사용
 
   return (
