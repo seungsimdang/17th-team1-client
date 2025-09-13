@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from "react";
 
 interface CountryData {
   id: string;
@@ -32,54 +32,53 @@ export const useClustering = ({ countries, zoomLevel }: UseClusteringProps) => {
 
   // 거리 기반 클러스터링 함수 (메모화)
   const clusterLocations = useCallback(
-    (locations: CountryData[], distance: number): ClusterData[] => {
+    (locations: CountryData[]): ClusterData[] => {
       const clusters: ClusterData[] = [];
-      const processed = new Set<number>();
+      const countryGroups = new Map<string, CountryData[]>();
 
-      locations.forEach((location, index) => {
-        if (processed.has(index)) return;
+      // 같은 국가끼리 그룹화
+      locations.forEach((location) => {
+        const countryFlag = location.flag;
+        if (!countryGroups.has(countryFlag)) {
+          countryGroups.set(countryFlag, []);
+        }
+        countryGroups.get(countryFlag)!.push(location);
+      });
 
-        const cluster: ClusterData = {
-          id: location.id,
-          name: location.name,
-          flag: location.flag,
-          lat: location.lat,
-          lng: location.lng,
-          color: location.color,
-          items: [location],
-          count: 1,
-        };
+      // 각 국가별로 클러스터 생성
+      countryGroups.forEach((cities, flag) => {
+        if (cities.length === 1) {
+          // 단일 도시면 그대로 유지
+          clusters.push({
+            id: cities[0].id,
+            name: cities[0].name,
+            flag: cities[0].flag,
+            lat: cities[0].lat,
+            lng: cities[0].lng,
+            color: cities[0].color,
+            items: cities,
+            count: 1,
+          });
+        } else {
+          // 여러 도시면 클러스터로 통합
+          const centerLat =
+            cities.reduce((sum, city) => sum + city.lat, 0) / cities.length;
+          const centerLng =
+            cities.reduce((sum, city) => sum + city.lng, 0) / cities.length;
 
-        // 주변의 가까운 위치들을 클러스터에 추가
-        locations.forEach((otherLocation, otherIndex) => {
-          if (otherIndex === index || processed.has(otherIndex)) return;
+          const countryName = cities[0].name.split(",")[1]?.trim() || "국가";
 
-          const dist = Math.sqrt(
-            Math.pow(location.lat - otherLocation.lat, 2) +
-              Math.pow(location.lng - otherLocation.lng, 2)
-          );
-
-          if (dist < distance) {
-            cluster.items.push(otherLocation);
-            cluster.count++;
-            processed.add(otherIndex);
-
-            // 클러스터 중심점 재계산
-            const totalLat = cluster.items.reduce(
-              (sum, item) => sum + item.lat,
-              0
-            );
-            const totalLng = cluster.items.reduce(
-              (sum, item) => sum + item.lng,
-              0
-            );
-            cluster.lat = totalLat / cluster.items.length;
-            cluster.lng = totalLng / cluster.items.length;
-          }
-        });
-
-        processed.add(index);
-        clusters.push(cluster);
+          clusters.push({
+            id: `cluster_${flag}`,
+            name: `${flag} ${countryName} ${cities.length}개 도시`,
+            flag: cities[0].flag,
+            lat: centerLat,
+            lng: centerLng,
+            color: cities[0].color,
+            items: cities,
+            count: cities.length,
+          });
+        }
       });
 
       return clusters;
@@ -87,45 +86,22 @@ export const useClustering = ({ countries, zoomLevel }: UseClusteringProps) => {
     []
   );
 
-  // 줌 레벨에 따른 클러스터링 거리 계산 (메모화)
-  const getClusterDistance = useCallback((zoom: number): number => {
-    if (zoom > 6) return 50; // 매우 멀리 - 최강 클러스터링
-    if (zoom > 5) return 40; // 멀리 - 강한 클러스터링
-    if (zoom > 4) return 30; // 중간 거리 - 중간 클러스터링
-    if (zoom > 3) return 20; // 가까이 - 약한 클러스터링
-    if (zoom > 2) return 15; // 더 가까이 - 매우 약한 클러스터링
-    if (zoom > 1.5) return 10; // 매우 가까이 - 최소 클러스터링
-    return 0; // 극도로 가까이 - 클러스터링 해제
-  }, []);
-
   // 클러스터 데이터 계산
   const clusters = useMemo(() => {
-    console.log('🎯 줌 레벨 변경됨:', zoomLevel);
+    console.log("국가별 클러스터링 시작:", countries.length);
 
-    // countries 배열이 비어있으면 빈 배열 반환
-    if (!countries || countries.length === 0) {
-      return [];
-    }
+    if (!countries || countries.length === 0) return [];
 
-    // 줌 레벨이 너무 높으면 (너무 멀리서 보면) 빈 배열 반환
-    if (zoomLevel > 10) {
-      console.log('줌 레벨이 너무 높음. 클러스터 숨김');
-      return [];
-    }
-
-    const clusterDistance = getClusterDistance(zoomLevel);
-    console.log(`클러스터 거리: ${clusterDistance}`);
-
-    const result = clusterLocations(countries, clusterDistance);
+    const result = clusterLocations(countries);
     console.log(`생성된 클러스터: ${result.length}개`);
 
     return result;
-  }, [countries, zoomLevel, clusterLocations, getClusterDistance]);
+  }, [countries, clusterLocations]);
 
   // 상태 업데이트
   useEffect(() => {
     setClusteredData(clusters);
-    console.log('클러스터 데이터 업데이트됨:', clusters.length, clusters);
+    console.log("클러스터 데이터 업데이트됨:", clusters.length, clusters);
   }, [clusters]);
 
   return {

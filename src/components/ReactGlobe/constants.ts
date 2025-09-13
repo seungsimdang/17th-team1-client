@@ -3,7 +3,7 @@ export const GLOBE_CONFIG = {
   WIDTH: 500, // 지구본 컴포넌트 너비 (px)
   HEIGHT: 500, // 지구본 컴포넌트 높이 (px)
   INITIAL_ALTITUDE: 2.5, // 초기 카메라 고도 (지구 반지름 배수)
-  MIN_ZOOM: 0.3, // 최소 줌 레벨
+  MIN_ZOOM: 0.01, // 최소 줌 레벨
   MAX_ZOOM: 3.0, // 최대 줌 레벨
   CLUSTER_ZOOM: 0.1, // 클러스터링이 활성화되는 줌 임계값
   FOCUS_ZOOM: 1.5, // 국가 포커스 시 줌 레벨
