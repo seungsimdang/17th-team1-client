@@ -1,9 +1,28 @@
-import { LABEL_OFFSET, COLORS } from './constants';
-import { calculateDottedLine } from './utils';
+import { LABEL_OFFSET, COLORS } from "./constants";
+import { calculateDottedLine } from "./utils";
 
 // 개별 라벨 스타일 생성
-export const createSingleLabelStyles = (d: any) => {
-  const { lineLength, angle } = calculateDottedLine();
+// styles.ts
+export const createSingleLabelStyles = (
+  d: any,
+  index: number = 0,
+  angleOffset: number = 0
+) => {
+  const distance = 50; // 중심점에서의 거리
+
+  // 기본 각도 + 오프셋 각도
+  const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315]; // 8방향
+  const baseAngle = baseAngles[index % baseAngles.length];
+  const finalAngle = (baseAngle + angleOffset) % 360;
+
+  // 각도를 라디안으로 변환
+  const radians = (finalAngle * Math.PI) / 180;
+
+  // x, y 좌표 계산
+  const offsetX = Math.cos(radians) * distance;
+  const offsetY = Math.sin(radians) * distance;
+
+  const { lineLength, angle } = calculateDottedLine(offsetX, offsetY);
 
   return {
     centerPoint: `
@@ -23,8 +42,13 @@ export const createSingleLabelStyles = (d: any) => {
       left: 0;
       width: ${lineLength}px;
       height: 2px;
-      background: linear-gradient(to right, ${COLORS.WHITE_LABEL} 50%, transparent 50%);
-      background-size: 8px 2px;
+      background: repeating-linear-gradient(
+        to right,
+        rgba(255,255,255,0.8) 0px,
+        rgba(255,255,255,0.8) 4px,
+        transparent 4px,
+        transparent 8px
+      );
       transform: rotate(${angle}deg);
       transform-origin: 0 1px;
       z-index: 5;
@@ -49,9 +73,9 @@ export const createSingleLabelStyles = (d: any) => {
       gap: 6px;
       pointer-events: auto;
       position: absolute;
-      z-index: 20;
-      top: ${LABEL_OFFSET.Y}px;
-      left: ${LABEL_OFFSET.X}px;
+      z-index: ${20 + index};
+      top: ${offsetY}px;
+      left: ${offsetX}px;
       transform: translate(-50%, -50%);
       white-space: nowrap;
     `,

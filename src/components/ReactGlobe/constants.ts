@@ -5,7 +5,7 @@ export const GLOBE_CONFIG = {
   INITIAL_ALTITUDE: 2.5, // 초기 카메라 고도 (지구 반지름 배수)
   MIN_ZOOM: 0.3, // 최소 줌 레벨
   MAX_ZOOM: 3.0, // 최대 줌 레벨
-  CLUSTER_ZOOM: 0.8, // 클러스터링이 활성화되는 줌 임계값
+  CLUSTER_ZOOM: 0.1, // 클러스터링이 활성화되는 줌 임계값
   FOCUS_ZOOM: 1.5, // 국가 포커스 시 줌 레벨
   MIN_DISTANCE: 50, // 클러스터링 최소 거리 (px)
   MAX_DISTANCE: 500, // 클러스터링 최대 거리 (px)
@@ -33,8 +33,8 @@ export const COLORS = {
   ATMOSPHERE: "#4a90e2", // 대기권 색상 (파란색)
   CLUSTER: "#4a90e2", // 클러스터 마커 색상
   CLUSTER_BG: "#2c3e50", // 클러스터 배경 색상 (어두운 회색)
-  POLYGON_SIDE: "#060606", // 폴리곤 측면 색상
-  POLYGON_STROKE: "rgba(255,255,255,0.6)", // 국경선 색상
+  POLYGON_SIDE: "rgba(100,100,100,0.1)", // 폴리곤 측면 색상
+  POLYGON_STROKE: "#fff", // 국경선 색상
   INACTIVE_POLYGON: "rgba(100, 100, 100, 0.02)", // 비활성 폴리곤 색상 (매우 연한 회색)
   WHITE_LABEL: "rgba(255,255,255,0.8)", // 흰색 라벨 텍스트 색상
   WHITE_BORDER: "rgba(255,255,255,0.6)", // 흰색 테두리 색상

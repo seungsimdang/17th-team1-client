@@ -74,7 +74,7 @@ const GlobePrototype = () => {
             id: "JPN3",
             name: "교토, 일본",
             flag: "🇯🇵",
-            lat: 35.0116,
+            lat: 36.0116,
             lng: 135.7681,
             color: "#e91e63",
           },
@@ -334,6 +334,7 @@ const GlobePrototype = () => {
           onZoomChange={handleZoomChange}
           clusteredData={clusteredData}
           shouldShowClusters={shouldShowClusters}
+          zoomLevel={zoomLevel}
         />
       </div>
 
