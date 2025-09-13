@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - chore/deploy-by-gcp-with-docker
+      - develop
     paths:
       - "src/**"
       - "package.json"
