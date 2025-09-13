@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, {
   useEffect,
@@ -6,41 +6,41 @@ import React, {
   useState,
   useCallback,
   useMemo,
-} from 'react';
-import dynamic from 'next/dynamic';
+} from "react";
+import dynamic from "next/dynamic";
 import {
   GLOBE_CONFIG,
   ANIMATION_DURATION,
   COLORS,
   EXTERNAL_URLS,
-} from './ReactGlobe/constants';
+} from "./ReactGlobe/constants";
 import {
   getISOCode,
   getPolygonColor,
   getPolygonLabel,
   createZoomPreventListeners,
-} from './ReactGlobe/utils';
+} from "./ReactGlobe/utils";
 import {
   createSingleLabelStyles,
   createClusterLabelStyles,
-} from './ReactGlobe/styles';
-import type { ReactGlobeProps, CountryData } from '../types/globe';
+} from "./ReactGlobe/styles";
+import type { ReactGlobeProps, CountryData } from "../types/globe";
 
-const Globe = dynamic(() => import('react-globe.gl'), {
+const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
   loading: () => (
     <div
       style={{
         width: GLOBE_CONFIG.WIDTH,
         height: GLOBE_CONFIG.HEIGHT,
-        borderRadius: '50%',
+        borderRadius: "50%",
         background:
-          'radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white',
-        fontSize: '14px',
+          "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "white",
+        fontSize: "14px",
       }}
     >
       🌍 Globe 로딩 중...
@@ -67,7 +67,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
   // 클라이언트 마운트 확인
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       setIsMounted(true);
     }
   }, []);
@@ -178,7 +178,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
   // HTML 요소 렌더링 함수
   const getHtmlElement = useCallback(
     (d: any) => {
-      const el = document.createElement('div');
+      const el = document.createElement("div");
       el.style.cssText = `
         position: relative;
         cursor: pointer;
@@ -196,7 +196,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
             <span style="font-size: 14px; pointer-events: none;">${
               d.flag
             }</span>
-            <span style="pointer-events: none;">${d.name.split(',')[0]}</span>
+            <span style="pointer-events: none;">${d.name.split(",")[0]}</span>
           </div>
         `;
       } else {
@@ -212,8 +212,8 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
             <span style="font-size: 11px; opacity: 0.8; pointer-events: none;">
               ${d.items
                 .slice(0, 2)
-                .map((item: any) => item.name.split(',')[0])
-                .join(', ')}${d.count > 2 ? ' 등' : ''}
+                .map((item: any) => item.name.split(",")[0])
+                .join(", ")}${d.count > 2 ? " 등" : ""}
             </span>
           </div>
         `;
@@ -260,8 +260,8 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         }
       };
 
-      el.addEventListener('click', handleClick);
-      el.addEventListener('mousedown', handleClick);
+      el.addEventListener("click", handleClick);
+      el.addEventListener("mousedown", handleClick);
       el.onclick = handleClick;
 
       return el;
@@ -272,7 +272,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
   // 줌 변경 감지
   const handleZoomChange = useCallback(
     (pov: any) => {
-      if (pov && typeof pov.altitude === 'number') {
+      if (pov && typeof pov.altitude === "number") {
         let newZoom = pov.altitude;
 
         if (newZoom < GLOBE_CONFIG.MIN_ZOOM) {
@@ -301,7 +301,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
   // 브라우저 줌 방지 및 Globe 초기 설정
   useEffect(() => {
-    if (!isMounted || typeof window === 'undefined') return;
+    if (!isMounted || typeof window === "undefined") return;
 
     const timer = setTimeout(() => {
       if (globeRef.current && !globeLoading) {
@@ -320,16 +320,16 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
     const { preventZoom, preventKeyboardZoom, preventTouchZoom } =
       createZoomPreventListeners();
 
-    document.addEventListener('wheel', preventZoom, { passive: false });
-    document.addEventListener('keydown', preventKeyboardZoom);
-    document.addEventListener('touchstart', preventTouchZoom, {
+    document.addEventListener("wheel", preventZoom, { passive: false });
+    document.addEventListener("keydown", preventKeyboardZoom);
+    document.addEventListener("touchstart", preventTouchZoom, {
       passive: false,
     });
 
     return () => {
-      document.removeEventListener('wheel', preventZoom);
-      document.removeEventListener('keydown', preventKeyboardZoom);
-      document.removeEventListener('touchstart', preventTouchZoom);
+      document.removeEventListener("wheel", preventZoom);
+      document.removeEventListener("keydown", preventKeyboardZoom);
+      document.removeEventListener("touchstart", preventTouchZoom);
       clearTimeout(timer);
     };
   }, [isMounted, globeLoading]);
@@ -346,7 +346,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
     // Globe가 완전히 로드된 후 초기 시점 설정
     setTimeout(() => {
-      if (globeRef.current && typeof window !== 'undefined') {
+      if (globeRef.current && typeof window !== "undefined") {
         globeRef.current.pointOfView({
           altitude: GLOBE_CONFIG.INITIAL_ALTITUDE,
         });
@@ -360,14 +360,14 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         style={{
           width: GLOBE_CONFIG.WIDTH,
           height: GLOBE_CONFIG.HEIGHT,
-          borderRadius: '50%',
+          borderRadius: "50%",
           background:
-            'radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: '14px',
+            "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontSize: "14px",
         }}
       >
         🌍 Globe 로딩 중...
@@ -381,21 +381,21 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         style={{
           width: GLOBE_CONFIG.WIDTH,
           height: GLOBE_CONFIG.HEIGHT,
-          borderRadius: '50%',
+          borderRadius: "50%",
           background:
-            'radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontSize: '14px',
-          textAlign: 'center',
-          flexDirection: 'column',
-          gap: '10px',
+            "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontSize: "14px",
+          textAlign: "center",
+          flexDirection: "column",
+          gap: "10px",
         }}
       >
         <div>⚠️ Globe 로딩 실패</div>
-        <div style={{ fontSize: '12px', opacity: 0.8 }}>
+        <div style={{ fontSize: "12px", opacity: 0.8 }}>
           인터넷 연결을 확인해주세요
         </div>
       </div>
