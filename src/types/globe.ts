@@ -32,4 +32,5 @@ export interface ReactGlobeProps {
   onZoomChange: (zoomLevel: number) => void;
   clusteredData: ClusterData[];
   shouldShowClusters: boolean;
+  zoomLevel: number;
 }
