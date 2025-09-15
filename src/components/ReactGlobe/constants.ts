@@ -23,9 +23,9 @@ export const LABEL_OFFSET = {
 
 // 애니메이션 시간 (ms)
 export const ANIMATION_DURATION = {
-  CAMERA_MOVE: 1500, // 카메라 이동 애니메이션 시간
+  CAMERA_MOVE: 1500, // 카메라 이동 애니메이션 시간 (더 빠르게)
   INITIAL_SETUP: 1000, // 초기 설정 완료 대기 시간
-  ZOOM_UPDATE_DELAY: 100, // 줌 업데이트 디바운스 시간
+  ZOOM_UPDATE_DELAY: 50, // 줌 업데이트 디바운스 시간 (더 빠르게)
   SETUP_DELAY: 500, // 설정 지연 시간
 } as const;
 

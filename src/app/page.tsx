@@ -49,6 +49,7 @@ const GlobePrototype = () => {
   const [selectedClusterData, setSelectedClusterData] = useState<CountryData[] | null>(null); // 선택된 클러스터의 데이터
   const [zoomStack, setZoomStack] = useState<number[]>([]);
   const [snapZoomTo, setSnapZoomTo] = useState<number | null>(null);
+  const [, setSelectionStack] = useState<(CountryData[] | null)[]>([]); // 선택 경로 스택
 
   // 여행 패턴들 (메모화)
   const travelPatterns: TravelPattern[] = useMemo(
@@ -544,37 +545,78 @@ const GlobePrototype = () => {
     setSelectedCountry(countryId);
   }, []);
 
+  // 히스테리시스 임계값 (줌인/줌아웃 다르게)
+  const CITY_TO_COUNTRY_IN = 0.24;  // 도시→나라 (줌인 시 진입 기준)
+  const CITY_TO_COUNTRY_OUT = 0.30; // 도시→나라 (줌아웃 시 이탈 기준)
+  const COUNTRY_TO_ROOT_IN = 0.55;  // 나라→루트 (줌인 시 진입 기준)
+  const COUNTRY_TO_ROOT_OUT = 0.80; // 나라→루트 (줌아웃 시 이탈 기준)
+
   const handleZoomChange = useCallback((newZoomLevel: number) => {
     setZoomLevel((prev) => {
       const rounded = Number(newZoomLevel.toFixed(2));
+      
+      // 클릭으로 인한 줌인인 경우 즉시 반영 (부드러운 애니메이션을 위해)
+      if (rounded < prev - 0.1) {
+        return rounded;
+      }
+      
       // 줌아웃 시작을 감지하면 직전 단계로 스냅
       if (rounded > prev + 0.01 && zoomStack.length > 0) {
         const last = zoomStack[zoomStack.length - 1];
         setSnapZoomTo(last);
         setZoomStack((s) => s.slice(0, -1));
-        // 스냅 적용 후 현재 값은 유지
+        // 선택 경로도 한 단계 상위로 복원
+        setSelectionStack((stack) => {
+          if (stack.length === 0) {
+            setSelectedClusterData(null);
+            return stack;
+          }
+          const newStack = stack.slice(0, -1);
+          const parent = newStack.length > 0 ? newStack[newStack.length - 1] : null;
+          setSelectedClusterData(parent || null);
+          return newStack;
+        });
         return prev;
       }
+      
       // 상위로 충분히 멀어지면 초기화
-      if (rounded >= 0.8 && selectedClusterData) {
+      if (rounded >= COUNTRY_TO_ROOT_OUT && selectedClusterData) {
         setSelectedClusterData(null);
         setZoomStack([]);
         setSnapZoomTo(null);
+        setSelectionStack([]);
       }
-      // 큰 변화만 반영
-      if (Math.abs(prev - rounded) >= 0.05) {
+      
+      // 스냅 스택이 없는 일반 줌아웃 경로에서 임계값 교차 시 상위로 복원
+      if (rounded > prev + 0.01 && zoomStack.length === 0) {
+        // 도시 → 나라 경계 상향 교차
+        if (prev <= CITY_TO_COUNTRY_OUT && rounded >= CITY_TO_COUNTRY_OUT) {
+          setSelectionStack((stack) => {
+            if (stack.length === 0) return stack;
+            const newStack = stack.slice(0, -1);
+            const parent = newStack.length > 0 ? newStack[newStack.length - 1] : null;
+            setSelectedClusterData(parent || null);
+            return newStack;
+          });
+        }
+      }
+
+      // 작은 변화도 반영 (더 부드러운 줌)
+      if (Math.abs(prev - rounded) >= 0.02) {
         return rounded;
       }
+      
       return prev;
     });
   }, [selectedClusterData, zoomStack]);
 
   // 클러스터 선택 핸들러
   const handleClusterSelect = useCallback((cluster: any) => {
-    // 현재 줌을 스택에 저장하고 선택 갱신
+    // 현재 줌/선택을 스택에 저장하고 선택 갱신
     setZoomStack((prev) => [...prev, zoomLevel]);
+    setSelectionStack((stack) => [...stack, selectedClusterData ? [...selectedClusterData] : null]);
     setSelectedClusterData(cluster.items);
-  }, []);
+  }, [zoomLevel, selectedClusterData]);
 
   // 휠로 줌아웃 시, 가까운 스냅 지점으로 자동 복귀 (직전 스택 단계)
   useEffect(() => {
@@ -598,6 +640,7 @@ const GlobePrototype = () => {
     setZoomLevel(2.5);
     setZoomStack([]);
     setSnapZoomTo(null);
+    setSelectionStack([]);
   };
 
   return (
