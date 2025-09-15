@@ -55,31 +55,27 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
   selectedCountry,
   onCountrySelect,
   onZoomChange,
+  onClusterSelect,
   clusteredData,
   shouldShowClusters,
   zoomLevel,
+  selectedClusterData,
+  snapZoomTo,
 }) => {
   const globeRef = useRef<any>(null);
+  const activeCountryFlagRef = useRef<string | null>(null);
+  const [activeCountryFlag, setActiveCountryFlag] = useState<string | null>(null);
+  const [activeCountryItemIdList, setActiveCountryItemIdList] = useState<string[] | null>(null);
   const [countries, setCountries] = useState<any[]>([]);
   const [globeLoading, setGlobeLoading] = useState(true);
   const [globeError, setGlobeError] = useState<string | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
-
   const currentPattern = travelPatterns[currentGlobeIndex];
-
-  // 클라이언트 마운트 확인
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsMounted(true);
-    }
-  }, []);
 
   // ISO 코드 매핑 함수
   const getISOCodeMapped = useCallback(getISOCode, []);
 
   // 국가 데이터 로드
   useEffect(() => {
-    if (!isMounted) return;
 
     const loadCountries = async () => {
       try {
@@ -107,7 +103,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
     };
 
     loadCountries();
-  }, [isMounted]);
+  }, []);
 
   // 폴리곤 색상 계산 함수
   const getPolygonColorMapped = useCallback(
@@ -156,9 +152,54 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
   // HTML 요소 데이터
   const htmlElements = useMemo(() => {
-    if (!isMounted) return [];
+    if (typeof window === "undefined") return [];
 
-    if (shouldShowClusters && clusteredData.length > 0) {
+    // 항상 클러스터링된 데이터 사용 (줌 레벨/선택 상태에 따라 필터)
+    if (clusteredData.length > 0) {
+      if (selectedClusterData && selectedClusterData.length > 0) {
+        const selectedIds = new Set(selectedClusterData.map((c) => c.id));
+
+        // 단계1: 나라 단위 클러스터 라벨만 노출
+        if (zoomLevel >= 0.32 && zoomLevel <= 0.7) {
+          return clusteredData;
+        }
+
+        // 단계2: 선택된 나라의 단일 지역만 노출 → selectedClusterData를 직접 싱글 형태로 변환하여 사용
+        return selectedClusterData.map((country) => ({
+          ...country,
+          items: [country],
+          count: 1,
+        }));
+      }
+
+      // 선택된 클러스터 데이터가 없더라도, 잠긴 국가 정보/ID목록이 있으면 그 나라의 선택된 도시들만 표시
+      if (zoomLevel <= 0.25 && (activeCountryFlag || activeCountryFlagRef.current || (activeCountryItemIdList && activeCountryItemIdList.length > 0))) {
+        const lockedFlag = activeCountryFlag || activeCountryFlagRef.current;
+        const allowedIdSet = activeCountryItemIdList ? new Set(activeCountryItemIdList) : null;
+
+        // ID 목록이 있으면 그 집합만 노출
+        if (allowedIdSet && allowedIdSet.size > 0) {
+          const baseList = selectedClusterData && selectedClusterData.length > 0
+            ? selectedClusterData
+            : currentPattern.countries;
+          return baseList
+            .filter((it: any) => allowedIdSet.has(it.id))
+            .map((it: any) => ({ ...it, items: [it], count: 1 }));
+        }
+
+        // fallback: 국기 기반
+        if (lockedFlag) {
+          const base = selectedClusterData && selectedClusterData.length > 0
+            ? selectedClusterData
+            : clusteredData
+                .filter((c: any) => c.count === 1 && c.items && c.items.length === 1)
+                .map((c: any) => c.items[0]);
+          return base
+            .filter((it: any) => it.flag === lockedFlag)
+            .map((it: any) => ({ ...it, items: [it], count: 1 }));
+        }
+      }
+
       return clusteredData;
     }
 
@@ -167,11 +208,17 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       items: [country],
       count: 1,
     }));
-  }, [shouldShowClusters, clusteredData, currentPattern.countries, isMounted]);
+  }, [clusteredData, currentPattern.countries, selectedClusterData, zoomLevel, activeCountryFlag]);
 
   // HTML 요소 렌더링 함수
   const getHtmlElement = useCallback(
     (d: any) => {
+      if (typeof window === "undefined" || !document) {
+        // SSR 환경에서는 빈 div 반환
+        const el = document.createElement("div");
+        el.style.display = "none";
+        return el;
+      }
       const el = document.createElement("div");
       const labelIndex = htmlElements.findIndex((item) => item.id === d.id);
 
@@ -209,46 +256,57 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
       const currentPos = calculateScreenPosition(d.lat, d.lng);
 
-      // 다른 라벨들과의 화면상 거리 계산
-      const conflicts = htmlElements.filter((other) => {
-        if (other.id === d.id) return false;
-        const otherPos = calculateScreenPosition(other.lat, other.lng);
-        const distance = Math.sqrt(
-          Math.pow(currentPos.x - otherPos.x, 2) +
-            Math.pow(currentPos.y - otherPos.y, 2)
-        );
-        return distance < 100;
-      });
+      // 주변 라벨들을 그룹핑하여 균등 각도 배치
+      const groupRadius = zoomLevel <= 0.2 ? 120 : 140; // 도시단계에서 조금 더 타이트하게
+      const neighbors = htmlElements
+        .filter((other) => {
+          const otherPos = calculateScreenPosition(other.lat, other.lng);
+          const distance = Math.sqrt(
+            Math.pow(currentPos.x - otherPos.x, 2) +
+              Math.pow(currentPos.y - otherPos.y, 2)
+          );
+          return distance < groupRadius;
+        })
+        .sort((a, b) => {
+          // 안정적인 순서를 위해 id 기준 정렬
+          const aId = String(a.id);
+          const bId = String(b.id);
+          return aId < bId ? -1 : aId > bId ? 1 : 0;
+        });
 
-      // 충돌하는 라벨 수에 따라 각도 조정
-      let angleOffset = 0;
-      if (conflicts.length > 0) {
-        const labelIndex = htmlElements.findIndex((item) => item.id === d.id);
-
-        // 현재 라벨의 전체 인덱스를 사용
-        const myIndex = conflicts.filter(
-          (conflict) =>
-            htmlElements.findIndex((item) => item.id === conflict.id) <
-            labelIndex
-        ).length;
-
-        angleOffset = myIndex * (360 / (conflicts.length + 1));
-      }
+      const groupSize = Math.max(neighbors.length, 1);
+      const myGroupIndex = Math.max(
+        neighbors.findIndex((item) => item.id === d.id),
+        0
+      );
+      const angleStep = 360 / groupSize;
+      // 도시(개별) 라벨 단계에서는 거리도 동적 조정 (혼잡할수록 더 밖으로 배치)
+      const isCityLevel = d.count === 1;
+      const angleOffset = myGroupIndex * angleStep;
+      const dynamicDistance = isCityLevel
+        ? Math.min(140, 60 + groupSize * 6) // 그룹 크기에 따라 60~140px
+        : undefined;
 
       if (d.count === 1 || !d.items || d.items.length === 1) {
-        const styles = createSingleLabelStyles(d, labelIndex, angleOffset);
+        const baseItem = d.items && d.items.length === 1 ? d.items[0] : d;
+        const displayFlag = baseItem.flag ?? d.flag;
+        const displayName = (baseItem.name ?? d.name).split(",")[0];
+        const styles = createSingleLabelStyles(
+          d,
+          labelIndex,
+          angleOffset,
+          dynamicDistance
+        );
         el.innerHTML = `
           <div style="${styles.centerPoint}"></div>
           <div style="${styles.dottedLine}"></div>
           <div style="${styles.label}">
-            <span style="font-size: 14px; pointer-events: none;">${
-              d.flag
-            }</span>
-            <span style="pointer-events: none;">${d.name.split(",")[0]}</span>
+            <span style="font-size: 14px; pointer-events: none;">${displayFlag}</span>
+            <span style="pointer-events: none;">${displayName}</span>
           </div>
         `;
       } else {
-        const styles = createClusterLabelStyles(d);
+        const styles = createClusterLabelStyles(d, labelIndex, angleOffset);
 
         el.innerHTML = `
           <div style="${styles.centerPoint}"></div>
@@ -272,24 +330,78 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         event.preventDefault();
         event.stopPropagation();
 
+        console.log("클릭 이벤트 발생:", d);
+        console.log("클러스터 정보:", { count: d.count, items: d.items?.length });
+
         if (globeRef.current) {
           const targetLat = d.lat;
           const targetLng = d.lng;
 
           if (d.count > 1 && d.items && d.items.length > 1) {
+            // 클러스터 클릭 시 - 2단계 줌(국가단위 → 도시단위)
+            const currentPov = globeRef.current.pointOfView();
+            const currentAlt = currentPov && typeof currentPov.altitude === "number" ? currentPov.altitude : undefined;
+
+            // 선택된 클러스터 내 국가가 여러 개인지 확인
+            const uniqueFlags = new Set((d.items || []).map((it: any) => it.flag));
+            const isMultiCountry = uniqueFlags.size > 1;
+
+            // 단일 국가면 국가 플래그 잠금, 다국가면 잠금 해제
+            if (isMultiCountry) {
+              setActiveCountryFlag(null);
+              activeCountryFlagRef.current = null;
+            } else if (d.flag) {
+              setActiveCountryFlag(d.flag);
+              activeCountryFlagRef.current = d.flag;
+            }
+
+            let targetAltitude: number = GLOBE_CONFIG.CLUSTER_ZOOM_STAGE1;
+            if (typeof currentAlt === "number") {
+              if (isMultiCountry) {
+                // 여러 국가가 섞여 있으면 1단계(국가 클러스터)부터 보여주기
+                targetAltitude = GLOBE_CONFIG.CLUSTER_ZOOM_STAGE1;
+              } else {
+                // 단일 국가면 2단계(도시)로 이동
+                targetAltitude = GLOBE_CONFIG.CLUSTER_ZOOM;
+              }
+            }
+
+            if (onClusterSelect) {
+              onClusterSelect(d);
+            }
+            // 국가 클러스터 클릭 시 ID 목록 저장 (단일 국가인 경우에만)
+            if (!isMultiCountry) {
+              const ids = (d.items || []).map((it: any) => it.id);
+              setActiveCountryItemIdList(ids);
+            } else {
+              setActiveCountryItemIdList(null);
+            }
+
             globeRef.current.pointOfView(
               {
                 lat: targetLat,
                 lng: targetLng,
-                altitude: GLOBE_CONFIG.CLUSTER_ZOOM,
+                altitude: targetAltitude,
               },
               ANIMATION_DURATION.CAMERA_MOVE
             );
 
             setTimeout(() => {
-              onZoomChange(GLOBE_CONFIG.CLUSTER_ZOOM);
+              console.log("클러스터 줌 레벨 업데이트:", targetAltitude);
+              onZoomChange(targetAltitude);
             }, ANIMATION_DURATION.ZOOM_UPDATE_DELAY);
           } else {
+            // 개별 나라 클릭 시 - 가까이 줌인하면서 개별 표시
+            console.log("개별 나라 클릭 - 줌 레벨:", GLOBE_CONFIG.FOCUS_ZOOM);
+            // 현재 라벨이 국가/도시 라벨이면 국가 플래그 잠금(상태와 ref 모두)
+            if (d.flag) {
+              setActiveCountryFlag(d.flag);
+              activeCountryFlagRef.current = d.flag;
+              // 도시 라벨 클릭의 경우 단일 아이템만 유지
+              if (d.items && d.items.length === 1) {
+                setActiveCountryItemIdList([d.items[0].id]);
+              }
+            }
             globeRef.current.pointOfView(
               {
                 lat: targetLat,
@@ -298,13 +410,19 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               },
               ANIMATION_DURATION.CAMERA_MOVE
             );
+
+            setTimeout(() => {
+              console.log("개별 나라 줌 레벨 업데이트:", GLOBE_CONFIG.FOCUS_ZOOM);
+              onZoomChange(GLOBE_CONFIG.FOCUS_ZOOM);
+            }, ANIMATION_DURATION.ZOOM_UPDATE_DELAY);
           }
         }
 
-        if (d.items && d.items.length > 0) {
-          onCountrySelect(d.items[0].id);
-        } else {
-          onCountrySelect(d.id);
+        // 나라 선택은 단일 아이템일 때만
+        if (!(d.count > 1)) {
+          const countryId = d.items && d.items.length === 1 ? d.items[0].id : d.id;
+          console.log("나라 선택:", countryId);
+          onCountrySelect(countryId);
         }
       };
 
@@ -314,7 +432,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
       return el;
     },
-    [onCountrySelect, htmlElements, currentPattern.countries]
+    [onCountrySelect, htmlElements, currentPattern.countries, zoomLevel]
   );
 
   // 줌 변경 감지
@@ -341,15 +459,23 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
           }
         }
 
+        // 외부에서 스냅 지시가 있으면 해당 값으로 고정
+        if (typeof snapZoomTo === 'number') {
+          newZoom = snapZoomTo;
+          if (globeRef.current) {
+            globeRef.current.pointOfView({ altitude: newZoom }, 0);
+          }
+        }
+
         onZoomChange(newZoom);
       }
     },
-    [onZoomChange]
+    [onZoomChange, snapZoomTo]
   );
 
   // 브라우저 줌 방지 및 Globe 초기 설정
   useEffect(() => {
-    if (!isMounted || typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
 
     const timer = setTimeout(() => {
       if (globeRef.current && !globeLoading) {
@@ -380,12 +506,11 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       document.removeEventListener("touchstart", preventTouchZoom);
       clearTimeout(timer);
     };
-  }, [isMounted, globeLoading]);
+  }, [globeLoading]);
 
   // 초기 시점 설정 (클라이언트에서만)
   useEffect(() => {
     if (
-      !isMounted ||
       !globeRef.current ||
       globeLoading ||
       countries.length === 0
@@ -400,9 +525,9 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         });
       }
     }, ANIMATION_DURATION.SETUP_DELAY);
-  }, [isMounted, globeLoading, countries]);
+  }, [globeLoading, countries]);
 
-  if (!isMounted || globeLoading) {
+  if (globeLoading) {
     return (
       <div
         style={{

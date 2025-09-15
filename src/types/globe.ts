@@ -30,7 +30,10 @@ export interface ReactGlobeProps {
   selectedCountry: string | null;
   onCountrySelect: (countryId: string | null) => void;
   onZoomChange: (zoomLevel: number) => void;
+  onClusterSelect?: (cluster: ClusterData) => void;
   clusteredData: ClusterData[];
   shouldShowClusters: boolean;
   zoomLevel: number;
+  selectedClusterData?: CountryData[];
+  snapZoomTo?: number | null;
 }

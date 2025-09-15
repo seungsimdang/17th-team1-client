@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useClustering } from "@/hooks/useClustering";
 
@@ -46,6 +46,9 @@ const GlobePrototype = () => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [currentGlobeIndex, setCurrentGlobeIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(2.5);
+  const [selectedClusterData, setSelectedClusterData] = useState<CountryData[] | null>(null); // 선택된 클러스터의 데이터
+  const [zoomStack, setZoomStack] = useState<number[]>([]);
+  const [snapZoomTo, setSnapZoomTo] = useState<number | null>(null);
 
   // 여행 패턴들 (메모화)
   const travelPatterns: TravelPattern[] = useMemo(
@@ -522,6 +525,7 @@ const GlobePrototype = () => {
   const { clusteredData, shouldShowClusters } = useClustering({
     countries: currentPattern.countries,
     zoomLevel,
+    selectedClusterData: selectedClusterData || undefined,
   });
 
   // 줌 레벨에 따른 클러스터링 거리 계산 (UI 표시용)
@@ -541,14 +545,44 @@ const GlobePrototype = () => {
   }, []);
 
   const handleZoomChange = useCallback((newZoomLevel: number) => {
-    // 큰 변화가 있을 때만 업데이트 (0.1 이상 차이)
     setZoomLevel((prev) => {
-      if (Math.abs(prev - newZoomLevel) >= 0.1) {
-        return Number(newZoomLevel.toFixed(2));
+      const rounded = Number(newZoomLevel.toFixed(2));
+      // 줌아웃 시작을 감지하면 직전 단계로 스냅
+      if (rounded > prev + 0.01 && zoomStack.length > 0) {
+        const last = zoomStack[zoomStack.length - 1];
+        setSnapZoomTo(last);
+        setZoomStack((s) => s.slice(0, -1));
+        // 스냅 적용 후 현재 값은 유지
+        return prev;
+      }
+      // 상위로 충분히 멀어지면 초기화
+      if (rounded >= 0.8 && selectedClusterData) {
+        setSelectedClusterData(null);
+        setZoomStack([]);
+        setSnapZoomTo(null);
+      }
+      // 큰 변화만 반영
+      if (Math.abs(prev - rounded) >= 0.05) {
+        return rounded;
       }
       return prev;
     });
+  }, [selectedClusterData, zoomStack]);
+
+  // 클러스터 선택 핸들러
+  const handleClusterSelect = useCallback((cluster: any) => {
+    // 현재 줌을 스택에 저장하고 선택 갱신
+    setZoomStack((prev) => [...prev, zoomLevel]);
+    setSelectedClusterData(cluster.items);
   }, []);
+
+  // 휠로 줌아웃 시, 가까운 스냅 지점으로 자동 복귀 (직전 스택 단계)
+  useEffect(() => {
+    if (typeof snapZoomTo === 'number') {
+      const t = setTimeout(() => setSnapZoomTo(null), 120);
+      return () => clearTimeout(t);
+    }
+  }, [snapZoomTo]);
 
   const [expandedCluster, setExpandedCluster] = useState<string | null>(null); // 추가
 
@@ -560,6 +594,10 @@ const GlobePrototype = () => {
   const handlePatternChange = (index: number) => {
     setCurrentGlobeIndex(index);
     setSelectedCountry(null);
+    setSelectedClusterData(null);
+    setZoomLevel(2.5);
+    setZoomStack([]);
+    setSnapZoomTo(null);
   };
 
   return (
@@ -644,9 +682,12 @@ const GlobePrototype = () => {
           selectedCountry={selectedCountry}
           onCountrySelect={handleCountrySelect}
           onZoomChange={handleZoomChange}
+          onClusterSelect={handleClusterSelect}
           clusteredData={clusteredData}
           shouldShowClusters={shouldShowClusters}
           zoomLevel={zoomLevel}
+          selectedClusterData={selectedClusterData || undefined}
+          snapZoomTo={snapZoomTo}
         />
       </div>
 

@@ -5,8 +5,9 @@ export const GLOBE_CONFIG = {
   INITIAL_ALTITUDE: 2.5, // 초기 카메라 고도 (지구 반지름 배수)
   MIN_ZOOM: 0.01, // 최소 줌 레벨
   MAX_ZOOM: 3.0, // 최대 줌 레벨
-  CLUSTER_ZOOM: 0.1, // 클러스터링이 활성화되는 줌 임계값
-  FOCUS_ZOOM: 1.5, // 국가 포커스 시 줌 레벨
+  CLUSTER_ZOOM_STAGE1: 0.5, // 1단계 줌 (하위 클러스터가 보이는 수준)
+  CLUSTER_ZOOM: 0.17, // 2단계 줌 (나라 단위가 보이는 수준)
+  FOCUS_ZOOM: 0.1, // 국가 포커스 시 줌 레벨 (더 가까이)
   MIN_DISTANCE: 50, // 클러스터링 최소 거리 (px)
   MAX_DISTANCE: 500, // 클러스터링 최대 거리 (px)
   ATMOSPHERE_ALTITUDE: 0.15, // 대기권 두께 (지구 반지름 배수)
