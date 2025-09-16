@@ -1,5 +1,3 @@
-'use client';
-
 export function FixedSaveButton({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) {
   return (
     <div className="fixed left-0 right-0 bottom-5 px-6 z-40">

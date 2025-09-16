@@ -1,5 +1,3 @@
-'use client';
-
 export function LoadingOverlay({ show }: { show: boolean }) {
   if (!show) return null;
   return (
