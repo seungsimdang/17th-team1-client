@@ -257,36 +257,21 @@ export function GoogleMapsModal({
         coordinateSearch();
     };
 
-    // Google Maps API 로드
     useEffect(() => {
         if (!isOpen) return;
 
-        const loadGoogleMaps = () => {
+        function waitForGoogleMaps() {
             if (window.google && window.google.maps && window.google.maps.places) {
-                console.log('Google Maps API 이미 로드됨');
                 initMap();
-                return;
+            } else {
+                setTimeout(waitForGoogleMaps, 200);
             }
+        }
 
-            console.log('Google Maps API 로드 시작');
-            const script = document.createElement("script");
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&language=ko&region=kr&callback=initMap`;
-            script.async = true;
-            script.defer = true;
-
-            window.initMap = () => {
-                console.log('Google Maps API 로드 완료');
-                initMap();
-            };
-            document.head.appendChild(script);
-        };
-
-        loadGoogleMaps();
+        waitForGoogleMaps();
 
         return () => {
-            if ('initMap' in window) {
-                delete (window as any).initMap;
-            }
+            // 필요하면 cleanup
         };
     }, [isOpen]);
 
