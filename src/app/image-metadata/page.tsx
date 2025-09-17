@@ -1,5 +1,9 @@
 import ImageMetadata from "@/components/image-metadata/ImageMetadata";
 
-export default function Page() {
-  return <ImageMetadata />;
+interface PageProps {
+  searchParams: { city?: string };
+}
+
+export default function Page({ searchParams }: PageProps) {
+  return <ImageMetadata initialCity={searchParams.city} />;
 }
