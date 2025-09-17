@@ -1,9 +1,10 @@
 import ImageMetadata from "@/components/image-metadata/ImageMetadata";
 
 interface PageProps {
-  searchParams: { city?: string };
+  searchParams: Promise<{ city?: string }>;
 }
 
-export default function Page({ searchParams }: PageProps) {
-  return <ImageMetadata initialCity={searchParams.city} />;
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams;
+  return <ImageMetadata initialCity={params.city} />;
 }
