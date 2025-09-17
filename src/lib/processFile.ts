@@ -88,7 +88,7 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
       )}, ${exifData.longitude.toFixed(4)}`;
       try {
         const addressResponse = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${exifData.latitude},${exifData.longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=ko`
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${exifData.latitude},${exifData.longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=ko&region=kr`
         );
         const addressData = await addressResponse.json();
         if (addressData.results && addressData.results.length > 0)

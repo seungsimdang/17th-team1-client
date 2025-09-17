@@ -5,6 +5,7 @@ import { processSingleFile } from "@/lib/processFile";
 import { LoadingOverlay } from "./LoadingOverlay";
 import { ImageMetadataHeader } from "./ImageMetadataHeader";
 import { FixedSaveButton } from "./FixedSaveButton";
+import { GoogleMapsModal } from "./GoogleMapsModal";
 import type { ImageMetadata } from "@/types/imageMetadata";
 
 interface ImageMetadataProps {
@@ -19,6 +20,8 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [keyword, setKeyword] = useState("");
+  const [isMapsModalOpen, setIsMapsModalOpen] = useState(false);
+  const [selectedImageForMaps, setSelectedImageForMaps] = useState<ImageMetadata | null>(null);
   const city = initialCity || "";
   const cityMain = useMemo(() => city.split(",")[0]?.trim() || "", [city]);
 
@@ -53,6 +56,41 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
 
   const handleImageSelect = (metadata: ImageMetadata) =>
     setSelectedImage(metadata);
+
+  const handleLocationClick = (metadata: ImageMetadata) => {
+    setSelectedImageForMaps(metadata);
+    setIsMapsModalOpen(true);
+  };
+
+  const handleLocationUpdate = (lat: number, lng: number, address: string) => {
+    if (!selectedImageForMaps) return;
+
+    // 새로운 위치 정보로 업데이트
+    const updatedLocation = {
+      latitude: lat,
+      longitude: lng,
+      altitude: selectedImageForMaps.location?.altitude,
+      address: address,
+      nearbyPlaces: [address], // 기본적으로 선택된 주소만 포함
+    };
+
+    // 메타데이터 리스트 업데이트
+    setMetadataList(prev =>
+      prev.map(item =>
+        item.id === selectedImageForMaps.id
+          ? { ...item, location: updatedLocation }
+          : item
+      )
+    );
+
+    // 현재 선택된 이미지도 업데이트
+    if (selectedImage?.id === selectedImageForMaps.id) {
+      setSelectedImage(prev =>
+        prev ? { ...prev, location: updatedLocation } : null
+      );
+    }
+  };
+
   const handleSave = () => {
     if (selectedImage) console.log("저장:", selectedImage, keyword);
   };
@@ -140,12 +178,12 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
     const formatMonth = (ts?: string) =>
       ts
         ? (() => {
-            const d = new Date(ts);
-            return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(
-              2,
-              "0"
-            )}`;
-          })()
+          const d = new Date(ts);
+          return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(
+            2,
+            "0"
+          )}`;
+        })()
         : "";
     const displayLocation =
       shown.location?.nearbyPlaces?.[1] || shown.location?.address || "";
@@ -197,24 +235,23 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
                   </div>
                 </div>
               )}
-              {displayLocation && (
-                <div className="absolute top-3 left-28">
-                  <div className="bg-black/70 text-white px-3 py-1 rounded-full text-xs flex items-center">
-                    <svg
-                      className="w-3 h-3 mr-1"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {displayLocation}
-                  </div>
+              <div className="absolute top-3 left-28">
+                <div className="bg-black/70 text-white px-3 py-1 rounded-full text-xs flex items-center cursor-pointer hover:bg-black/80 transition-colors"
+                  onClick={() => handleLocationClick(shown)}>
+                  <svg
+                    className="w-3 h-3 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {displayLocation || "정보 없음"}
                 </div>
-              )}
+              </div>
               {images.length > 1 && (
                 <>
                   <button
@@ -237,6 +274,12 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
           </div>
         </div>
         <FixedSaveButton onClick={() => handleSave()} />
+        <GoogleMapsModal
+          isOpen={isMapsModalOpen}
+          onClose={() => setIsMapsModalOpen(false)}
+          imageMetadata={selectedImageForMaps}
+          onLocationUpdate={handleLocationUpdate}
+        />
       </div>
     );
   }
