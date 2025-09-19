@@ -1,6 +1,7 @@
 import { ImageMetadata } from "@/types/imageMetadata";
 import exifr from "exifr";
 
+// 서버 API로 근처 장소 가져오기
 async function getNearbyPlaces(lat: number, lng: number): Promise<string[]> {
   try {
     const response = await fetch(`/api/places?lat=${lat}&lng=${lng}`);
@@ -9,6 +10,18 @@ async function getNearbyPlaces(lat: number, lng: number): Promise<string[]> {
   } catch {
     return [];
   }
+}
+
+// 서버 API로 역지오코딩(주소) 가져오기
+async function getAddress(lat: number, lng: number): Promise<string> {
+  try {
+    const response = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
+    const data = await response.json();
+    if (data.results && data.results.length > 0) {
+      return data.results[0].formatted_address;
+    }
+  } catch {}
+  return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 }
 
 export async function processSingleFile(file: File): Promise<ImageMetadata> {
@@ -86,21 +99,11 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
         flash: exifData.Flash ? exifData.Flash !== 0 : false,
       };
     if (exifData.latitude && exifData.longitude) {
-      const nearbyPlaces = await getNearbyPlaces(
-        exifData.latitude,
-        exifData.longitude
-      );
-      let address = `${exifData.latitude.toFixed(
-        4
-      )}, ${exifData.longitude.toFixed(4)}`;
-      try {
-        const addressResponse = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${exifData.latitude},${exifData.longitude}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=ko&region=kr`
-        );
-        const addressData = await addressResponse.json();
-        if (addressData.results && addressData.results.length > 0)
-          address = addressData.results[0].formatted_address;
-      } catch {}
+      // 백엔드 API로 주소, 장소 정보 요청 (키 노출 X)
+      const [nearbyPlaces, address] = await Promise.all([
+        getNearbyPlaces(exifData.latitude, exifData.longitude),
+        getAddress(exifData.latitude, exifData.longitude),
+      ]);
       extracted.location = {
         latitude: exifData.latitude,
         longitude: exifData.longitude,
