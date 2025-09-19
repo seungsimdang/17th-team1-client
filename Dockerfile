@@ -3,12 +3,12 @@ FROM node:20-alpine AS base
 FROM base AS builder
 WORKDIR /app
 
-# pnpm 설치
-RUN npm install -g pnpm
+# pnpm 버전 고정
+RUN npm install -g pnpm@10.8.1
 
 # pnpm 설정 파일들 복사
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 RUN pnpm run build
@@ -31,6 +31,5 @@ COPY --from=builder /app/package.json .
 ARG NEXT_PUBLIC_BASE_URL
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 # ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY 제거
-
 ENV PORT=80
 CMD ["node", "server.js"]
