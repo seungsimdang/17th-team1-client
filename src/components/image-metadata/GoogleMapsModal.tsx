@@ -374,7 +374,7 @@ export function GoogleMapsModal({
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                             placeholder="장소를 검색하세요..."
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                         />
