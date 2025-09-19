@@ -1,3 +1,8 @@
+import {
+  GooglePlaceDetailsResponse,
+  GooglePlacesNearbyResponse,
+  PlaceWithDistance,
+} from "@/types/google-places";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -5,7 +10,6 @@ export async function GET(request: NextRequest) {
   const latStr = searchParams.get("lat");
   const lngStr = searchParams.get("lng");
 
-  // 입력 검증 추가
   if (!latStr || !lngStr) {
     return NextResponse.json({ error: "lat/lng required" }, { status: 400 });
   }
@@ -19,15 +23,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // type 파라미터 제거
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=2000&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=ko&region=kr`
     );
-
-    const data = await response.json();
+    const data: GooglePlacesNearbyResponse = await response.json();
 
     if (data.results && data.results.length > 0) {
-      // 거리 계산
+      // 거리 계산 함수
       const calculateDistance = (
         lat1: number,
         lon1: number,
@@ -48,48 +50,53 @@ export async function GET(request: NextRequest) {
         return R * c;
       };
 
-      // 거리 계산 및 정렬
-      const placesWithDistance = data.results.map((place: any) => {
-        const actualDistance = calculateDistance(
-          lat,
-          lng,
-          place.geometry.location.lat,
-          place.geometry.location.lng
-        );
+      // 거리 포함 데이터 가공
+      const placesWithDistance: PlaceWithDistance[] = data.results.map(
+        (place) => {
+          const actualDistance = calculateDistance(
+            lat,
+            lng,
+            place.geometry.location.lat,
+            place.geometry.location.lng
+          );
+          return {
+            ...place,
+            actualDistance: Math.round(actualDistance),
+          };
+        }
+      );
 
-        return {
-          ...place,
-          actualDistance: Math.round(actualDistance),
-        };
-      });
-
-      // 거리순으로 정렬하고 상위 5개 선택
+      // 가까운 5개 장소 뽑기
       const sortedPlaces = placesWithDistance
-        .sort((a: any, b: any) => a.actualDistance - b.actualDistance)
+        .sort((a, b) => a.actualDistance - b.actualDistance)
         .slice(0, 5);
 
-      // 상세 정보 가져오기
-      const placeDetails = [];
+      // 상세 정보 병렬 호출
+      const placeDetails = (
+        await Promise.all(
+          sortedPlaces.map(async (place) => {
+            const detailsResponse = await fetch(
+              `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,formatted_address,types,rating,user_ratings_total&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=ko&region=kr`
+            );
+            const detailsData: GooglePlaceDetailsResponse =
+              await detailsResponse.json();
+            if (detailsData.result) {
+              return {
+                name: detailsData.result.name,
+                distance: place.actualDistance,
+                rating: detailsData.result.rating,
+                types: detailsData.result.types,
+              };
+            }
+            return null;
+          })
+        )
+      ).filter(Boolean);
 
-      for (const place of sortedPlaces) {
-        const detailsResponse = await fetch(
-          `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,formatted_address,types,rating,user_ratings_total&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=ko&region=kr`
-        );
-
-        const detailsData = await detailsResponse.json();
-
-        if (detailsData.result) {
-          placeDetails.push({
-            name: detailsData.result.name,
-            distance: place.actualDistance,
-            rating: detailsData.result.rating,
-            types: detailsData.result.types,
-          });
-        }
-      }
-
+      // 콘솔 로그 (디버깅용)
       console.log("=== 모든 타입 장소들 (거리순) ===");
       placeDetails.forEach((place, index) => {
+        if (!place) return;
         console.log(
           `${index + 1}. ${place.name} - 거리: ${place.distance}m, 평점: ${
             place.rating
@@ -98,7 +105,7 @@ export async function GET(request: NextRequest) {
       });
 
       return NextResponse.json({
-        places: placeDetails.map((p) => p.name),
+        places: placeDetails.map((p) => p?.name),
         address: sortedPlaces[0]?.vicinity || `${lat}, ${lng}`,
       });
     }
