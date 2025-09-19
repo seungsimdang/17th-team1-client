@@ -260,12 +260,14 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
               {images.length > 1 && (
                 <>
                   <button
+                    type="button"
                     onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
                     className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white w-8 h-8 rounded-full"
                   >
                     ‹
                   </button>
                   <button
+                    type="button"
                     onClick={() =>
                       setCurrentIndex((i) => Math.min(images.length - 1, i + 1))
                     }
