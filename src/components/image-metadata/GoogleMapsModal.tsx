@@ -164,6 +164,8 @@ export function GoogleMapsModal({
             );
         };
 
+        console.log(nearbySearch);
+
         // 장소 상세 정보 가져오기
         const getPlaceDetails = (placeId: string, originalPlace: google.maps.places.PlaceResult) => {
             const request: google.maps.places.PlaceDetailsRequest = {
