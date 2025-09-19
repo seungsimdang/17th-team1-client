@@ -27,31 +27,36 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
 
   const handleFileUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
-
       setIsProcessing(true);
+      try {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
 
-      const tasks: Promise<ImageMetadata>[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const f = files[i];
-        if (f.type.startsWith("image/")) tasks.push(processSingleFile(f));
+        const tasks: Promise<ImageMetadata>[] = [];
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i];
+          if (f.type.startsWith("image/")) tasks.push(processSingleFile(f));
+        }
+
+        const settled = await Promise.allSettled(tasks);
+        const results = settled
+          .filter((r): r is PromiseFulfilledResult<ImageMetadata> => r.status === "fulfilled")
+          .map((r) => r.value);
+
+        if (results.length === 0) return;
+
+        setMetadataList((prev) => {
+          const next = prev.length > 0 ? [...prev, ...results] : results;
+          setSelectedImage(next[prev.length]);
+          setCurrentIndex(prev.length);
+          return next;
+        });
+      } finally {
+        (e.target as HTMLInputElement).value = "";
+        setIsProcessing(false);
       }
-
-      const results = await Promise.all(tasks);
-
-      setMetadataList((prev) =>
-        prev.length > 0 ? [...prev, ...results] : results
-      );
-      // 여러 장이어도 모든 처리 완료 후 상세(스와이프) 화면으로 진입
-      if (results.length > 0) {
-        setSelectedImage(results[0]);
-        setCurrentIndex(0);
-      }
-
-      setIsProcessing(false);
     },
-    []
+    [metadataList]
   );
 
   const handleImageSelect = (metadata: ImageMetadata) =>
