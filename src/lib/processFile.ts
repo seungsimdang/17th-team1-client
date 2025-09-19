@@ -33,17 +33,24 @@ export async function processSingleFile(file: File): Promise<ImageMetadata> {
         quality: 0.92,
       });
       const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
-      if (jpegBlob instanceof Blob)
-        extracted.imagePreview = URL.createObjectURL(jpegBlob);
+      if (jpegBlob instanceof Blob) {
+        // 메모리 누수 방지: 기존 Object URL 해제
+        const newUrl = URL.createObjectURL(jpegBlob);
+        URL.revokeObjectURL(extracted.imagePreview);
+        extracted.imagePreview = newUrl;
+      }
     } catch {
       try {
         const thumb = await exifr.thumbnail(file);
         if (thumb) {
           // Uint8Array를 새로운 Uint8Array로 복사하여 타입 안전성 확보
           const thumbArray = new Uint8Array(thumb);
-          extracted.imagePreview = URL.createObjectURL(
+          // 메모리 누수 방지: 기존 Object URL 해제
+          const newUrl = URL.createObjectURL(
             new Blob([thumbArray], { type: "image/jpeg" })
           );
+          URL.revokeObjectURL(extracted.imagePreview);
+          extracted.imagePreview = newUrl;
         }
       } catch {}
     }
