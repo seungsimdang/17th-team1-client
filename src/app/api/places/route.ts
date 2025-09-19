@@ -2,13 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const lat = searchParams.get("lat");
-  const lng = searchParams.get("lng");
+  const latStr = searchParams.get("lat");
+  const lngStr = searchParams.get("lng");
+
+  // 입력 검증 추가
+  if (!latStr || !lngStr) {
+    return NextResponse.json({ error: "lat/lng required" }, { status: 400 });
+  }
+  const lat = Number(latStr);
+  const lng = Number(lngStr);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return NextResponse.json(
+      { error: "lat/lng must be numbers" },
+      { status: 400 }
+    );
+  }
 
   try {
-    // 1단계: 모든 장소 타입으로 검색
+    // type 파라미터 제거
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=2000&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=ko&region=kr&type=tourist_attraction|museum|establishment|point_of_interest|landmark|restaurant|cafe|store|shopping_mall|hospital|school|university|park|church|mosque|temple|synagogue|zoo|aquarium|amusement_park|stadium|gym|spa|beauty_salon|bank|atm|gas_station|parking|subway_station|bus_station|airport|train_station|police|fire_station|post_office|library|pharmacy|dentist|veterinary_care|laundry|car_repair|car_wash|car_dealer|real_estate_agency|travel_agency|insurance_agency|accounting|lawyer|funeral_home|cemetery|embassy|city_hall|courthouse|local_government_office`
+      `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=2000&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=ko&region=kr`
     );
 
     const data = await response.json();
@@ -38,8 +51,8 @@ export async function GET(request: NextRequest) {
       // 거리 계산 및 정렬
       const placesWithDistance = data.results.map((place: any) => {
         const actualDistance = calculateDistance(
-          parseFloat(lat!),
-          parseFloat(lng!),
+          lat,
+          lng,
           place.geometry.location.lat,
           place.geometry.location.lng
         );
