@@ -4,7 +4,7 @@ FROM base AS builder
 WORKDIR /app
 
 # pnpm 버전 고정
-RUN npm install -g pnpm@10.8.1
+RUN npm install -g pnpm@9.1.0
 
 # pnpm 설정 파일들 복사
 COPY package.json pnpm-lock.yaml ./
