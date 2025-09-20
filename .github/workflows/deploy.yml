@@ -58,6 +58,7 @@ jobs:
           tags: jiohjung/globber-fe:latest
           build-args: |
             NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}
+            NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -82,21 +83,22 @@ jobs:
             docker stop globber-fe || true
             echo "Removing container"
             docker rm globber-fe || true
-                    echo "Create custom bridge network (if not exists)"
-                    docker network inspect globber_fe_bridge >/dev/null 2>&1 || \
-                    docker network create \
-                      --driver bridge \
-                      --subnet=172.28.0.0/16 \
-                      globber_fe_bridge
-                    echo "Starting container"
-                    docker run -d \
-                      --name globber-fe \
-                      --network globber_fe_bridge \
-                      --ip 172.28.0.2 \
-                      -p 3000:80 \
-                      -e TZ=Asia/Seoul \
-                      -e NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL_PROD }} \
-                      jiohjung/globber-fe:latest
+            echo "Create custom bridge network (if not exists)"
+            docker network inspect globber_fe_bridge >/dev/null 2>&1 || \
+            docker network create \
+              --driver bridge \
+              --subnet=172.28.0.0/16 \
+              globber_fe_bridge
+            echo "Starting container"
+            docker run -d \
+              --name globber-fe \
+              --network globber_fe_bridge \
+              --ip 172.28.0.2 \
+              -p 3000:80 \
+              -e TZ=Asia/Seoul \
+              -e NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL_PROD }} \
+              -e GOOGLE_MAPS_SERVER_API_KEY=${{ secrets.GOOGLE_MAPS_SERVER_API_KEY }} \
+              jiohjung/globber-fe:latest
           EOF
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}

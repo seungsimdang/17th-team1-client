@@ -214,6 +214,12 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         return el;
       }
       const el = document.createElement("div");
+      // ensure positioned container so absolute children (+ button) place correctly
+      el.style.position = 'relative';
+      el.style.zIndex = '999';
+      el.style.pointerEvents = 'auto';
+      el.style.position = 'relative';
+      el.style.pointerEvents = 'auto';
       const labelIndex = htmlElements.findIndex((item) => item.id === d.id);
 
       // Globe의 현재 카메라 정보를 이용해 화면상 위치 계산
@@ -294,11 +300,42 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         el.innerHTML = `
           <div style="${styles.centerPoint}"></div>
           <div style="${styles.dottedLine}"></div>
-          <div style="${styles.label}">
+          <div style="${styles.label} position: absolute;">
+            <img 
+              src="/add_image_btn.svg" 
+              alt="add" 
+              data-city="${displayName}"
+              style="position:absolute; left:0; top:0; transform:translate(-40%,-40%); width:24px; height:24px; cursor:pointer; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); z-index:9999;"
+            />
             <span style="font-size: 14px; pointer-events: none;">${displayFlag}</span>
             <span style="pointer-events: none;">${displayName}</span>
           </div>
         `;
+        const navigateToMetadata = () => {
+          const q = encodeURIComponent(displayName);
+          window.location.href = `/image-metadata?city=${q}`;
+        };
+
+        const handler = (e: any) => {
+          e.preventDefault();
+          e.stopPropagation();
+          navigateToMetadata();
+        };
+        const bind = () => {
+          const node = el.querySelector('img[data-city]') as HTMLImageElement | null;
+          if (node) {
+            node.onclick = handler;
+            node.onerror = () => {
+              node.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="%230099ff"/><path d="M24 12v24M12 24h24" stroke="white" stroke-width="4" stroke-linecap="round"/></svg>';
+            };
+            node.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); });
+            node.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); });
+            node.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); });
+            node.addEventListener('wheel', (e) => { e.preventDefault(); e.stopPropagation(); });
+            node.draggable = false;
+          }
+        };
+        setTimeout(bind, 0);
       } else {
         const styles = createClusterLabelStyles(d, labelIndex, angleOffset);
 
@@ -317,6 +354,35 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
             </span>
           </div>
         `;
+        
+        const rad = (angleOffset * Math.PI) / 180;
+        const dist = 120;
+        const offsetX = Math.cos(rad) * dist;
+        const offsetY = Math.sin(rad) * dist;
+        const plus = document.createElement('img');
+        plus.src = '/add_image_btn.svg';
+        plus.alt = 'add';
+        plus.setAttribute('data-city', '');
+        plus.style.position = 'absolute';
+        plus.style.width = '42px';
+        plus.style.height = '42px';
+        plus.style.left = `${offsetX - 60}px`;
+        plus.style.top = `${offsetY}px`;
+        plus.style.transform = 'translate(-50%, -50%)';
+        plus.style.cursor = 'pointer';
+        plus.style.zIndex = '999';
+        plus.style.filter = 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))';
+        plus.addEventListener('click', (e: any) => {
+          e.preventDefault();
+          e.stopPropagation();
+          // cluster 클릭 -> 이미지 메타 페이지로 이동하되 첫번째 아이템 이름 사용
+          const name = (d.items && d.items[0]?.name) ? d.items[0].name.split(',')[0] : '';
+          if (name) {
+            const q = encodeURIComponent(name);
+            window.location.href = `/image-metadata?city=${q}`;
+          }
+        });
+        el.appendChild(plus);
       }
 
       // 클릭 핸들러
