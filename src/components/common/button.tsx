@@ -1,15 +1,14 @@
-"use client";
-
+import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Camera, X } from "lucide-react";
 import Image from "next/image";
-import { Slot } from "radix-ui";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { EMOJI_LIST } from "@/constants/emoji";
 import useImage from "@/hooks/useImage";
 import { cn } from "@/utils/cn";
 
 type ImageUploadButtonProps = {
-  photoType?: string;
+  photoType: string;
   disabled?: boolean;
   className?: string;
 };
@@ -61,9 +60,9 @@ export const Button = ({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
   }) => {
-  const Comp: any = asChild ? Slot : "button";
+  const Comp = asChild ? Slot : "button";
 
-  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size }), className)} {...(props as any)} />;
 };
 
 export const IconButton = ({
@@ -78,10 +77,10 @@ export const IconButton = ({
     icon: React.ReactNode;
     asChild?: boolean;
   }) => {
-  const Comp: any = asChild ? Slot : "button";
+  const Comp = asChild ? Slot : "button";
 
   return (
-    <Comp data-slot="icon-button" className={cn(iconButtonVariants({ size, className }))} {...props}>
+    <Comp data-slot="icon-button" className={cn(iconButtonVariants({ size }), className)} {...(props as any)}>
       {icon}
       {children}
     </Comp>
@@ -90,9 +89,9 @@ export const IconButton = ({
 
 export const ImageUploadButton = ({ photoType, disabled = false, className }: ImageUploadButtonProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { photos, handleSelectFile, handleRemove } = useImage([photoType as string]);
+  const { photos, handleSelectFile, handleRemove } = useImage([photoType]);
 
-  const uploadedImage = photos[photoType as string]?.url || null;
+  const uploadedImage = photos[photoType]?.url || null;
 
   const handleClick = () => {
     if (disabled) return;
@@ -102,48 +101,31 @@ export const ImageUploadButton = ({ photoType, disabled = false, className }: Im
   const handleChangeFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = (e.target as HTMLInputElement).files;
     if (files && files.length > 0) {
-      handleSelectFile(photoType as string)(files[0]);
+      handleSelectFile(photoType)(files[0]);
     }
     e.target.value = "";
   };
 
   const handleRemoveClick = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation();
-    handleRemove(photoType as string)();
+    handleRemove(photoType)();
   };
 
   return (
-    <button
-      type="button"
-      className={cn(
-        "relative flex w-full shrink-0 flex-col justify-center gap-4 rounded-[30px] border border-dashed border-gray-200 bg-white outline-none disabled:bg-gray-100",
-        !disabled && "hover:border-gray-300 hover:bg-gray-50",
-        uploadedImage ? "items-start gap-10 p-0" : "aspect-square items-center gap-4 p-16",
-        className,
-      )}
-      onClick={handleClick}
-      disabled={disabled}
-    >
-      {uploadedImage ? (
-        <>
-          <button
-            onClick={handleRemoveClick}
-            className={cn(
-              "absolute top-8 right-8 inline-flex aspect-square items-center rounded-full bg-[rgba(255,255,255,0.70)] p-2 text-gray-500",
-              disabled ? "text-gray-400" : "hover:text-gray-600",
-            )}
-            type="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                handleRemoveClick(e);
-              }
-            }}
-          >
-            <X size={16} />
-          </button>
-
+    <div className="relative">
+      <button
+        type="button"
+        className={cn(
+          "relative flex w-full shrink-0 flex-col justify-center gap-4 rounded-[30px] border border-dashed border-gray-200 bg-white outline-none disabled:bg-gray-100",
+          !disabled && "hover:border-gray-300 hover:bg-gray-50",
+          uploadedImage ? "items-start gap-10 p-0" : "aspect-square items-center gap-4 p-16",
+          className,
+        )}
+        onClick={handleClick}
+        disabled={disabled}
+        aria-label={uploadedImage ? "이미지 업로드 버튼 (이미지가 업로드됨)" : "이미지 업로드 버튼"}
+      >
+        {uploadedImage ? (
           <Image
             src={uploadedImage}
             alt="업로드된 이미지"
@@ -151,42 +133,51 @@ export const ImageUploadButton = ({ photoType, disabled = false, className }: Im
             height={90}
             className="flex aspect-square !w-full shrink-0 items-center gap-10 self-stretch rounded-md object-cover"
           />
-        </>
-      ) : (
-        <>
-          <Camera size={16} className={disabled ? "text-gray-400" : "text-gray-700"} />
-          {/* <span className={cn("text-xs font-medium", disabled ? "text-gray-400" : "text-gray-700")}>사진 업로드</span> */}
-        </>
-      )}
+        ) : (
+          <>
+            <Camera size={16} className={disabled ? "text-gray-400" : "text-gray-700"} />
+            {/* <span className={cn("text-xs font-medium", disabled ? "text-gray-400" : "text-gray-700")}>사진 업로드</span> */}
+          </>
+        )}
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleChangeFileInput}
-        className="hidden"
-        disabled={disabled}
-      />
-    </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleChangeFileInput}
+          className="hidden"
+          disabled={disabled}
+        />
+      </button>
+
+      {uploadedImage && (
+        <button
+          onClick={handleRemoveClick}
+          className={cn(
+            "absolute top-8 right-8 inline-flex aspect-square items-center rounded-full bg-[rgba(255,255,255,0.70)] p-2 text-gray-500 cursor-pointer",
+            disabled ? "text-gray-400 cursor-not-allowed" : "hover:text-gray-600",
+          )}
+          type="button"
+          tabIndex={disabled ? -1 : 0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleRemoveClick(e);
+            }
+          }}
+          aria-label="이미지 삭제"
+        >
+          <X size={16} />
+        </button>
+      )}
+    </div>
   );
 };
-
-const EMOJI_LIST = [
-  "😊", "😄", "😃", "😁", "😆", "😅", "🤣", "😂", "🙂", "🙃",
-  "😉", "😇", "🥰", "😍", "🤩", "😘", "😗", "😚", "😙", "😋",
-  "😛", "😜", "🤪", "😝", "🤑", "🤗", "🤭", "🤫", "🤔", "🤐",
-  "🤨", "😐", "😑", "😶", "😏", "😒", "🙄", "😬", "🤥", "😔",
-  "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭",
-  "😤", "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨",
-  "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤨", "😐", "😑",
-  "😶", "😏", "😒", "🙄", "😬", "🤥", "😔", "😕", "🙁", "☹️",
-  "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠", "😡",
-  "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓"
-];
 
 export const EmogiUploadButton = ({ disabled = false, className }: ImageUploadButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
+  const dialogId = useId();
 
   const handleClick = () => {
     if (disabled) return;
@@ -213,40 +204,57 @@ export const EmogiUploadButton = ({ disabled = false, className }: ImageUploadBu
           !disabled && "hover:border-gray-300 hover:bg-gray-700",
           className,
         )}
+        aria-label={selectedEmoji ? `이모지 업로드 버튼 (선택된 이모지: ${selectedEmoji})` : "이모지 업로드 버튼"}
+        aria-expanded={isOpen}
+        aria-haspopup="dialog"
       >
         <div className="absolute -top-2 -left-2 w-4 h-4 border-2 border-dashed border-gray-400 bg-gray-800 transform rotate-45 rounded-sm" />
 
         {selectedEmoji ? (
-          <>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemove();
-              }}
-              className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
-              type="button"
-            >
-              <X size={12} />
-            </button>
-            <div className="text-2xl">
-              {selectedEmoji}
-            </div>
-          </>
+          <div className="text-2xl">{selectedEmoji}</div>
         ) : (
-          <div className="text-gray-300 text-2xl group-hover:text-gray-200 transition-colors">
-            😊
-          </div>
+          <div className="text-gray-300 text-2xl group-hover:text-gray-200 transition-colors">😊</div>
         )}
       </button>
 
+      {selectedEmoji && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRemove();
+          }}
+          className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer"
+          type="button"
+          tabIndex={disabled ? -1 : 0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+              handleRemove();
+            }
+          }}
+          aria-label="이모지 삭제"
+        >
+          <X size={12} />
+        </button>
+      )}
+
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50">
+        <div
+          className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50"
+          role="dialog"
+          aria-labelledby={dialogId}
+          aria-modal="true"
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-sm font-medium text-gray-700">이모지 선택</h3>
+            <h3 id={dialogId} className="text-sm font-medium text-gray-700">
+              이모지 선택
+            </h3>
             <button
               onClick={() => setIsOpen(false)}
               className="text-gray-400 hover:text-gray-600"
               type="button"
+              aria-label="이모지 선택 창 닫기"
             >
               <X size={16} />
             </button>
@@ -259,6 +267,7 @@ export const EmogiUploadButton = ({ disabled = false, className }: ImageUploadBu
                 onClick={() => handleEmojiSelect(emoji)}
                 className="w-8 h-8 flex items-center justify-center text-lg hover:bg-gray-100 rounded transition-colors"
                 type="button"
+                aria-label={`이모지 ${emoji} 선택`}
               >
                 {emoji}
               </button>
