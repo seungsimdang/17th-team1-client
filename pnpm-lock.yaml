@@ -11,6 +11,9 @@ importers:
       '@googlemaps/google-maps-services-js':
         specifier: ^3.4.2
         version: 3.4.2
+      '@radix-ui/react-slot':
+        specifier: ^1.2.3
+        version: 1.2.3(@types/react@19.1.13)(react@19.1.0)
       '@tanstack/react-query':
         specifier: ^5.85.9
         version: 5.89.0(react@19.1.0)
