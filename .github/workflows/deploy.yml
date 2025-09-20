@@ -7,7 +7,6 @@ on:
       - main
       - develop
       - feat/GLB-54
-      - feat/GLB-36
     paths:
       - "src/**"
       - "package.json"
