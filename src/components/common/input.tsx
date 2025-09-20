@@ -1,5 +1,3 @@
-"use client";
-
 import { cva, type VariantProps } from "class-variance-authority";
 import { Upload } from "lucide-react";
 import SearchIcon from "@/assets/icons/search.svg";
@@ -30,7 +28,12 @@ export const Input = ({
 }: React.ComponentProps<"input"> & VariantProps<typeof inputVariants> & { variant?: "success" | "fail" }) => {
   return (
     <div className={cn("relative", className)}>
-      <input type={type} data-slot="input" className={inputVariants({ isDark, className })} {...props} />
+      <input
+        type={type}
+        data-slot="input"
+        className={cn(inputVariants({ isDark }), className)}
+        {...props}
+      />
     </div>
   );
 };
