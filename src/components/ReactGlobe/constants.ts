@@ -1,10 +1,10 @@
 // Globe 설정 상수
 export const GLOBE_CONFIG = {
-  WIDTH: 500, // 지구본 컴포넌트 너비 (px)
-  HEIGHT: 500, // 지구본 컴포넌트 높이 (px)
+  WIDTH: 600, // 지구본 컴포넌트 너비 (px)
+  HEIGHT: 800, // 지구본 컴포넌트 높이 (px)
   INITIAL_ALTITUDE: 2.5, // 초기 카메라 고도 (지구 반지름 배수)
   MIN_ZOOM: 0.01, // 최소 줌 레벨
-  MAX_ZOOM: 3.0, // 최대 줌 레벨
+  MAX_ZOOM: 2.5, // 최대 줌 레벨
   CLUSTER_ZOOM_STAGE1: 0.5, // 1단계 줌 (하위 클러스터가 보이는 수준)
   CLUSTER_ZOOM: 0.17, // 2단계 줌 (나라 단위가 보이는 수준)
   FOCUS_ZOOM: 0.1, // 국가 포커스 시 줌 레벨 (더 가까이)
@@ -65,7 +65,6 @@ export const ISO_CODE_MAP: { [key: string]: string } = {
 // 외부 리소스 URL
 export const EXTERNAL_URLS = {
   // 세계 지도 GeoJSON 데이터 URL
-  WORLD_GEOJSON:
-    "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson",
+  WORLD_GEOJSON: "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson",
   NIGHT_SKY_IMAGE: "//unpkg.com/three-globe/example/img/night-sky.png", // 배경 별하늘 이미지 URL
 } as const;

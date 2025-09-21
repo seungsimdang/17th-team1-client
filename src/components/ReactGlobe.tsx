@@ -69,6 +69,10 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
   const [countries, setCountries] = useState<any[]>([]);
   const [globeLoading, setGlobeLoading] = useState(true);
   const [globeError, setGlobeError] = useState<string | null>(null);
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 600,
+    height: typeof window !== 'undefined' ? window.innerHeight : 800
+  });
   const currentPattern = travelPatterns[currentGlobeIndex];
   const [displayPhase, setDisplayPhase] = useState<"root" | "country" | "city">("root");
   const [isAnimating, setIsAnimating] = useState(false);
@@ -537,6 +541,21 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
     [onZoomChange, snapZoomTo, displayPhase, isAnimating]
   );
 
+  // 윈도우 리사이즈 감지
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // 브라우저 줌 방지 및 Globe 초기 설정
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -642,10 +661,9 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
   return (
     <Globe
       ref={globeRef}
-      width={GLOBE_CONFIG.WIDTH}
-      height={GLOBE_CONFIG.HEIGHT}
+      width={Math.min(600, windowSize.width)}
+      height={Math.min(800, windowSize.width)}
       backgroundColor="rgba(0,0,0,0)"
-      backgroundImageUrl={EXTERNAL_URLS.NIGHT_SKY_IMAGE}
       showAtmosphere={true}
       atmosphereColor={COLORS.ATMOSPHERE}
       atmosphereAltitude={GLOBE_CONFIG.ATMOSPHERE_ALTITUDE}
