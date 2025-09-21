@@ -7,12 +7,67 @@ language: ko
 # Base branch for comparing pull requests
 base_branch: develop
 
+# Frontend 우선순위 시스템 (P1~P5)
+priority_system:
+  P1:
+    description: "꼭 반영해주세요 (Request changes)"
+    criteria: "런타임 오류, 보안 취약점, 메모리 누수, 접근성 심각한 문제, 성능 크리티컬 이슈"
+    action: "반드시 반영하거나 합리적인 반박 의견 제시 필요"
+    examples:
+      - "React key prop 누락으로 인한 리렌더링 이슈"
+      - "XSS 취약점 (dangerouslySetInnerHTML 오남용)"
+      - "무한 루프를 발생시키는 useEffect"
+      - "접근성 필수 속성 누락 (alt, aria-label 등)"
+
+  P2:
+    description: "적극적으로 고려해주세요 (Request changes)"
+    criteria: "성능 저하, 컴포넌트 아키텍처 위반, 타입 안전성, SEO 영향, 번들 크기 최적화"
+    action: "수용하거나 적합한 의견으로 토론 권장"
+    examples:
+      - "불필요한 리렌더링을 유발하는 코드"
+      - "any 타입 남용"
+      - "hydration mismatch 가능성"
+      - "Tailwind CSS 대신 인라인 스타일 사용"
+
+  P3:
+    description: "웬만하면 반영해 주세요 (Comment)"
+    criteria: "코드 컨벤션, 가독성 개선, React/Next.js 모범 사례, 컴포넌트 재사용성"
+    action: "수용하거나 반영 불가 사유 설명, 향후 계획 명시 권장"
+    examples:
+      - "컴포넌트 파일명 컨벤션 (PascalCase)"
+      - "커스텀 훅 추출 제안"
+      - "prop 타입 정의 개선"
+      - "상태 관리 로직 분리"
+
+  P4:
+    description: "반영해도 좋고 넘어가도 좋습니다 (Approve)"
+    criteria: "사소한 최적화, 선택적 리팩토링, 코드 정리"
+    action: "고민해보는 정도면 충분, 무시해도 무관"
+    examples:
+      - "변수명 개선 제안"
+      - "주석 추가 제안"
+      - "선택적 타입 단언 개선"
+
+  P5:
+    description: "그냥 사소한 의견입니다 (Approve)"
+    criteria: "개인 취향, 참고용 의견, 미래 고려사항"
+    action: "무시해도 무관"
+    examples:
+      - "개인적인 코딩 스타일 선호"
+      - "추후 고려할 수 있는 라이브러리 제안"
+
 # Code review configurations
 reviews:
   # General review instructions
   instructions: |
     - React, TypeScript, Next.js, Tailwind CSS 프로젝트입니다.
     - 코드 리뷰 시 한국어로 피드백을 제공해주세요.
+    - 모든 리뷰 코멘트에는 우선순위(P1~P5)를 명시해주세요.
+    - P1: 꼭 반영해주세요 (Request changes) - 런타임 오류, 보안, 접근성 심각한 문제
+    - P2: 적극적으로 고려해주세요 (Request changes) - 성능, 아키텍처, 타입 안전성
+    - P3: 웬만하면 반영해 주세요 (Comment) - 컨벤션, 가독성, 모범 사례
+    - P4: 반영해도 좋고 넘어가도 좋습니다 (Approve) - 사소한 최적화
+    - P5: 그냥 사소한 의견입니다 (Approve) - 개인 취향, 참고용
     - 성능, 보안, 가독성을 우선적으로 검토해주세요.
     - React 모범 사례와 TypeScript 타입 안전성을 확인해주세요.
     - Tailwind CSS 모범 사례와 유틸리티 클래스 사용법을 확인해주세요.
