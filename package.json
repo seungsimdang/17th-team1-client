@@ -10,7 +10,8 @@
     "format": "biome format --write",
     "check": "biome check --write",
     "reporter": "biome check --reporter=summary",
-    "ci": "biome ci"
+    "ci": "biome ci",
+    "tokens:build": "node scripts/build-tokens.js"
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.2",
