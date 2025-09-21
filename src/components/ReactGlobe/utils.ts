@@ -22,11 +22,17 @@ export const getPolygonColor = (
   const isoCode = feature.id;
   const countryData = countries.find((c: any) => getISOCode(c.id) === isoCode);
 
+  // 여행 데이터가 없는 국가는 비활성 색상
   if (!countryData) return COLORS.INACTIVE_POLYGON;
 
-  const isSelected = selectedCountry && countries.find((c) => c.id === selectedCountry && getISOCode(c.id) === isoCode);
+  // 여행 데이터가 있는 국가는 globe 레벨 색상 적용
+  // 해당 국가의 도시 수 계산
+  const countryCode = getISOCode(countryData.id);
+  const cityCount = countries.filter((c: any) => getISOCode(c.id) === countryCode).length;
 
-  return isSelected ? countryData.color : `${countryData.color}44`;
+  if (cityCount >= 8) return COLORS.GLOBE_LV3; // 8개 이상: 가장 밝은 파란색
+  if (cityCount >= 5) return COLORS.GLOBE_LV2; // 5개 이상: 중간 파란색
+  return COLORS.GLOBE_LV1; // 1개 이상: 어두운 파란색
 };
 
 // 폴리곤 레이블 생성

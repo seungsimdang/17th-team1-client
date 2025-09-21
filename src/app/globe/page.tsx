@@ -74,7 +74,7 @@ const GlobePrototype = () => {
             color: "#e91e63",
           },
           {
-            id: "JPN2",
+            id: "JPN",
             name: "오사카, 일본",
             flag: "🇯🇵",
             lat: 34.6937,
@@ -82,11 +82,59 @@ const GlobePrototype = () => {
             color: "#e91e63",
           },
           {
-            id: "JPN3",
+            id: "JPN",
             name: "교토, 일본",
             flag: "🇯🇵",
             lat: 36.0116,
             lng: 135.7681,
+            color: "#e91e63",
+          },
+          {
+            id: "JPN",
+            name: "요코하마, 일본",
+            flag: "🇯🇵",
+            lat: 35.4437,
+            lng: 139.638,
+            color: "#e91e63",
+          },
+          {
+            id: "JPN",
+            name: "나고야, 일본",
+            flag: "🇯🇵",
+            lat: 35.1815,
+            lng: 136.9066,
+            color: "#e91e63",
+          },
+          {
+            id: "JPN",
+            name: "후쿠오카, 일본",
+            flag: "🇯🇵",
+            lat: 33.5904,
+            lng: 130.4017,
+            color: "#e91e63",
+          },
+          {
+            id: "JPN",
+            name: "삿포로, 일본",
+            flag: "🇯🇵",
+            lat: 43.0642,
+            lng: 141.3469,
+            color: "#e91e63",
+          },
+          {
+            id: "JPN",
+            name: "센다이, 일본",
+            flag: "🇯🇵",
+            lat: 38.2682,
+            lng: 140.8694,
+            color: "#e91e63",
+          },
+          {
+            id: "JPN",
+            name: "히로시마, 일본",
+            flag: "🇯🇵",
+            lat: 34.3853,
+            lng: 132.4553,
             color: "#e91e63",
           },
           {
@@ -95,6 +143,38 @@ const GlobePrototype = () => {
             flag: "🇰🇷",
             lat: 37.5665,
             lng: 126.978,
+            color: "#9c27b0",
+          },
+          {
+            id: "KOR",
+            name: "부산, 한국",
+            flag: "🇰🇷",
+            lat: 35.1796,
+            lng: 129.0756,
+            color: "#9c27b0",
+          },
+          {
+            id: "KOR",
+            name: "대구, 한국",
+            flag: "🇰🇷",
+            lat: 35.8714,
+            lng: 128.6014,
+            color: "#9c27b0",
+          },
+          {
+            id: "KOR",
+            name: "인천, 한국",
+            flag: "🇰🇷",
+            lat: 37.4563,
+            lng: 126.7052,
+            color: "#9c27b0",
+          },
+          {
+            id: "KOR",
+            name: "광주, 한국",
+            flag: "🇰🇷",
+            lat: 35.1595,
+            lng: 126.8526,
             color: "#9c27b0",
           },
           {
@@ -715,7 +795,10 @@ const GlobePrototype = () => {
         >
           내 지구본 자랑하기
         </button>
-        <button type="button" className="w-full bg-transparent text-text-primary font-bold py-3 rounded-2xl text-base cursor-pointer">
+        <button
+          type="button"
+          className="w-full bg-transparent text-text-primary font-bold py-3 rounded-2xl text-base cursor-pointer"
+        >
           홈으로 이동
         </button>
       </div>
