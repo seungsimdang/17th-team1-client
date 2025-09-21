@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useClustering } from "@/hooks/useClustering";
 
 // ReactGlobe을 동적 import로 로드 (SSR 방지)
@@ -13,8 +13,7 @@ const ReactGlobe = dynamic(() => import("@/components/ReactGlobe"), {
         width: 500,
         height: 500,
         borderRadius: "50%",
-        background:
-          "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
+        background: "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -514,13 +513,10 @@ const GlobePrototype = () => {
         ],
       },
     ],
-    []
+    [],
   );
 
-  const currentPattern = useMemo(
-    () => travelPatterns[currentGlobeIndex],
-    [travelPatterns, currentGlobeIndex]
-  );
+  const currentPattern = useMemo(() => travelPatterns[currentGlobeIndex], [travelPatterns, currentGlobeIndex]);
 
   // 클러스터링 훅 사용
   const { clusteredData, shouldShowClusters } = useClustering({
@@ -546,81 +542,87 @@ const GlobePrototype = () => {
   }, []);
 
   // 히스테리시스 임계값 (줌인/줌아웃 다르게)
-  const CITY_TO_COUNTRY_IN = 0.24;  // 도시→나라 (줌인 시 진입 기준)
-  const CITY_TO_COUNTRY_OUT = 0.30; // 도시→나라 (줌아웃 시 이탈 기준)
-  const COUNTRY_TO_ROOT_IN = 0.55;  // 나라→루트 (줌인 시 진입 기준)
-  const COUNTRY_TO_ROOT_OUT = 0.80; // 나라→루트 (줌아웃 시 이탈 기준)
+  const CITY_TO_COUNTRY_IN = 0.24; // 도시→나라 (줌인 시 진입 기준)
+  const CITY_TO_COUNTRY_OUT = 0.3; // 도시→나라 (줌아웃 시 이탈 기준)
+  const COUNTRY_TO_ROOT_IN = 0.55; // 나라→루트 (줌인 시 진입 기준)
+  const COUNTRY_TO_ROOT_OUT = 0.8; // 나라→루트 (줌아웃 시 이탈 기준)
 
-  const handleZoomChange = useCallback((newZoomLevel: number) => {
-    setZoomLevel((prev) => {
-      const rounded = Number(newZoomLevel.toFixed(2));
-      
-      // 클릭으로 인한 줌인인 경우 즉시 반영 (부드러운 애니메이션을 위해)
-      if (rounded < prev - 0.1) {
-        return rounded;
-      }
-      
-      // 줌아웃 시작을 감지하면 직전 단계로 스냅
-      if (rounded > prev + 0.01 && zoomStack.length > 0) {
-        const last = zoomStack[zoomStack.length - 1];
-        setSnapZoomTo(last);
-        setZoomStack((s) => s.slice(0, -1));
-        // 선택 경로도 한 단계 상위로 복원
-        setSelectionStack((stack) => {
-          if (stack.length === 0) {
-            setSelectedClusterData(null);
-            return stack;
-          }
-          const newStack = stack.slice(0, -1);
-          const parent = newStack.length > 0 ? newStack[newStack.length - 1] : null;
-          setSelectedClusterData(parent || null);
-          return newStack;
-        });
-        return prev;
-      }
-      
-      // 상위로 충분히 멀어지면 초기화
-      if (rounded >= COUNTRY_TO_ROOT_OUT && selectedClusterData) {
-        setSelectedClusterData(null);
-        setZoomStack([]);
-        setSnapZoomTo(null);
-        setSelectionStack([]);
-      }
-      
-      // 스냅 스택이 없는 일반 줌아웃 경로에서 임계값 교차 시 상위로 복원
-      if (rounded > prev + 0.01 && zoomStack.length === 0) {
-        // 도시 → 나라 경계 상향 교차
-        if (prev <= CITY_TO_COUNTRY_OUT && rounded >= CITY_TO_COUNTRY_OUT) {
+  const handleZoomChange = useCallback(
+    (newZoomLevel: number) => {
+      setZoomLevel((prev) => {
+        const rounded = Number(newZoomLevel.toFixed(2));
+
+        // 클릭으로 인한 줌인인 경우 즉시 반영 (부드러운 애니메이션을 위해)
+        if (rounded < prev - 0.1) {
+          return rounded;
+        }
+
+        // 줌아웃 시작을 감지하면 직전 단계로 스냅
+        if (rounded > prev + 0.01 && zoomStack.length > 0) {
+          const last = zoomStack[zoomStack.length - 1];
+          setSnapZoomTo(last);
+          setZoomStack((s) => s.slice(0, -1));
+          // 선택 경로도 한 단계 상위로 복원
           setSelectionStack((stack) => {
-            if (stack.length === 0) return stack;
+            if (stack.length === 0) {
+              setSelectedClusterData(null);
+              return stack;
+            }
             const newStack = stack.slice(0, -1);
             const parent = newStack.length > 0 ? newStack[newStack.length - 1] : null;
             setSelectedClusterData(parent || null);
             return newStack;
           });
+          return prev;
         }
-      }
 
-      // 작은 변화도 반영 (더 부드러운 줌)
-      if (Math.abs(prev - rounded) >= 0.02) {
-        return rounded;
-      }
-      
-      return prev;
-    });
-  }, [selectedClusterData, zoomStack]);
+        // 상위로 충분히 멀어지면 초기화
+        if (rounded >= COUNTRY_TO_ROOT_OUT && selectedClusterData) {
+          setSelectedClusterData(null);
+          setZoomStack([]);
+          setSnapZoomTo(null);
+          setSelectionStack([]);
+        }
+
+        // 스냅 스택이 없는 일반 줌아웃 경로에서 임계값 교차 시 상위로 복원
+        if (rounded > prev + 0.01 && zoomStack.length === 0) {
+          // 도시 → 나라 경계 상향 교차
+          if (prev <= CITY_TO_COUNTRY_OUT && rounded >= CITY_TO_COUNTRY_OUT) {
+            setSelectionStack((stack) => {
+              if (stack.length === 0) return stack;
+              const newStack = stack.slice(0, -1);
+              const parent = newStack.length > 0 ? newStack[newStack.length - 1] : null;
+              setSelectedClusterData(parent || null);
+              return newStack;
+            });
+          }
+        }
+
+        // 작은 변화도 반영 (더 부드러운 줌)
+        if (Math.abs(prev - rounded) >= 0.02) {
+          return rounded;
+        }
+
+        return prev;
+      });
+    },
+    [selectedClusterData, zoomStack],
+  );
 
   // 클러스터 선택 핸들러
-  const handleClusterSelect = useCallback((cluster: any) => {
-    // 현재 줌/선택을 스택에 저장하고 선택 갱신
-    setZoomStack((prev) => [...prev, zoomLevel]);
-    setSelectionStack((stack) => [...stack, selectedClusterData ? [...selectedClusterData] : null]);
-    setSelectedClusterData(cluster.items);
-  }, [zoomLevel, selectedClusterData]);
+  const handleClusterSelect = useCallback(
+    (cluster: any) => {
+      // 현재 줌/선택을 스택에 저장하고 선택 갱신
+      setZoomStack((prev) => [...prev, zoomLevel]);
+      setSelectionStack((stack) => [...stack, selectedClusterData ? [...selectedClusterData] : null]);
+      setSelectedClusterData(cluster.items);
+    },
+    [zoomLevel, selectedClusterData],
+  );
 
   // 휠로 줌아웃 시, 가까운 스냅 지점으로 자동 복귀 (직전 스택 단계)
   useEffect(() => {
-    if (typeof snapZoomTo === 'number') {
+    if (typeof snapZoomTo === "number") {
       const t = setTimeout(() => setSnapZoomTo(null), 120);
       return () => clearTimeout(t);
     }
@@ -647,21 +649,18 @@ const GlobePrototype = () => {
     <div
       style={{
         minHeight: "100vh",
-        background:
-          "linear-gradient(135deg, #0c1a2e 0%, #1a252f 50%, #2c3e50 100%)",
+        background: "linear-gradient(135deg, #0c1a2e 0%, #1a252f 50%, #2c3e50 100%)",
         color: "white",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         padding: "40px 20px",
-        fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+        fontFamily: '"Pretendard Variable", "Helvetica Neue", Arial, sans-serif',
       }}
     >
       {/* 헤더 */}
-      <div
-        style={{ textAlign: "center", marginBottom: "40px", maxWidth: "800px" }}
-      >
+      <div style={{ textAlign: "center", marginBottom: "40px", maxWidth: "800px" }}>
         <div
           style={{
             backgroundColor: "rgba(74, 144, 226, 0.1)",
@@ -671,12 +670,8 @@ const GlobePrototype = () => {
             marginBottom: "20px",
           }}
         >
-          <h2 style={{ margin: "0 0 8px 0", color: "#4a90e2" }}>
-            {currentPattern.title}
-          </h2>
-          <p style={{ margin: "0", color: "#8892b0", fontSize: "14px" }}>
-            {currentPattern.subtitle}
-          </p>
+          <h2 style={{ margin: "0 0 8px 0", color: "#4a90e2" }}>{currentPattern.title}</h2>
+          <p style={{ margin: "0", color: "#8892b0", fontSize: "14px" }}>{currentPattern.subtitle}</p>
         </div>
 
         {/* 패턴 선택 버튼 */}
@@ -686,15 +681,9 @@ const GlobePrototype = () => {
               key={index}
               onClick={() => handlePatternChange(index)}
               style={{
-                backgroundColor:
-                  currentGlobeIndex === index
-                    ? "rgba(74, 144, 226, 0.3)"
-                    : "rgba(255, 255, 255, 0.1)",
+                backgroundColor: currentGlobeIndex === index ? "rgba(74, 144, 226, 0.3)" : "rgba(255, 255, 255, 0.1)",
                 color: currentGlobeIndex === index ? "#4a90e2" : "#8892b0",
-                border:
-                  currentGlobeIndex === index
-                    ? "2px solid #4a90e2"
-                    : "1px solid rgba(255, 255, 255, 0.2)",
+                border: currentGlobeIndex === index ? "2px solid #4a90e2" : "1px solid rgba(255, 255, 255, 0.2)",
                 borderRadius: "25px",
                 padding: "10px 20px",
                 cursor: "pointer",
@@ -744,8 +733,8 @@ const GlobePrototype = () => {
             textAlign: "center",
           }}
         >
-          현재 줌 레벨: {zoomLevel.toFixed(2)} | 클러스터 거리:{" "}
-          {getClusterDistance(zoomLevel)} | 클러스터: {clusteredData.length}개
+          현재 줌 레벨: {zoomLevel.toFixed(2)} | 클러스터 거리: {getClusterDistance(zoomLevel)} | 클러스터:{" "}
+          {clusteredData.length}개
         </div>
       )}
 
