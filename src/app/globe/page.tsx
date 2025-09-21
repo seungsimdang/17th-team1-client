@@ -655,9 +655,8 @@ const GlobePrototype = () => {
 
   return (
     <div
-      className="w-full overflow-hidden bg-gradient-to-b from-[#001d39] to-[#0d0c14] text-white flex flex-col max-w-[600px] mx-auto relative"
+      className="w-full overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900 text-text-primary flex flex-col max-w-[600px] mx-auto relative font-sans"
       style={{
-        fontFamily: '"Pretendard Variable", "Helvetica Neue", Arial, sans-serif',
         height: "100dvh", // Dynamic Viewport Height - 모바일 브라우저의 실제 보이는 영역
       }}
     >
@@ -665,18 +664,10 @@ const GlobePrototype = () => {
       <div
         className={`text-center pt-8 px-6 pb-4 transition-opacity duration-500 ${isZoomed ? "opacity-0" : "opacity-100"}`}
       >
-        <div
-          className="inline-flex items-center rounded-full px-4 py-2 text-xs font-bold mb-3"
-          style={{
-            backgroundColor: "var(--color-surface-inverseprimary)",
-            color: "var(--color-text-inverseprimary)",
-          }}
-        >
+        <div className="inline-flex items-center rounded-full px-4 py-2 text-xs font-bold mb-3 bg-surface-inverseprimary text-text-inverseprimary">
           AI 인사이트 준비중...
         </div>
-        <h1 className="text-xl font-extrabold" style={{ color: "var(--color-text-primary)" }}>
-          N개 도시, N개국 여행자
-        </h1>
+        <h1 className="text-xl font-extrabold text-text-primary">N개 도시, N개국 여행자</h1>
       </div>
 
       {/* React Globe 컴포넌트 */}
@@ -688,12 +679,11 @@ const GlobePrototype = () => {
               key={index}
               type="button"
               onClick={() => handlePatternChange(index)}
-              className={`
-                w-8 h-8 rounded-full text-xs font-bold transition-all duration-200
-                ${
-                  currentGlobeIndex === index ? "bg-blue-400 text-black" : "bg-white/20 text-white/60 hover:bg-white/30"
-                }
-              `}
+              className={`w-8 h-8 rounded-full text-xs font-bold transition-all duration-200 ${
+                currentGlobeIndex === index
+                  ? "bg-blue-theme text-text-inverseprimary"
+                  : "bg-surface-placeholder--8 text-text-secondary hover:bg-surface-placeholder--16"
+              }`}
             >
               {index + 1}
             </button>
@@ -721,12 +711,11 @@ const GlobePrototype = () => {
       <div className={`px-4 pb-4 space-y-2 transition-opacity duration-500 ${isZoomed ? "opacity-0" : "opacity-100"}`}>
         <button
           type="button"
-          className="w-full text-black font-bold py-3 rounded-2xl text-base"
-          style={{ backgroundColor: "var(--color-blue-theme)" }}
+          className="w-full text-text-inverseprimary font-bold py-3 rounded-2xl text-base bg-blue-theme cursor-pointer"
         >
           내 지구본 자랑하기
         </button>
-        <button type="button" className="w-full bg-transparent text-white font-bold py-3 rounded-2xl text-base">
+        <button type="button" className="w-full bg-transparent text-text-primary font-bold py-3 rounded-2xl text-base cursor-pointer">
           홈으로 이동
         </button>
       </div>
@@ -741,7 +730,7 @@ const GlobePrototype = () => {
             setZoomLevel(2.5);
             setSnapZoomTo(2.5);
           }}
-          className="flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-4 py-3 rounded-full font-medium text-sm hover:bg-white/20 transition-all duration-200"
+          className="flex items-center gap-2 bg-surface-placeholder--16 backdrop-blur-sm text-text-primary px-4 py-3 rounded-full font-medium text-sm hover:bg-surface-placeholder--8 transition-all duration-200"
         >
           <svg
             width="16"
