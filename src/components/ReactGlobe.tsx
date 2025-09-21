@@ -1,31 +1,13 @@
 "use client";
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
 import dynamic from "next/dynamic";
-import {
-  GLOBE_CONFIG,
-  ANIMATION_DURATION,
-  COLORS,
-  EXTERNAL_URLS,
-} from "./ReactGlobe/constants";
-import {
-  getISOCode,
-  getPolygonColor,
-  getPolygonLabel,
-  createZoomPreventListeners,
-} from "./ReactGlobe/utils";
-import {
-  createSingleLabelStyles,
-  createClusterLabelStyles,
-} from "./ReactGlobe/styles";
-import type { ReactGlobeProps, CountryData } from "../types/globe";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import type { CountryData, ReactGlobeProps } from "../types/globe";
+import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "./ReactGlobe/constants";
+import { createClusterLabelStyles, createSingleLabelStyles } from "./ReactGlobe/styles";
+import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "./ReactGlobe/utils";
 
 const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
@@ -35,8 +17,7 @@ const Globe = dynamic(() => import("react-globe.gl"), {
         width: GLOBE_CONFIG.WIDTH,
         height: GLOBE_CONFIG.HEIGHT,
         borderRadius: "50%",
-        background:
-          "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
+        background: "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -70,10 +51,59 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
   const [globeLoading, setGlobeLoading] = useState(true);
   const [globeError, setGlobeError] = useState<string | null>(null);
   const [windowSize, setWindowSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 600,
-    height: typeof window !== 'undefined' ? window.innerHeight : 800
+    width: typeof window !== "undefined" ? window.innerWidth : 600,
+    height: typeof window !== "undefined" ? window.innerHeight : 800,
   });
   const currentPattern = travelPatterns[currentGlobeIndex];
+
+  // Create gradient texture for globe from Figma design
+  const globeImageUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) return "";
+
+    // First gradient: Main background (black to #032F59)
+    // Based on Figma: gradientHandlePositions [0.5, 0.8113], [0.5, 0.1069], [1.2045, 0.8113]
+    const gradient1 = ctx.createRadialGradient(
+      256,
+      415, // center at 50%, 81.13%
+      0, // inner radius
+      256,
+      415, // outer center
+      361, // outer radius (70.45% of 512)
+    );
+    gradient1.addColorStop(0, "#000000");
+    gradient1.addColorStop(1, "#032f59");
+
+    ctx.fillStyle = gradient1;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Second gradient: White overlay with transparency
+    // Based on Figma: gradientHandlePositions [0.5, 0.5], [0.5, 1], [0, 0.5]
+    ctx.globalCompositeOperation = "source-over";
+    const gradient2 = ctx.createRadialGradient(
+      256,
+      256, // center at 50%, 50%
+      0, // inner radius
+      256,
+      256, // outer center
+      256, // outer radius (50% of 512)
+    );
+    gradient2.addColorStop(0, "rgba(255, 255, 255, 0.1)"); // 10% opacity
+    gradient2.addColorStop(0.1577, "rgba(255, 255, 255, 0)");
+    gradient2.addColorStop(0.8361, "rgba(255, 255, 255, 0)");
+    gradient2.addColorStop(1, "rgba(255, 255, 255, 0.1)");
+
+    ctx.fillStyle = gradient2;
+    ctx.fillRect(0, 0, 512, 512);
+
+    return canvas.toDataURL();
+  }, []);
   const [displayPhase, setDisplayPhase] = useState<"root" | "country" | "city">("root");
   const [isAnimating, setIsAnimating] = useState(false);
   const phaseTargetRef = useRef<"root" | "country" | "city" | null>(null);
@@ -84,7 +114,6 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
   // 국가 데이터 로드
   useEffect(() => {
-
     const loadCountries = async () => {
       try {
         setGlobeLoading(true);
@@ -102,8 +131,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         setCountries(features);
         setGlobeLoading(false);
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
         setGlobeError(`국가 데이터 로드 실패: ${errorMessage}`);
         setGlobeLoading(false);
         setCountries([]);
@@ -115,30 +143,21 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
   // 폴리곤 색상 계산 함수
   const getPolygonColorMapped = useCallback(
-    (feature: any) =>
-      getPolygonColor(
-        feature,
-        currentPattern.countries,
-        selectedCountry,
-        getISOCodeMapped
-      ),
-    [currentPattern.countries, selectedCountry, getISOCodeMapped]
+    (feature: any) => getPolygonColor(feature, currentPattern.countries, selectedCountry, getISOCodeMapped),
+    [currentPattern.countries, selectedCountry, getISOCodeMapped],
   );
 
   // 폴리곤 레이블 함수
   const getPolygonLabelMapped = useCallback(
-    (feature: any) =>
-      getPolygonLabel(feature, currentPattern.countries, getISOCodeMapped),
-    [currentPattern.countries, getISOCodeMapped]
+    (feature: any) => getPolygonLabel(feature, currentPattern.countries, getISOCodeMapped),
+    [currentPattern.countries, getISOCodeMapped],
   );
 
   // 폴리곤 클릭 핸들러
   const handlePolygonClick = useCallback(
     (polygon: any) => {
       const countryISOCode = polygon.properties?.ISO_A3 || polygon.id;
-      const clickedCountry = currentPattern.countries.find(
-        (c: any) => getISOCodeMapped(c.id) === countryISOCode
-      );
+      const clickedCountry = currentPattern.countries.find((c: any) => getISOCodeMapped(c.id) === countryISOCode);
       if (clickedCountry) {
         onCountrySelect(clickedCountry.id);
 
@@ -150,12 +169,12 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               lng: clickedCountry.lng,
               altitude: 1.5,
             },
-            1000
+            1000,
           );
         }
       }
     },
-    [currentPattern.countries, getISOCode, onCountrySelect]
+    [currentPattern.countries, getISOCode, onCountrySelect],
   );
 
   // HTML 요소 데이터
@@ -219,11 +238,11 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       }
       const el = document.createElement("div");
       // ensure positioned container so absolute children (+ button) place correctly
-      el.style.position = 'relative';
-      el.style.zIndex = '999';
-      el.style.pointerEvents = 'auto';
-      el.style.position = 'relative';
-      el.style.pointerEvents = 'auto';
+      el.style.position = "relative";
+      el.style.zIndex = "999";
+      el.style.pointerEvents = "auto";
+      el.style.position = "relative";
+      el.style.pointerEvents = "auto";
       const labelIndex = htmlElements.findIndex((item) => item.id === d.id);
 
       // Globe의 현재 카메라 정보를 이용해 화면상 위치 계산
@@ -248,12 +267,8 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         const vector = new THREE.Vector3(x, y, z);
         vector.project(camera);
 
-        const screenX =
-          (vector.x * renderer.domElement.width) / 2 +
-          renderer.domElement.width / 2;
-        const screenY =
-          -(vector.y * renderer.domElement.height) / 2 +
-          renderer.domElement.height / 2;
+        const screenX = (vector.x * renderer.domElement.width) / 2 + renderer.domElement.width / 2;
+        const screenY = -(vector.y * renderer.domElement.height) / 2 + renderer.domElement.height / 2;
 
         return { x: screenX, y: screenY };
       };
@@ -265,10 +280,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       const neighbors = htmlElements
         .filter((other) => {
           const otherPos = calculateScreenPosition(other.lat, other.lng);
-          const distance = Math.sqrt(
-            Math.pow(currentPos.x - otherPos.x, 2) +
-              Math.pow(currentPos.y - otherPos.y, 2)
-          );
+          const distance = Math.sqrt((currentPos.x - otherPos.x) ** 2 + (currentPos.y - otherPos.y) ** 2);
           return distance < groupRadius;
         })
         .sort((a, b) => {
@@ -281,7 +293,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       const groupSize = Math.max(neighbors.length, 1);
       const myGroupIndex = Math.max(
         neighbors.findIndex((item) => item.id === d.id),
-        0
+        0,
       );
       const angleStep = 360 / groupSize;
       // 도시(개별) 라벨 단계에서는 거리도 동적 조정 (혼잡할수록 더 밖으로 배치)
@@ -295,12 +307,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         const baseItem = d.items && d.items.length === 1 ? d.items[0] : d;
         const displayFlag = baseItem.flag ?? d.flag;
         const displayName = (baseItem.name ?? d.name).split(",")[0];
-        const styles = createSingleLabelStyles(
-          d,
-          labelIndex,
-          angleOffset,
-          dynamicDistance
-        );
+        const styles = createSingleLabelStyles(d, labelIndex, angleOffset, dynamicDistance);
         el.innerHTML = `
           <div style="${styles.centerPoint}"></div>
           <div style="${styles.dottedLine}"></div>
@@ -326,16 +333,29 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
           navigateToMetadata();
         };
         const bind = () => {
-          const node = el.querySelector('img[data-city]') as HTMLImageElement | null;
+          const node = el.querySelector("img[data-city]") as HTMLImageElement | null;
           if (node) {
             node.onclick = handler;
             node.onerror = () => {
-              node.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="%230099ff"/><path d="M24 12v24M12 24h24" stroke="white" stroke-width="4" stroke-linecap="round"/></svg>';
+              node.src =
+                'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="%230099ff"/><path d="M24 12v24M12 24h24" stroke="white" stroke-width="4" stroke-linecap="round"/></svg>';
             };
-            node.addEventListener('mousedown', (e) => { e.preventDefault(); e.stopPropagation(); });
-            node.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); });
-            node.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); });
-            node.addEventListener('wheel', (e) => { e.preventDefault(); e.stopPropagation(); });
+            node.addEventListener("mousedown", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            });
+            node.addEventListener("pointerdown", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            });
+            node.addEventListener("touchstart", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            });
+            node.addEventListener("wheel", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            });
             node.draggable = false;
           }
         };
@@ -358,29 +378,29 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
             </span>
           </div>
         `;
-        
+
         const rad = (angleOffset * Math.PI) / 180;
         const dist = 120;
         const offsetX = Math.cos(rad) * dist;
         const offsetY = Math.sin(rad) * dist;
-        const plus = document.createElement('img');
-        plus.src = '/add_image_btn.svg';
-        plus.alt = 'add';
-        plus.setAttribute('data-city', '');
-        plus.style.position = 'absolute';
-        plus.style.width = '42px';
-        plus.style.height = '42px';
+        const plus = document.createElement("img");
+        plus.src = "/add_image_btn.svg";
+        plus.alt = "add";
+        plus.setAttribute("data-city", "");
+        plus.style.position = "absolute";
+        plus.style.width = "42px";
+        plus.style.height = "42px";
         plus.style.left = `${offsetX - 60}px`;
         plus.style.top = `${offsetY}px`;
-        plus.style.transform = 'translate(-50%, -50%)';
-        plus.style.cursor = 'pointer';
-        plus.style.zIndex = '999';
-        plus.style.filter = 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))';
-        plus.addEventListener('click', (e: any) => {
+        plus.style.transform = "translate(-50%, -50%)";
+        plus.style.cursor = "pointer";
+        plus.style.zIndex = "999";
+        plus.style.filter = "drop-shadow(0 2px 6px rgba(0,0,0,0.4))";
+        plus.addEventListener("click", (e: any) => {
           e.preventDefault();
           e.stopPropagation();
           // cluster 클릭 -> 이미지 메타 페이지로 이동하되 첫번째 아이템 이름 사용
-          const name = (d.items && d.items[0]?.name) ? d.items[0].name.split(',')[0] : '';
+          const name = d.items && d.items[0]?.name ? d.items[0].name.split(",")[0] : "";
           if (name) {
             const q = encodeURIComponent(name);
             window.location.href = `/image-metadata?city=${q}`;
@@ -424,9 +444,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
           }
 
           // 타겟 줌 레벨 및 목표 phase 결정
-          const targetAltitude = isMultiCountry 
-            ? GLOBE_CONFIG.CLUSTER_ZOOM_STAGE1 
-            : GLOBE_CONFIG.CLUSTER_ZOOM;
+          const targetAltitude = isMultiCountry ? GLOBE_CONFIG.CLUSTER_ZOOM_STAGE1 : GLOBE_CONFIG.CLUSTER_ZOOM;
           phaseTargetRef.current = isMultiCountry ? "country" : "city";
 
           // 애니메이션 중에는 기존 phase 유지 → 깜빡임 방지
@@ -437,7 +455,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               lng: targetLng,
               altitude: targetAltitude,
             },
-            ANIMATION_DURATION.CAMERA_MOVE
+            ANIMATION_DURATION.CAMERA_MOVE,
           );
           setTimeout(() => {
             setIsAnimating(false);
@@ -464,7 +482,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               lng: targetLng,
               altitude: GLOBE_CONFIG.FOCUS_ZOOM,
             },
-            ANIMATION_DURATION.CAMERA_MOVE
+            ANIMATION_DURATION.CAMERA_MOVE,
           );
           setTimeout(() => {
             setIsAnimating(false);
@@ -485,7 +503,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
       return el;
     },
-    [onCountrySelect, htmlElements, currentPattern.countries, zoomLevel]
+    [onCountrySelect, htmlElements, currentPattern.countries, zoomLevel],
   );
 
   // 줌 변경 감지
@@ -497,23 +515,17 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         if (newZoom < GLOBE_CONFIG.MIN_ZOOM) {
           newZoom = GLOBE_CONFIG.MIN_ZOOM;
           if (globeRef.current) {
-            globeRef.current.pointOfView(
-              { altitude: GLOBE_CONFIG.MIN_ZOOM },
-              0
-            );
+            globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.MIN_ZOOM }, 0);
           }
         } else if (newZoom > GLOBE_CONFIG.MAX_ZOOM) {
           newZoom = GLOBE_CONFIG.MAX_ZOOM;
           if (globeRef.current) {
-            globeRef.current.pointOfView(
-              { altitude: GLOBE_CONFIG.MAX_ZOOM },
-              0
-            );
+            globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.MAX_ZOOM }, 0);
           }
         }
 
         // 외부에서 스냅 지시가 있으면 해당 값으로 고정
-        if (typeof snapZoomTo === 'number') {
+        if (typeof snapZoomTo === "number") {
           newZoom = snapZoomTo;
           if (globeRef.current) {
             globeRef.current.pointOfView({ altitude: newZoom }, 0);
@@ -538,7 +550,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         onZoomChange(newZoom);
       }
     },
-    [onZoomChange, snapZoomTo, displayPhase, isAnimating]
+    [onZoomChange, snapZoomTo, displayPhase, isAnimating],
   );
 
   // 윈도우 리사이즈 감지
@@ -548,12 +560,12 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       });
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // 브라우저 줌 방지 및 Globe 초기 설정
@@ -562,10 +574,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
     const timer = setTimeout(() => {
       if (globeRef.current && !globeLoading) {
-        globeRef.current.pointOfView(
-          { altitude: GLOBE_CONFIG.INITIAL_ALTITUDE },
-          ANIMATION_DURATION.INITIAL_SETUP
-        );
+        globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.INITIAL_ALTITUDE }, ANIMATION_DURATION.INITIAL_SETUP);
 
         if (globeRef.current.controls) {
           globeRef.current.controls().minDistance = GLOBE_CONFIG.MIN_DISTANCE;
@@ -574,8 +583,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       }
     }, ANIMATION_DURATION.SETUP_DELAY);
 
-    const { preventZoom, preventKeyboardZoom, preventTouchZoom } =
-      createZoomPreventListeners();
+    const { preventZoom, preventKeyboardZoom, preventTouchZoom } = createZoomPreventListeners();
 
     document.addEventListener("wheel", preventZoom, { passive: false });
     document.addEventListener("keydown", preventKeyboardZoom);
@@ -593,12 +601,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
   // 초기 시점 설정 (클라이언트에서만)
   useEffect(() => {
-    if (
-      !globeRef.current ||
-      globeLoading ||
-      countries.length === 0
-    )
-      return;
+    if (!globeRef.current || globeLoading || countries.length === 0) return;
 
     // Globe가 완전히 로드된 후 초기 시점 설정
     setTimeout(() => {
@@ -617,8 +620,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
           width: GLOBE_CONFIG.WIDTH,
           height: GLOBE_CONFIG.HEIGHT,
           borderRadius: "50%",
-          background:
-            "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
+          background: "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -638,8 +640,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
           width: GLOBE_CONFIG.WIDTH,
           height: GLOBE_CONFIG.HEIGHT,
           borderRadius: "50%",
-          background:
-            "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
+          background: "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -651,9 +652,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         }}
       >
         <div>⚠️ Globe 로딩 실패</div>
-        <div style={{ fontSize: "12px", opacity: 0.8 }}>
-          인터넷 연결을 확인해주세요
-        </div>
+        <div style={{ fontSize: "12px", opacity: 0.8 }}>인터넷 연결을 확인해주세요</div>
       </div>
     );
   }
@@ -664,6 +663,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       width={Math.min(600, windowSize.width)}
       height={Math.min(800, windowSize.width)}
       backgroundColor="rgba(0,0,0,0)"
+      globeImageUrl={globeImageUrl}
       showAtmosphere={true}
       atmosphereColor={COLORS.ATMOSPHERE}
       atmosphereAltitude={GLOBE_CONFIG.ATMOSPHERE_ALTITUDE}

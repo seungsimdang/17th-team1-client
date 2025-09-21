@@ -34,9 +34,9 @@ export const COLORS = {
   ATMOSPHERE: "#4a90e2", // 대기권 색상 (파란색)
   CLUSTER: "#4a90e2", // 클러스터 마커 색상
   CLUSTER_BG: "#2c3e50", // 클러스터 배경 색상 (어두운 회색)
-  POLYGON_SIDE: "rgba(100,100,100,0.1)", // 폴리곤 측면 색상
-  POLYGON_STROKE: "#fff", // 국경선 색상
-  INACTIVE_POLYGON: "rgba(100, 100, 100, 0.02)", // 비활성 폴리곤 색상 (매우 연한 회색)
+  POLYGON_SIDE: "rgba(100,100,100, 0.1)", // 폴리곤 측면 색상
+  POLYGON_STROKE: "gray", // 국경선 색상 (흰색 10%와 유사)
+  INACTIVE_POLYGON: "#94cbff33", // 비활성 폴리곤 색상 (매우 연한 회색)
   WHITE_LABEL: "rgba(255,255,255,0.8)", // 흰색 라벨 텍스트 색상
   WHITE_BORDER: "rgba(255,255,255,0.6)", // 흰색 테두리 색상
 } as const;
