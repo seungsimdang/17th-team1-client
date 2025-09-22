@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ImageMetadata } from "@/types/imageMetadata";
+import type { ImageMetadata } from "@/types/imageMetadata";
 
 interface GoogleMapsModalProps {
     isOpen: boolean;

@@ -297,12 +297,6 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
           <div style="${styles.centerPoint}"></div>
           <div style="${styles.dottedLine}"></div>
           <div style="${styles.label} position: absolute;">
-            <img 
-              src="/add_image_btn.svg" 
-              alt="add" 
-              data-city="${displayName}"
-              style="position:absolute; left:0; top:0; transform:translate(-40%,-40%); width:24px; height:24px; cursor:pointer; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5)); z-index:9999;"
-            />
             <span style="font-size: 14px; pointer-events: none;">${displayFlag}</span>
             <span style="pointer-events: none;">${displayName}</span>
           </div>
@@ -348,62 +342,111 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       } else {
         const styles = createClusterLabelStyles(d, labelIndex, angleOffset);
 
-        el.innerHTML = `
-          <div style="${styles.centerPoint}"></div>
-          <div style="${styles.dottedLine}"></div>
-          <div style="
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50px;
-            padding: 12px 16px;
-            backdrop-filter: blur(8px);
-            min-width: 89px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-          ">
-            <span style="
-              color: #ffffff;
-              font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-              font-size: 16px;
-              font-weight: 500;
-              line-height: 20px;
-              white-space: nowrap;
-            ">
-              ${d.name}
-            </span>
-          </div>
-        `;
+        // 대륙 클러스터인지 국가 클러스터인지 판단 (클러스터 이름으로 구분)
+        const isContinentCluster =
+          d.name.includes("아시아") ||
+          d.name.includes("유럽") ||
+          d.name.includes("북아메리카") ||
+          d.name.includes("남아메리카") ||
+          d.name.includes("오세아니아") ||
+          d.name.includes("아프리카") ||
+          d.name.includes("개국");
 
-        const rad = (angleOffset * Math.PI) / 180;
-        const dist = 120;
-        const offsetX = Math.cos(rad) * dist;
-        const offsetY = Math.sin(rad) * dist;
-        const plus = document.createElement("img");
-        plus.src = "/add_image_btn.svg";
-        plus.alt = "add";
-        plus.setAttribute("data-city", "");
-        plus.style.position = "absolute";
-        plus.style.width = "42px";
-        plus.style.height = "42px";
-        plus.style.left = `${offsetX - 60}px`;
-        plus.style.top = `${offsetY}px`;
-        plus.style.transform = "translate(-50%, -50%)";
-        plus.style.cursor = "pointer";
-        plus.style.zIndex = "999";
-        plus.style.filter = "drop-shadow(0 2px 6px rgba(0,0,0,0.4))";
-        plus.addEventListener("click", (e: any) => {
-          e.preventDefault();
-          e.stopPropagation();
-          // cluster 클릭 -> 이미지 메타 페이지로 이동하되 첫번째 아이템 이름 사용
-          const name = d.items && d.items[0]?.name ? d.items[0].name.split(",")[0] : "";
-          if (name) {
-            const q = encodeURIComponent(name);
-            window.location.href = `/image-metadata?city=${q}`;
-          }
-        });
-        // el.appendChild(plus);
+        if (isContinentCluster) {
+          // 대륙 클러스터: 기존 "+숫자" 형태 유지
+          el.innerHTML = `
+            <div style="${styles.centerPoint}"></div>
+            <div style="${styles.dottedLine}"></div>
+            <div style="
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 50px;
+              padding: 12px 16px;
+              backdrop-filter: blur(8px);
+              min-width: 89px;
+              height: 44px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              pointer-events: none;
+            ">
+              <span style="
+                color: #ffffff;
+                font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+                font-size: 16px;
+                font-weight: 500;
+                line-height: 20px;
+                white-space: nowrap;
+              ">
+                ${d.name}
+              </span>
+            </div>
+          `;
+        } else {
+          // 국가 클러스터: 새로운 컴팩트 디자인 (개별/겹치는 국가 모두 동일)
+          const nameAndCount = d.name.split(" +");
+          const countryName = nameAndCount[0];
+          const countNumber = nameAndCount.length > 1 ? nameAndCount[1] : null;
+
+          el.innerHTML = `
+            <div style="${styles.centerPoint}"></div>
+            <div style="${styles.dottedLine}"></div>
+            <div style="
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 50px;
+              padding: 8px 12px;
+              backdrop-filter: blur(8px);
+              height: 32px;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 6px;
+              position: relative;
+              pointer-events: none;
+            ">
+              <!-- 국가명 -->
+              <span style="
+                color: #ffffff;
+                font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+                font-size: 15px;
+                font-weight: 500;
+                line-height: 19px;
+                white-space: nowrap;
+              ">
+                ${countryName}
+              </span>
+              <!-- 숫자 뱃지 (겹쳐진 도시가 있을 때만 표시) -->
+              ${
+                countNumber
+                  ? `
+                <div style="
+                  background: rgba(255, 255, 255, 0.2);
+                  border-radius: 50%;
+                  width: 20px;
+                  height: 20px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  flex-shrink: 0;
+                ">
+                  <span style="
+                    color: #ffffff;
+                    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+                    font-size: 12px;
+                    font-weight: 500;
+                    line-height: 15px;
+                    text-align: center;
+                  ">
+                    ${countNumber}
+                  </span>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          `;
+        }
+
+        // + 아이콘 제거됨
       }
 
       // 클릭 핸들러
@@ -412,6 +455,17 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         event.stopPropagation();
 
         if (!globeRef.current) return;
+
+        // 클러스터 타입으로 개별 도시인지 판단
+        if (d.clusterType === "individual_city") {
+          // 개별 도시 클러스터 클릭 시 - 바로 image-metadata로 이동
+          const cityName = d.items && d.items[0]?.name ? d.items[0].name.split(",")[0] : d.name.split(",")[0];
+          if (cityName) {
+            const q = encodeURIComponent(cityName);
+            window.location.href = `/image-metadata?city=${q}`;
+            return;
+          }
+        }
 
         const targetLat = d.lat;
         const targetLng = d.lng;
@@ -461,7 +515,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
             onZoomChange(targetAltitude);
           }, ANIMATION_DURATION.CAMERA_MOVE + 30);
         } else {
-          // 개별 나라 클릭 시
+          // 기존 로직 (개별 나라 클릭 시)
           if (d.flag) {
             setActiveCountryFlag(d.flag);
             activeCountryFlagRef.current = d.flag;

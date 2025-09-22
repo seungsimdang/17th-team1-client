@@ -21,6 +21,7 @@ interface ClusterData {
   color: string;
   items: CountryData[];
   count: number;
+  clusterType?: 'individual_city' | 'country_cluster' | 'continent_cluster';
 }
 
 interface UseClusteringProps {
@@ -40,10 +41,10 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
     if (zoom >= 1.5) return 8; // 멀리서 볼 때는 중간 거리로 클러스터링
     if (zoom >= 1.0) return 5; // 중간 거리에서 볼 때는 작은 거리로 클러스터링
     if (zoom >= 0.5) return 3; // 가까이서 볼 때는 매우 작은 거리로 클러스터링
-    if (zoom >= 0.3) return 1.5; // 매우 가까이서 볼 때는 작은 거리로 클러스터링
-    if (zoom >= 0.2) return 0; // 국가 단위로 분해 (개별 표시)
-    if (zoom >= 0.1) return 0; // 더 가까워도 개별 표시 유지
-    return 0; // 최대로 가까울 땐 항상 개별 표시
+    if (zoom >= 0.3) return 2; // 매우 가까이서 볼 때는 작은 거리로 클러스터링
+    if (zoom >= 0.2) return 1.5; // 줌인 상태에서도 같은 국가 클러스터링 유지
+    if (zoom >= 0.1) return 1; // 더 가까워도 같은 국가는 클러스터링
+    return 1; // 최대로 가까울 때도 같은 국가는 클러스터링
   }, []);
 
   // 지역 밀도 계산 함수
@@ -79,19 +80,19 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
   // 거리 기반 클러스터링 함수 (메모화)
   const clusterLocations = useCallback(
     (locations: CountryData[], clusterDistance: number, currentZoomLevel: number): ClusterData[] => {
-      if (clusterDistance <= 0) {
-        // 클러스터링을 하지 않는 경우, 모든 위치를 개별적으로 반환
+      // 매우 가까운 줌 (0.1 이하)에서는 클러스터링 완전 해제하여 개별 도시 표시
+      if (currentZoomLevel <= 0.1 || clusterDistance <= 0) {
         return locations.map((location) => {
-          const displayName = currentZoomLevel >= 2.0 ? getCountryName(location.id) : location.name;
           return {
-            id: location.id,
-            name: displayName,
+            id: `${location.id}_${location.lat}_${location.lng}`,
+            name: location.name, // 개별 도시명 표시
             flag: location.flag,
             lat: location.lat,
             lng: location.lng,
             color: location.color,
             items: [location],
             count: 1,
+            clusterType: 'individual_city' as const,
           };
         });
       }
@@ -101,46 +102,114 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
       const densityMap = calculateRegionDensity(locations);
 
       locations.forEach((location) => {
-        if (processed.has(location.id)) return;
+        const locationKey = `${location.id}_${location.lat}_${location.lng}`;
+        if (processed.has(locationKey)) return;
 
         const nearbyLocations: CountryData[] = [location];
-        processed.add(location.id);
+        processed.add(locationKey);
 
         // 지역 밀도에 따른 클러스터링 거리 조정
         const locationDensity = densityMap.get(location.id) || 1.0;
         const adjustedDistance = clusterDistance * locationDensity;
 
-        // 주변 위치들 찾기 (같은 대륙끼리만)
+        // 주변 위치들 찾기 (줌 레벨에 따라 다른 로직)
         locations.forEach((otherLocation) => {
-          if (processed.has(otherLocation.id)) return;
+          const otherLocationKey = `${otherLocation.id}_${otherLocation.lat}_${otherLocation.lng}`;
+          if (processed.has(otherLocationKey)) return;
 
-          // 같은 대륙인지 확인
-          const sameContinent = getContinent(location.id) === getContinent(otherLocation.id);
-          if (!sameContinent) return;
+          // 줌 레벨에 따른 클러스터링 조건
+          let shouldCluster = false;
+
+          if (currentZoomLevel >= 2.5) {
+            // 디폴트 줌(2.5): 같은 대륙끼리만 클러스터링
+            const sameContinent = getContinent(location.id) === getContinent(otherLocation.id);
+            shouldCluster = sameContinent;
+          } else {
+            // 줌인 상태: 같은 국가끼리만 클러스터링 (최대 국가별)
+            const sameCountry = location.id === otherLocation.id;
+            shouldCluster = sameCountry;
+          }
+
+          if (!shouldCluster) return;
 
           const distance = Math.sqrt((location.lat - otherLocation.lat) ** 2 + (location.lng - otherLocation.lng) ** 2);
 
           if (distance <= adjustedDistance) {
             nearbyLocations.push(otherLocation);
-            processed.add(otherLocation.id);
+            processed.add(otherLocationKey);
           }
         });
 
         if (nearbyLocations.length === 1) {
-          // 단일 위치면 디폴트 줌에서는 국가명으로 표시
+          // 단일 위치 처리: 같은 국가의 다른 도시들과 강제 클러스터링 시도
           const location = nearbyLocations[0];
-          const displayName = currentZoomLevel >= 2.0 ? getCountryName(location.id) : location.name;
 
-          clusters.push({
-            id: location.id,
-            name: displayName,
-            flag: location.flag,
-            lat: location.lat,
-            lng: location.lng,
-            color: location.color,
-            items: nearbyLocations,
-            count: 1,
+          // 줌 레벨에 따른 클러스터링 조건으로 같은 그룹 위치들 찾기
+          const sameGroupLocations = locations.filter((otherLocation) => {
+            const otherLocationKey = `${otherLocation.id}_${otherLocation.lat}_${otherLocation.lng}`;
+            if (processed.has(otherLocationKey)) return false;
+
+            if (currentZoomLevel >= 2.5) {
+              // 디폴트 줌: 같은 대륙
+              return getContinent(location.id) === getContinent(otherLocation.id);
+            } else {
+              // 줌인 상태: 같은 국가만
+              return location.id === otherLocation.id;
+            }
           });
+
+          if (sameGroupLocations.length > 1) {
+            // 같은 그룹의 여러 위치들을 강제로 클러스터링
+            sameGroupLocations.forEach((loc) => {
+              const locKey = `${loc.id}_${loc.lat}_${loc.lng}`;
+              processed.add(locKey);
+            });
+
+            const centerLat = sameGroupLocations.reduce((sum, loc) => sum + loc.lat, 0) / sameGroupLocations.length;
+            const centerLng = sameGroupLocations.reduce((sum, loc) => sum + loc.lng, 0) / sameGroupLocations.length;
+
+            // 줌 레벨에 따른 클러스터 이름 생성
+            let clusterName: string;
+            if (currentZoomLevel >= 2.5) {
+              // 디폴트 줌: 대륙명 표시
+              const countryIds = sameGroupLocations.map((loc) => loc.id);
+              clusterName = getContinentClusterName(countryIds);
+            } else {
+              // 줌인 상태: 국가명 표시 (겹쳐진 도시가 있을 때만 숫자 표시)
+              const countryName = getCountryName(location.id);
+              if (sameGroupLocations.length > 1) {
+                clusterName = `${countryName} +${sameGroupLocations.length}`;
+              } else {
+                clusterName = countryName;
+              }
+            }
+
+            clusters.push({
+              id: `group_cluster_${location.id}_${centerLat}_${centerLng}`,
+              name: clusterName,
+              flag: location.flag,
+              lat: centerLat,
+              lng: centerLng,
+              color: location.color,
+              items: sameGroupLocations,
+              count: sameGroupLocations.length,
+              clusterType: currentZoomLevel >= 2.5 ? 'continent_cluster' : 'country_cluster',
+            });
+          } else {
+            // 진짜 단일 위치
+            const displayName = currentZoomLevel >= 2.0 ? getCountryName(location.id) : location.name;
+            clusters.push({
+              id: `${location.id}_${location.lat}_${location.lng}`,
+              name: displayName,
+              flag: location.flag,
+              lat: location.lat,
+              lng: location.lng,
+              color: location.color,
+              items: nearbyLocations,
+              count: 1,
+              clusterType: currentZoomLevel >= 2.0 ? 'country_cluster' : 'individual_city',
+            });
+          }
         } else {
           // 여러 위치면 클러스터로 통합
           const centerLat = nearbyLocations.reduce((sum, loc) => sum + loc.lat, 0) / nearbyLocations.length;
@@ -157,21 +226,30 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
           });
           const mostCommonFlag = Array.from(flagCounts.entries()).sort((a, b) => b[1] - a[1])[0][0];
 
-          // 클러스터 이름 생성: 같은 국가면 국가명, 다른 국가면 대륙명
+          // 줌 레벨에 따른 클러스터 이름 생성
           let clusterName: string;
 
-          if (uniqueCountries.size === 1) {
-            // 같은 국가의 여러 도시들
-            const countryCode = Array.from(uniqueCountries)[0];
-            const countryName = getCountryName(countryCode);
-            clusterName = `${countryName} +${nearbyLocations.length}`;
-          } else {
-            // 다른 국가들 (대륙별)
+          if (currentZoomLevel >= 2.5) {
+            // 디폴트 줌: 대륙명 표시
             clusterName = getContinentClusterName(countryIds);
+          } else {
+            // 줌인 상태: 국가명 표시 (같은 국가면 국가명, 다른 국가면 대륙명)
+            if (uniqueCountries.size === 1) {
+              const countryCode = Array.from(uniqueCountries)[0];
+              const countryName = getCountryName(countryCode);
+              // 겹쳐진 도시가 있을 때만 숫자 표시
+              if (nearbyLocations.length > 1) {
+                clusterName = `${countryName} +${nearbyLocations.length}`;
+              } else {
+                clusterName = countryName;
+              }
+            } else {
+              clusterName = getContinentClusterName(countryIds);
+            }
           }
 
           clusters.push({
-            id: `cluster_${location.id}`,
+            id: `cluster_${location.id}_${centerLat}_${centerLng}`,
             name: clusterName,
             flag: mostCommonFlag,
             lat: centerLat,
@@ -179,6 +257,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
             color: nearbyLocations[0].color,
             items: nearbyLocations,
             count: nearbyLocations.length,
+            clusterType: currentZoomLevel >= 2.5 ? 'continent_cluster' : 'country_cluster',
           });
         }
       });
@@ -243,6 +322,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
           color: items[0]?.color || "#4a90e2",
           items,
           count: items.length,
+          clusterType: 'country_cluster' as const,
         };
       });
 
