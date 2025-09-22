@@ -1,29 +1,13 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useClustering } from "@/hooks/useClustering";
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 // ReactGlobe을 동적 import로 로드 (SSR 방지)
 const ReactGlobe = dynamic(() => import("@/components/ReactGlobe"), {
   ssr: false,
-  loading: () => (
-    <div
-      style={{
-        width: 500,
-        height: 500,
-        borderRadius: "50%",
-        background: "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "white",
-        fontSize: "14px",
-      }}
-    >
-      🌍 Globe 로딩 중...
-    </div>
-  ),
+  loading: () => <div>🌍 지구본 생성 중...</div>,
 });
 
 interface CountryData {
@@ -810,8 +794,11 @@ const GlobePrototype = () => {
         <button
           type="button"
           onClick={() => {
-            setZoomLevel(2.5);
+            setSelectedClusterData(null);
+            setZoomStack([]);
+            setSelectionStack([]);
             setSnapZoomTo(2.5);
+            setZoomLevel(2.5);
           }}
           className="flex items-center gap-2 bg-surface-placeholder--16 backdrop-blur-sm text-text-primary px-4 py-3 rounded-full font-medium text-sm hover:bg-surface-placeholder--8 transition-all duration-200"
         >

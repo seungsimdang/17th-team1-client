@@ -11,23 +11,6 @@ import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabe
 
 const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
-  loading: () => (
-    <div
-      style={{
-        width: GLOBE_CONFIG.WIDTH,
-        height: GLOBE_CONFIG.HEIGHT,
-        borderRadius: "50%",
-        background: "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "white",
-        fontSize: "14px",
-      }}
-    >
-      🌍 Globe 로딩 중...
-    </div>
-  ),
 });
 
 const ReactGlobe: React.FC<ReactGlobeProps> = ({
@@ -615,19 +598,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
 
   if (globeLoading) {
     return (
-      <div
-        style={{
-          width: GLOBE_CONFIG.WIDTH,
-          height: GLOBE_CONFIG.HEIGHT,
-          borderRadius: "50%",
-          background: "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "white",
-          fontSize: "14px",
-        }}
-      >
+      <div className="text-text-secondary text-sm">
         🌍 Globe 로딩 중...
       </div>
     );
