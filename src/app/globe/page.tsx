@@ -1,5 +1,6 @@
 "use client";
 
+import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
 import { useClustering } from "@/hooks/useClustering";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -588,7 +589,23 @@ const GlobePrototype = () => {
     [],
   );
 
-  const currentPattern = useMemo(() => travelPatterns[currentGlobeIndex], [travelPatterns, currentGlobeIndex]);
+  // TODO: 이모지 매핑 - 추후 api response 형태에 따라 변경 필요
+  const travelPatternsWithFlags: TravelPattern[] = useMemo(
+    () =>
+      travelPatterns.map((pattern) => ({
+        ...pattern,
+        countries: pattern.countries.map((c) => ({
+          ...c,
+          flag: COUNTRY_CODE_TO_FLAG[c.id] || "",
+        })),
+      })),
+    [travelPatterns],
+  );
+
+  const currentPattern = useMemo(
+    () => travelPatternsWithFlags[currentGlobeIndex],
+    [travelPatternsWithFlags, currentGlobeIndex],
+  );
 
   // 클러스터링 훅 사용
   const { clusteredData, shouldShowClusters } = useClustering({
@@ -596,17 +613,6 @@ const GlobePrototype = () => {
     zoomLevel,
     selectedClusterData: selectedClusterData || undefined,
   });
-
-  // 줌 레벨에 따른 클러스터링 거리 계산 (UI 표시용)
-  const getClusterDistance = (zoom: number): number => {
-    if (zoom > 6) return 50;
-    if (zoom > 5) return 40;
-    if (zoom > 4) return 30;
-    if (zoom > 3) return 20;
-    if (zoom > 2) return 15;
-    if (zoom > 1.5) return 10;
-    return 0;
-  };
 
   // 핸들러 함수들
   const handleCountrySelect = useCallback((countryId: string | null) => {
@@ -740,7 +746,7 @@ const GlobePrototype = () => {
         <div className="absolute top-4 right-4 flex flex-col gap-1 z-10">
           {travelPatterns.map((pattern, index) => (
             <button
-              key={index}
+              key={pattern.title}
               type="button"
               onClick={() => handlePatternChange(index)}
               className={`w-8 h-8 rounded-full text-xs font-bold transition-all duration-200 ${
@@ -756,7 +762,7 @@ const GlobePrototype = () => {
 
         <div className="w-full h-full flex items-center justify-center">
           <ReactGlobe
-            travelPatterns={travelPatterns}
+            travelPatterns={travelPatternsWithFlags}
             currentGlobeIndex={currentGlobeIndex}
             selectedCountry={selectedCountry}
             onCountrySelect={handleCountrySelect}
@@ -808,7 +814,7 @@ const GlobePrototype = () => {
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            aria-label="뒤로가기 화살표"
+            aria-hidden="true"
           >
             <path d="M19 12H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             <path

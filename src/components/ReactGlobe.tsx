@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { ReactGlobeProps } from "../types/globe";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "./ReactGlobe/constants";
-import { createClusterLabelStyles, createSingleLabelStyles } from "./ReactGlobe/styles";
+import { createClusterLabelStyles } from "./ReactGlobe/styles";
 import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "./ReactGlobe/utils";
 
 const Globe = dynamic(() => import("react-globe.gl"), {
@@ -286,59 +286,43 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         ? Math.min(140, 60 + groupSize * 6) // 그룹 크기에 따라 60~140px
         : undefined;
 
-      if ((d.count === 1 || !d.items || d.items.length === 1) && !d.name.includes("+")) {
+      if (d.clusterType === "individual_city") {
         const baseItem = d.items && d.items.length === 1 ? d.items[0] : d;
         const displayFlag = baseItem.flag ?? d.flag;
-        // 줌 레벨에 따라 표시명 결정: 디폴트 줌(2.0 이상)에서는 클러스터명(국가명), 줌인 시 도시명
-        const shouldUseCountryName = zoomLevel >= 2.0;
-        const displayName = shouldUseCountryName ? d.name : (baseItem.name ?? d.name).split(",")[0];
-        const styles = createSingleLabelStyles(d, labelIndex, angleOffset, dynamicDistance);
+        const cityName = (baseItem.name ?? d.name).split(",")[0];
+        const styles = createClusterLabelStyles(d, labelIndex, angleOffset);
+
         el.innerHTML = `
           <div style="${styles.centerPoint}"></div>
           <div style="${styles.dottedLine}"></div>
-          <div style="${styles.label} position: absolute;">
-            <span style="font-size: 14px; pointer-events: none;">${displayFlag}</span>
-            <span style="pointer-events: none;">${displayName}</span>
+          <div style="
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 8px 12px;
+            backdrop-filter: blur(8px);
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            position: relative;
+            pointer-events: none;
+          ">
+            <!-- 좌측 국기 이모지 -->
+            <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${displayFlag}</span>
+            <!-- 도시명 -->
+            <span style="
+              color: #ffffff;
+              font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+              font-size: 15px;
+              font-weight: 500;
+              line-height: 19px;
+              white-space: nowrap;
+            ">
+              ${cityName}
+            </span>
           </div>
         `;
-        const navigateToMetadata = () => {
-          const q = encodeURIComponent(displayName);
-          window.location.href = `/image-metadata?city=${q}`;
-        };
-
-        const handler = (e: any) => {
-          e.preventDefault();
-          e.stopPropagation();
-          navigateToMetadata();
-        };
-        const bind = () => {
-          const node = el.querySelector("img[data-city]") as HTMLImageElement | null;
-          if (node) {
-            node.onclick = handler;
-            node.onerror = () => {
-              node.src =
-                'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="%230099ff"/><path d="M24 12v24M12 24h24" stroke="white" stroke-width="4" stroke-linecap="round"/></svg>';
-            };
-            node.addEventListener("mousedown", (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            });
-            node.addEventListener("pointerdown", (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            });
-            node.addEventListener("touchstart", (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            });
-            node.addEventListener("wheel", (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            });
-            node.draggable = false;
-          }
-        };
-        setTimeout(bind, 0);
       } else {
         const styles = createClusterLabelStyles(d, labelIndex, angleOffset);
 
@@ -386,6 +370,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
           const nameAndCount = d.name.split(" +");
           const countryName = nameAndCount[0];
           const countNumber = nameAndCount.length > 1 ? nameAndCount[1] : null;
+          const flagEmoji = d.flag || (d.items && d.items[0]?.flag) || "";
 
           el.innerHTML = `
             <div style="${styles.centerPoint}"></div>
@@ -403,6 +388,8 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               position: relative;
               pointer-events: none;
             ">
+              <!-- 좌측 국기 이모지 -->
+              <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${flagEmoji}</span>
               <!-- 국가명 -->
               <span style="
                 color: #ffffff;
@@ -419,7 +406,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
                 countNumber
                   ? `
                 <div style="
-                  background: rgba(255, 255, 255, 0.2);
+                  background: rgba(89, 190, 229, 0.5);
                   border-radius: 50%;
                   width: 20px;
                   height: 20px;
