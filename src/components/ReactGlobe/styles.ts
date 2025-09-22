@@ -77,9 +77,12 @@ export const createSingleLabelStyles = (d: any, index: number = 0, angleOffset: 
 };
 
 // 클러스터 라벨 스타일 생성
-export const createClusterLabelStyles = (d: any, index: number = 0, angleOffset: number = 0) => {
-  const distance = 100; // 중심점에서 라벨까지의 거리 (클러스터는 조금 더 멀리)
-
+export const createClusterLabelStyles = (
+  d: any,
+  index: number = 0,
+  angleOffset: number = 0,
+  distance: number = 100,
+) => {
   // 기본 각도 + 오프셋 각도
   const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315];
   const baseAngle = baseAngles[index % baseAngles.length];

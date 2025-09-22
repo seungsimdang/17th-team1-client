@@ -287,16 +287,49 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       const angleStep = 360 / groupSize;
       // 도시(개별) 라벨 단계에서는 거리도 동적 조정 (혼잡할수록 더 밖으로 배치)
       const isCityLevel = d.count === 1;
-      const angleOffset = myGroupIndex * angleStep;
+      // 기본 각도 분배 + 미세 분산(jitter)로 겹침 감소
+      const jitter = myGroupIndex % 2 === 0 ? -8 : 8;
+      const angleOffset = (myGroupIndex * angleStep + jitter + 360) % 360;
+      // 혼잡할수록 더 멀리 라벨을 배치해 겹침 해소
       const dynamicDistance = isCityLevel
-        ? Math.min(140, 60 + groupSize * 6) // 그룹 크기에 따라 60~140px
-        : undefined;
+        ? Math.min(220, 90 + groupSize * 10) // 90~220px
+        : Math.min(260, 120 + groupSize * 12); // 120~260px
+
+      // 화면 안에 라벨이 들어오도록 현재 각도 기준 최대 허용 거리 계산
+      let clampedDistance = dynamicDistance;
+      try {
+        const renderer = globeRef.current?.renderer?.() || globeRef.current?.renderer?.();
+        const width = renderer?.domElement?.width ?? window.innerWidth;
+        const height = renderer?.domElement?.height ?? window.innerHeight;
+        const margin = 16; // 화면 여백
+
+        const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315];
+        const baseAngle = baseAngles[labelIndex % baseAngles.length];
+        const finalAngleDeg = (baseAngle + angleOffset) % 360;
+        const radians = (finalAngleDeg * Math.PI) / 180;
+        const ux = Math.cos(radians);
+        const uy = Math.sin(radians);
+
+        const minX = margin;
+        const maxX = width - margin;
+        const minY = margin;
+        const maxY = height - margin;
+
+        const maxDistX =
+          Math.abs(ux) < 1e-4 ? Infinity : ux > 0 ? (maxX - currentPos.x) / ux : (minX - currentPos.x) / ux;
+        const maxDistY =
+          Math.abs(uy) < 1e-4 ? Infinity : uy > 0 ? (maxY - currentPos.y) / uy : (minY - currentPos.y) / uy;
+
+        const maxAllowed = Math.max(0, Math.min(maxDistX, maxDistY));
+        const minBaseline = isCityLevel ? 80 : 110;
+        clampedDistance = Math.max(Math.min(dynamicDistance, maxAllowed), minBaseline);
+      } catch {}
 
       if (d.clusterType === "individual_city") {
         const baseItem = d.items && d.items.length === 1 ? d.items[0] : d;
         const displayFlag = baseItem.flag ?? d.flag;
         const cityName = (baseItem.name ?? d.name).split(",")[0];
-        const styles = createClusterLabelStyles(d, labelIndex, angleOffset);
+        const styles = createClusterLabelStyles(d, labelIndex, angleOffset, clampedDistance);
 
         el.innerHTML = `
           <div style="${styles.centerPoint}"></div>
@@ -313,7 +346,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
             justify-content: center;
             gap: 6px;
             position: relative;
-            pointer-events: none;
+            pointer-events: auto;
             width: max-content;
           ">
             <!-- 좌측 국기 이모지 -->
@@ -332,7 +365,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
           </div>
         `;
       } else {
-        const styles = createClusterLabelStyles(d, labelIndex, angleOffset);
+        const styles = createClusterLabelStyles(d, labelIndex, angleOffset, clampedDistance);
 
         // 대륙 클러스터인지 국가 클러스터인지 판단 (클러스터 이름으로 구분)
         const isContinentCluster =
@@ -360,7 +393,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               align-items: center;
               justify-content: center;
               width: max-content;
-              pointer-events: none;
+              pointer-events: auto;
             ">
               <span style="
                 color: #ffffff;
@@ -396,7 +429,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               justify-content: center;
               gap: 6px;
               position: relative;
-              pointer-events: none;
+              pointer-events: auto;
               width: max-content;
             ">
               <!-- 좌측 국기 이모지 -->
