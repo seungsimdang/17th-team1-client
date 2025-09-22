@@ -16,7 +16,7 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
             open={open}
             onOpenChange={setOpen}
             className="toast-anim w-full flex items-center rounded-xl bg-[#21272D] text-white pl-3 pr-8 py-3 shadow-lg transition-all duration-200 will-change-[opacity,transform] data-[state=open]:opacity-100 data-[state=open]:translate-y-0 data-[state=closed]:opacity-0 data-[state=closed]:translate-y-1 motion-reduce:transition-none"
-            leadingClassName="w-6 h-6 flex items-center justify-center flex-shrink-0"
+            leadingClassName="w-6 h-6 flex items-center justify-center flex-shrink-0 mr-2"
             contentClassName="font-semibold text-sm tracking-[-0.02em] leading-none"
             leading={<span className="text-[20px]">😥</span>}
             duration={3000}
