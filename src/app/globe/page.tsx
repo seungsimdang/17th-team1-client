@@ -239,7 +239,7 @@ const GlobePrototype = () => {
         countries: [
           // 독일
           {
-            id: "GER1",
+            id: "DEU",
             name: "드레스덴, 독일",
             flag: "🇩🇪",
             lat: 51.0504,
@@ -247,7 +247,7 @@ const GlobePrototype = () => {
             color: "#ff9800",
           },
           {
-            id: "GER2",
+            id: "DEU",
             name: "베를린, 독일",
             flag: "🇩🇪",
             lat: 52.52,
@@ -255,7 +255,7 @@ const GlobePrototype = () => {
             color: "#ff9800",
           },
           {
-            id: "GER3",
+            id: "DEU",
             name: "마르부르크, 독일",
             flag: "🇩🇪",
             lat: 50.8021,
@@ -263,7 +263,7 @@ const GlobePrototype = () => {
             color: "#ff9800",
           },
           {
-            id: "GER4",
+            id: "DEU",
             name: "에센, 독일",
             flag: "🇩🇪",
             lat: 51.4556,
@@ -271,7 +271,7 @@ const GlobePrototype = () => {
             color: "#ff9800",
           },
           {
-            id: "GER5",
+            id: "DEU",
             name: "도르트문트, 독일",
             flag: "🇩🇪",
             lat: 51.5136,
@@ -279,7 +279,7 @@ const GlobePrototype = () => {
             color: "#ff9800",
           },
           {
-            id: "GER6",
+            id: "DEU",
             name: "쾰른, 독일",
             flag: "🇩🇪",
             lat: 50.9375,
@@ -287,7 +287,7 @@ const GlobePrototype = () => {
             color: "#ff9800",
           },
           {
-            id: "GER7",
+            id: "DEU",
             name: "프랑크푸르트, 독일",
             flag: "🇩🇪",
             lat: 50.1109,
@@ -295,7 +295,7 @@ const GlobePrototype = () => {
             color: "#ff9800",
           },
           {
-            id: "GER8",
+            id: "DEU",
             name: "하이델베르크, 독일",
             flag: "🇩🇪",
             lat: 49.3988,
@@ -303,7 +303,7 @@ const GlobePrototype = () => {
             color: "#ff9800",
           },
           {
-            id: "GER9",
+            id: "DEU",
             name: "뮌헨, 독일",
             flag: "🇩🇪",
             lat: 48.1351,
@@ -311,7 +311,7 @@ const GlobePrototype = () => {
             color: "#ff9800",
           },
           {
-            id: "GER10",
+            id: "DEU",
             name: "뒤셀도르프, 독일",
             flag: "🇩🇪",
             lat: 51.2277,
@@ -321,7 +321,7 @@ const GlobePrototype = () => {
 
           // 프랑스
           {
-            id: "FRA1",
+            id: "FRA",
             name: "니스, 프랑스",
             flag: "🇫🇷",
             lat: 43.7102,
@@ -329,7 +329,7 @@ const GlobePrototype = () => {
             color: "#2196f3",
           },
           {
-            id: "FRA2",
+            id: "FRA",
             name: "노르망디 - 몽생미셸, 프랑스",
             flag: "🇫🇷",
             lat: 48.6361,
@@ -337,7 +337,7 @@ const GlobePrototype = () => {
             color: "#2196f3",
           },
           {
-            id: "FRA3",
+            id: "FRA",
             name: "콜마르, 프랑스",
             flag: "🇫🇷",
             lat: 48.0794,
@@ -345,7 +345,7 @@ const GlobePrototype = () => {
             color: "#2196f3",
           },
           {
-            id: "FRA4",
+            id: "FRA",
             name: "파리, 프랑스",
             flag: "🇫🇷",
             lat: 48.8566,
@@ -353,7 +353,7 @@ const GlobePrototype = () => {
             color: "#2196f3",
           },
           {
-            id: "FRA5",
+            id: "FRA",
             name: "스트라스부르, 프랑스",
             flag: "🇫🇷",
             lat: 48.5734,
@@ -363,7 +363,7 @@ const GlobePrototype = () => {
 
           // 네덜란드
           {
-            id: "NLD1",
+            id: "NLD",
             name: "루르몬드, 네덜란드",
             flag: "🇳🇱",
             lat: 51.1944,
@@ -371,7 +371,7 @@ const GlobePrototype = () => {
             color: "#4caf50",
           },
           {
-            id: "NLD2",
+            id: "NLD",
             name: "벤로, 네덜란드",
             flag: "🇳🇱",
             lat: 51.3703,
@@ -379,7 +379,7 @@ const GlobePrototype = () => {
             color: "#4caf50",
           },
           {
-            id: "NLD3",
+            id: "NLD",
             name: "아인트호번, 네덜란드",
             flag: "🇳🇱",
             lat: 51.4416,
@@ -387,7 +387,7 @@ const GlobePrototype = () => {
             color: "#4caf50",
           },
           {
-            id: "NLD4",
+            id: "NLD",
             name: "잔세 스칸스, 네덜란드",
             flag: "🇳🇱",
             lat: 52.4742,
@@ -395,7 +395,7 @@ const GlobePrototype = () => {
             color: "#4caf50",
           },
           {
-            id: "NLD5",
+            id: "NLD",
             name: "암스테르담, 네덜란드",
             flag: "🇳🇱",
             lat: 52.3676,
@@ -405,7 +405,7 @@ const GlobePrototype = () => {
 
           // 오스트리아
           {
-            id: "AUT1",
+            id: "AUT",
             name: "빈, 오스트리아",
             flag: "🇦🇹",
             lat: 48.2082,
@@ -415,7 +415,7 @@ const GlobePrototype = () => {
 
           // 포르투갈
           {
-            id: "PRT1",
+            id: "PRT",
             name: "리스본, 포르투갈",
             flag: "🇵🇹",
             lat: 38.7223,
@@ -423,7 +423,7 @@ const GlobePrototype = () => {
             color: "#9c27b0",
           },
           {
-            id: "PRT2",
+            id: "PRT",
             name: "포르투, 포르투갈",
             flag: "🇵🇹",
             lat: 41.1579,
@@ -433,7 +433,7 @@ const GlobePrototype = () => {
 
           // 덴마크
           {
-            id: "DNK1",
+            id: "DNK",
             name: "코펜하겐, 덴마크",
             flag: "🇩🇰",
             lat: 55.6761,
@@ -443,7 +443,7 @@ const GlobePrototype = () => {
 
           // 노르웨이/아이슬란드 (오로라 관광)
           {
-            id: "NOR1",
+            id: "NOR",
             name: "오로라 관광 (노르웨이/아이슬란드)",
             flag: "🇳🇴",
             lat: 69.6492,
@@ -453,7 +453,7 @@ const GlobePrototype = () => {
 
           // 체코
           {
-            id: "CZE1",
+            id: "CZE",
             name: "프라하, 체코",
             flag: "🇨🇿",
             lat: 50.0755,
@@ -463,7 +463,7 @@ const GlobePrototype = () => {
 
           // 헝가리
           {
-            id: "HUN1",
+            id: "HUN",
             name: "부다페스트, 헝가리",
             flag: "🇭🇺",
             lat: 47.4979,
@@ -473,7 +473,7 @@ const GlobePrototype = () => {
 
           // 벨기에
           {
-            id: "BEL1",
+            id: "BEL",
             name: "브뤼셀, 벨기에",
             flag: "🇧🇪",
             lat: 50.8503,
@@ -483,7 +483,7 @@ const GlobePrototype = () => {
 
           // 몰타
           {
-            id: "MLT1",
+            id: "MLT",
             name: "몰타",
             flag: "🇲🇹",
             lat: 35.9375,
@@ -493,7 +493,7 @@ const GlobePrototype = () => {
 
           // 이탈리아
           {
-            id: "ITA2",
+            id: "ITA",
             name: "로마, 이탈리아",
             flag: "🇮🇹",
             lat: 41.9028,
@@ -501,7 +501,7 @@ const GlobePrototype = () => {
             color: "#ff5722",
           },
           {
-            id: "ITA3",
+            id: "ITA",
             name: "피사, 이탈리아",
             flag: "🇮🇹",
             lat: 43.7228,
@@ -509,7 +509,7 @@ const GlobePrototype = () => {
             color: "#ff5722",
           },
           {
-            id: "ITA4",
+            id: "ITA",
             name: "피렌체, 이탈리아",
             flag: "🇮🇹",
             lat: 43.7696,
@@ -517,7 +517,7 @@ const GlobePrototype = () => {
             color: "#ff5722",
           },
           {
-            id: "ITA5",
+            id: "ITA",
             name: "베니스, 이탈리아",
             flag: "🇮🇹",
             lat: 45.4408,
@@ -525,7 +525,7 @@ const GlobePrototype = () => {
             color: "#ff5722",
           },
           {
-            id: "ITA6",
+            id: "ITA",
             name: "밀라노, 이탈리아",
             flag: "🇮🇹",
             lat: 45.4642,
@@ -535,7 +535,7 @@ const GlobePrototype = () => {
 
           // 그리스
           {
-            id: "GRC1",
+            id: "GRC",
             name: "아테네, 그리스",
             flag: "🇬🇷",
             lat: 37.9838,
@@ -545,7 +545,7 @@ const GlobePrototype = () => {
 
           // 스위스
           {
-            id: "CHE1",
+            id: "CHE",
             name: "인터라켄, 스위스",
             flag: "🇨🇭",
             lat: 46.6863,
@@ -555,7 +555,7 @@ const GlobePrototype = () => {
 
           // 영국
           {
-            id: "GBR1",
+            id: "GBR",
             name: "런던, 영국",
             flag: "🇬🇧",
             lat: 51.5074,
@@ -565,7 +565,7 @@ const GlobePrototype = () => {
 
           // 스페인
           {
-            id: "ESP1",
+            id: "ESP",
             name: "바르셀로나, 스페인",
             flag: "🇪🇸",
             lat: 41.3851,
@@ -575,7 +575,7 @@ const GlobePrototype = () => {
 
           // 에스토니아
           {
-            id: "EST1",
+            id: "EST",
             name: "탈린, 에스토니아",
             flag: "🇪🇪",
             lat: 59.437,

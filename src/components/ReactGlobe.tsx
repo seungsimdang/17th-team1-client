@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import type { CountryData, ReactGlobeProps } from "../types/globe";
+import type { ReactGlobeProps } from "../types/globe";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "./ReactGlobe/constants";
 import { createClusterLabelStyles, createSingleLabelStyles } from "./ReactGlobe/styles";
 import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "./ReactGlobe/utils";
@@ -286,10 +286,12 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         ? Math.min(140, 60 + groupSize * 6) // 그룹 크기에 따라 60~140px
         : undefined;
 
-      if (d.count === 1 || !d.items || d.items.length === 1) {
+      if ((d.count === 1 || !d.items || d.items.length === 1) && !d.name.includes("+")) {
         const baseItem = d.items && d.items.length === 1 ? d.items[0] : d;
         const displayFlag = baseItem.flag ?? d.flag;
-        const displayName = (baseItem.name ?? d.name).split(",")[0];
+        // 줌 레벨에 따라 표시명 결정: 디폴트 줌(2.0 이상)에서는 클러스터명(국가명), 줌인 시 도시명
+        const shouldUseCountryName = zoomLevel >= 2.0;
+        const displayName = shouldUseCountryName ? d.name : (baseItem.name ?? d.name).split(",")[0];
         const styles = createSingleLabelStyles(d, labelIndex, angleOffset, dynamicDistance);
         el.innerHTML = `
           <div style="${styles.centerPoint}"></div>
@@ -349,15 +351,27 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         el.innerHTML = `
           <div style="${styles.centerPoint}"></div>
           <div style="${styles.dottedLine}"></div>
-          <div style="${styles.label}">
-            <span style="font-size: 14px; font-weight: bold; pointer-events: none; margin-right: 8px;">
-              ${d.count}개 지역
-            </span>
-            <span style="font-size: 11px; opacity: 0.8; pointer-events: none;">
-              ${d.items
-                .slice(0, 2)
-                .map((item: any) => item.name.split(",")[0])
-                .join(", ")}${d.count > 2 ? " 등" : ""}
+          <div style="
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 12px 16px;
+            backdrop-filter: blur(8px);
+            min-width: 89px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+          ">
+            <span style="
+              color: #ffffff;
+              font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+              font-size: 16px;
+              font-weight: 500;
+              line-height: 20px;
+              white-space: nowrap;
+            ">
+              ${d.name}
             </span>
           </div>
         `;
@@ -389,7 +403,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
             window.location.href = `/image-metadata?city=${q}`;
           }
         });
-        el.appendChild(plus);
+        // el.appendChild(plus);
       }
 
       // 클릭 핸들러
@@ -597,11 +611,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
   }, [globeLoading, countries]);
 
   if (globeLoading) {
-    return (
-      <div className="text-text-secondary text-sm">
-        🌍 Globe 로딩 중...
-      </div>
-    );
+    return <div className="text-text-secondary text-sm">🌍 Globe 로딩 중...</div>;
   }
 
   if (globeError) {
