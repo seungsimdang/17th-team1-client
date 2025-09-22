@@ -120,7 +120,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
           // 줌 레벨에 따른 클러스터링 조건
           let shouldCluster = false;
 
-          if (currentZoomLevel >= 3.0) {
+          if (currentZoomLevel >= 2.5) {
             // 디폴트 줌(3.0): 같은 대륙끼리만 클러스터링
             const sameContinent = getContinent(location.id) === getContinent(otherLocation.id);
             shouldCluster = sameContinent;

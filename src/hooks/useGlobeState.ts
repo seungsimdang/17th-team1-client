@@ -5,16 +5,16 @@ import type { CountryData, TravelPattern } from "@/data/travelPatterns";
 export const useGlobeState = (patterns: TravelPattern[]) => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [currentGlobeIndex, setCurrentGlobeIndex] = useState(0);
-  const [zoomLevel, setZoomLevel] = useState(3.0);
+  const [zoomLevel, setZoomLevel] = useState(2.5);
   const [selectedClusterData, setSelectedClusterData] = useState<CountryData[] | null>(null);
   const [zoomStack, setZoomStack] = useState<number[]>([]);
-  const [snapZoomTo, setSnapZoomTo] = useState<number | null>(3.0);
+  const [snapZoomTo, setSnapZoomTo] = useState<number | null>(2.5);
   const [selectionStack, setSelectionStack] = useState<(CountryData[] | null)[]>([]);
   const [isZoomed, setIsZoomed] = useState(false);
 
   // 줌 상태 감지 (초기 줌 레벨 2.5에서 줌 인 했을 때 줌된 것으로 간주)
   useEffect(() => {
-    const isCurrentlyZoomed = zoomLevel < 2.9; // 3.0보다 작으면 줌 인 된 것
+    const isCurrentlyZoomed = zoomLevel < 2.4; // 2.5보다 작으면 줌 인 된 것
     console.log("Zoom debug:", { zoomLevel, isCurrentlyZoomed });
     setIsZoomed(isCurrentlyZoomed);
   }, [zoomLevel]);
@@ -133,7 +133,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
     setCurrentGlobeIndex(index);
     setSelectedCountry(null);
     setSelectedClusterData(null);
-    setZoomLevel(3.0);
+    setZoomLevel(2.5);
     setZoomStack([]);
     setSnapZoomTo(null);
     setSelectionStack([]);
@@ -143,7 +143,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
     setSelectedClusterData(null);
     setZoomStack([]);
     setSelectionStack([]);
-    setZoomLevel(3.0);
+    setZoomLevel(2.5);
     setSnapZoomTo(null);
   }, []);
 

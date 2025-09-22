@@ -11,7 +11,7 @@ export const BackButton = ({ isZoomed, globeRef, onReset }: BackButtonProps) => 
   const handleBackClick = () => {
     // Globe ref를 통해 직접 카메라 이동
     if (globeRef.current?.globeRef?.current) {
-      globeRef.current.globeRef.current.pointOfView({ altitude: 3.0 }, 1000);
+      globeRef.current.globeRef.current.pointOfView({ altitude: 2.5 }, 1000);
 
       // 애니메이션 완료 후 상태 업데이트
       setTimeout(() => {
