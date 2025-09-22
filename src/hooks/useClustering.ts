@@ -1,7 +1,7 @@
 "use client";
 
-import { getContinent, getContinentClusterName, getCountryName } from "@/constants/countryMapping";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getContinent, getContinentClusterName, getCountryName } from "@/constants/countryMapping";
 
 interface CountryData {
   id: string;
@@ -21,7 +21,7 @@ interface ClusterData {
   color: string;
   items: CountryData[];
   count: number;
-  clusterType?: 'individual_city' | 'country_cluster' | 'continent_cluster';
+  clusterType?: "individual_city" | "country_cluster" | "continent_cluster";
 }
 
 interface UseClusteringProps {
@@ -92,7 +92,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
             color: location.color,
             items: [location],
             count: 1,
-            clusterType: 'individual_city' as const,
+            clusterType: "individual_city" as const,
           };
         });
       }
@@ -120,8 +120,8 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
           // 줌 레벨에 따른 클러스터링 조건
           let shouldCluster = false;
 
-          if (currentZoomLevel >= 2.5) {
-            // 디폴트 줌(2.5): 같은 대륙끼리만 클러스터링
+          if (currentZoomLevel >= 3.0) {
+            // 디폴트 줌(3.0): 같은 대륙끼리만 클러스터링
             const sameContinent = getContinent(location.id) === getContinent(otherLocation.id);
             shouldCluster = sameContinent;
           } else {
@@ -149,7 +149,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
             const otherLocationKey = `${otherLocation.id}_${otherLocation.lat}_${otherLocation.lng}`;
             if (processed.has(otherLocationKey)) return false;
 
-            if (currentZoomLevel >= 2.5) {
+            if (currentZoomLevel >= 3.0) {
               // 디폴트 줌: 같은 대륙
               return getContinent(location.id) === getContinent(otherLocation.id);
             } else {
@@ -170,7 +170,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
 
             // 줌 레벨에 따른 클러스터 이름 생성
             let clusterName: string;
-            if (currentZoomLevel >= 2.5) {
+            if (currentZoomLevel >= 3.0) {
               // 디폴트 줌: 대륙명 표시
               const countryIds = sameGroupLocations.map((loc) => loc.id);
               clusterName = getContinentClusterName(countryIds);
@@ -193,7 +193,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
               color: location.color,
               items: sameGroupLocations,
               count: sameGroupLocations.length,
-              clusterType: currentZoomLevel >= 2.5 ? 'continent_cluster' : 'country_cluster',
+              clusterType: currentZoomLevel >= 3.0 ? "continent_cluster" : "country_cluster",
             });
           } else {
             // 진짜 단일 위치
@@ -207,7 +207,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
               color: location.color,
               items: nearbyLocations,
               count: 1,
-              clusterType: currentZoomLevel >= 2.0 ? 'country_cluster' : 'individual_city',
+              clusterType: currentZoomLevel >= 2.0 ? "country_cluster" : "individual_city",
             });
           }
         } else {
@@ -229,7 +229,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
           // 줌 레벨에 따른 클러스터 이름 생성
           let clusterName: string;
 
-          if (currentZoomLevel >= 2.5) {
+          if (currentZoomLevel >= 3.0) {
             // 디폴트 줌: 대륙명 표시
             clusterName = getContinentClusterName(countryIds);
           } else {
@@ -257,7 +257,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
             color: nearbyLocations[0].color,
             items: nearbyLocations,
             count: nearbyLocations.length,
-            clusterType: currentZoomLevel >= 2.5 ? 'continent_cluster' : 'country_cluster',
+            clusterType: currentZoomLevel >= 3.0 ? "continent_cluster" : "country_cluster",
           });
         }
       });
@@ -322,7 +322,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
           color: items[0]?.color || "#4a90e2",
           items,
           count: items.length,
-          clusterType: 'country_cluster' as const,
+          clusterType: "country_cluster" as const,
         };
       });
 
