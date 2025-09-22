@@ -3,13 +3,16 @@
 import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
 import { useClustering } from "@/hooks/useClustering";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // ReactGlobe을 동적 import로 로드 (SSR 방지)
 const ReactGlobe = dynamic(() => import("@/components/ReactGlobe"), {
   ssr: false,
   loading: () => <div>🌍 지구본 생성 중...</div>,
 });
+
+// ReactGlobe ref 타입 import
+import type { ReactGlobeRef } from "@/components/ReactGlobe";
 
 interface CountryData {
   id: string;
@@ -27,6 +30,7 @@ interface TravelPattern {
 }
 
 const GlobePrototype = () => {
+  const globeRef = useRef<ReactGlobeRef>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [currentGlobeIndex, setCurrentGlobeIndex] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(2.5);
@@ -762,6 +766,7 @@ const GlobePrototype = () => {
 
         <div className="w-full h-full flex items-center justify-center">
           <ReactGlobe
+            ref={globeRef}
             travelPatterns={travelPatternsWithFlags}
             currentGlobeIndex={currentGlobeIndex}
             selectedCountry={selectedCountry}
@@ -800,11 +805,25 @@ const GlobePrototype = () => {
         <button
           type="button"
           onClick={() => {
+            // 상태 초기화
             setSelectedClusterData(null);
             setZoomStack([]);
             setSelectionStack([]);
-            setSnapZoomTo(2.5);
-            setZoomLevel(2.5);
+
+            // Globe ref를 통해 직접 카메라 이동
+            if (globeRef.current?.globeRef?.current) {
+              globeRef.current.globeRef.current.pointOfView({ altitude: 2.5 }, 1000);
+
+              // 애니메이션 완료 후 상태 업데이트
+              setTimeout(() => {
+                setZoomLevel(2.5);
+                setSnapZoomTo(null);
+              }, 1100); // 애니메이션 시간보다 약간 더 긴 시간
+            } else {
+              // fallback - ref가 없는 경우 즉시 상태 업데이트
+              setZoomLevel(2.5);
+              setSnapZoomTo(null);
+            }
           }}
           className="flex items-center gap-2 bg-surface-placeholder--16 backdrop-blur-sm text-text-primary px-4 py-3 rounded-full font-medium text-sm hover:bg-surface-placeholder--8 transition-all duration-200"
         >

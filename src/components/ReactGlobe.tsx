@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type React from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { ReactGlobeProps } from "../types/globe";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "./ReactGlobe/constants";
@@ -13,7 +13,11 @@ const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
 });
 
-const ReactGlobe: React.FC<ReactGlobeProps> = ({
+export interface ReactGlobeRef {
+  globeRef: React.RefObject<any>;
+}
+
+const ReactGlobe = forwardRef<ReactGlobeRef, ReactGlobeProps>(({
   travelPatterns,
   currentGlobeIndex,
   selectedCountry,
@@ -25,7 +29,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
   zoomLevel,
   selectedClusterData,
   snapZoomTo,
-}) => {
+}, ref) => {
   const globeRef = useRef<any>(null);
   const activeCountryFlagRef = useRef<string | null>(null);
   const [activeCountryFlag, setActiveCountryFlag] = useState<string | null>(null);
@@ -38,6 +42,11 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
     height: typeof window !== "undefined" ? window.innerHeight : 800,
   });
   const currentPattern = travelPatterns[currentGlobeIndex];
+
+  // Expose the globeRef to parent component
+  useImperativeHandle(ref, () => ({
+    globeRef,
+  }));
 
   // Create gradient texture for globe from Figma design
   const globeImageUrl = useMemo(() => {
@@ -747,6 +756,8 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       onZoom={handleZoomChange}
     />
   );
-};
+});
+
+ReactGlobe.displayName = "ReactGlobe";
 
 export default ReactGlobe;
