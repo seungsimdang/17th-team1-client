@@ -13,12 +13,7 @@ export const calculateDottedLine = (offsetX: number = LABEL_OFFSET.X, offsetY: n
 };
 
 // 폴리곤 색상 계산
-export const getPolygonColor = (
-  feature: any,
-  countries: any[],
-  selectedCountry: string | null,
-  getISOCode: (id: string) => string,
-) => {
+export const getPolygonColor = (feature: any, countries: any[], getISOCode: (id: string) => string) => {
   const isoCode = feature.id;
   const countryData = countries.find((c: any) => getISOCode(c.id) === isoCode);
 

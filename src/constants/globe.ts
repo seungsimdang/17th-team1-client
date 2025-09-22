@@ -1,3 +1,5 @@
+import worldCountries from "world-countries";
+
 // Globe 설정 상수
 export const GLOBE_CONFIG = {
   WIDTH: 600, // 지구본 컴포넌트 너비 (px)
@@ -44,26 +46,15 @@ export const COLORS = {
   WHITE_BORDER: "rgba(255,255,255,0.6)", // 흰색 테두리 색상
 } as const;
 
-// ISO 코드 매핑 (국가 코드 표준화)
-export const ISO_CODE_MAP: { [key: string]: string } = {
-  JPN: "JPN", // 일본
-  JPN2: "JPN", // 일본 (추가 코드)
-  JPN3: "JPN", // 일본 (추가 코드)
-  KOR: "KOR", // 한국
-  TWN: "TWN", // 대만
-  THA: "THA", // 태국
-  SGP: "SGP", // 싱가포르
-  USA: "USA", // 미국
-  FRA: "FRA", // 프랑스
-  EGY: "EGY", // 이집트
-  BRA: "BRA", // 브라질
-  AUS: "AUS", // 호주
-  ITA: "ITA", // 이탈리아
-  ESP: "ESP", // 스페인
-  GBR: "GBR", // 영국
-  DEU: "DEU", // 독일
-  CHE: "CHE", // 스위스
-} as const;
+// ISO 3166-1 국가코드 매핑 (world-countries 기반)
+export const ISO_CODE_MAP: { [key: string]: string } = worldCountries.reduce<{ [key: string]: string }>(
+  (acc, country) => {
+    const code = country.cca3;
+    acc[code] = code; // ISO 코드를 그대로 매핑
+    return acc;
+  },
+  {},
+);
 
 // 외부 리소스 URL
 export const EXTERNAL_URLS = {

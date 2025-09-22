@@ -93,8 +93,8 @@ const ReactGlobe = forwardRef<ReactGlobeRef, ReactGlobeProps>(
 
     // 폴리곤 색상 계산 함수
     const getPolygonColorMapped = useCallback(
-      (feature: any) => getPolygonColor(feature, currentPattern.countries, selectedCountry, getISOCodeMapped),
-      [currentPattern.countries, selectedCountry, getISOCodeMapped],
+      (feature: any) => getPolygonColor(feature, currentPattern.countries, getISOCodeMapped),
+      [currentPattern.countries, getISOCodeMapped],
     );
 
     // 폴리곤 레이블 함수
