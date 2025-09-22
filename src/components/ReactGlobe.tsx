@@ -295,15 +295,16 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
         el.innerHTML = `
           <div style="${styles.centerPoint}"></div>
           <div style="${styles.dottedLine}"></div>
-          <div style="
+          <div style="${styles.label}
             background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(148,203,255,0.2);
             border-radius: 50px;
             padding: 8px 12px;
             backdrop-filter: blur(8px);
             height: 32px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             gap: 6px;
             position: relative;
             pointer-events: none;
@@ -341,12 +342,12 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
           el.innerHTML = `
             <div style="${styles.centerPoint}"></div>
             <div style="${styles.dottedLine}"></div>
-            <div style="
+            <div style="${styles.label}
               background: rgba(255, 255, 255, 0.2);
               border-radius: 50px;
               padding: 12px 16px;
               backdrop-filter: blur(8px);
-              min-width: 89px;
+              /* min-width 제거: 내용만큼만 너비 */
               height: 44px;
               display: flex;
               align-items: center;
@@ -363,7 +364,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               ">
                 ${d.name}
               </span>
-            </div>
+              </div>
           `;
         } else {
           // 국가 클러스터: 새로운 컴팩트 디자인 (개별/겹치는 국가 모두 동일)
@@ -375,8 +376,9 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
           el.innerHTML = `
             <div style="${styles.centerPoint}"></div>
             <div style="${styles.dottedLine}"></div>
-            <div style="
+            <div style="${styles.label}
               background: rgba(255, 255, 255, 0.2);
+              border: 1px solid rgba(148,203,255,0.2);
               border-radius: 50px;
               padding: 8px 12px;
               backdrop-filter: blur(8px);
@@ -429,7 +431,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               `
                   : ""
               }
-            </div>
+              </div>
           `;
         }
 

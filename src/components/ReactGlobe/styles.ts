@@ -1,15 +1,9 @@
-import { LABEL_OFFSET, COLORS } from "./constants";
+import { COLORS } from "./constants";
 import { calculateDottedLine } from "./utils";
 
 // 개별 라벨 스타일 생성
 // styles.ts
-export const createSingleLabelStyles = (
-  d: any,
-  index: number = 0,
-  angleOffset: number = 0,
-  distance: number = 50
-) => {
-
+export const createSingleLabelStyles = (d: any, index: number = 0, angleOffset: number = 0, distance: number = 50) => {
   // 기본 각도 + 오프셋 각도
   const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315]; // 8방향
   const baseAngle = baseAngles[index % baseAngles.length];
@@ -66,8 +60,7 @@ export const createSingleLabelStyles = (
       cursor: pointer;
       user-select: none;
       transition: all 0.2s ease;
-      min-width: 80px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
@@ -83,11 +76,7 @@ export const createSingleLabelStyles = (
 };
 
 // 클러스터 라벨 스타일 생성
-export const createClusterLabelStyles = (
-  d: any,
-  index: number = 0,
-  angleOffset: number = 0
-) => {
+export const createClusterLabelStyles = (d: any, index: number = 0, angleOffset: number = 0) => {
   const distance = 100; // 중심점에서 라벨까지의 거리 (클러스터는 조금 더 멀리)
 
   // 기본 각도 + 오프셋 각도
@@ -140,7 +129,6 @@ export const createClusterLabelStyles = (
       cursor: pointer;
       user-select: none;
       transition: all 0.2s ease;
-      min-width: 100px;
       pointer-events: auto;
       position: absolute;
       z-index: ${20 + index};
