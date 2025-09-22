@@ -60,9 +60,10 @@ export const createSingleLabelStyles = (d: any, index: number = 0, angleOffset: 
       cursor: pointer;
       user-select: none;
       transition: all 0.2s ease;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
+      width: max-content;
       gap: 6px;
       pointer-events: auto;
       position: absolute;

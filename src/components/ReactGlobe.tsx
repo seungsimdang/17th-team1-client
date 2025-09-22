@@ -224,6 +224,12 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       el.style.position = "relative";
       el.style.zIndex = "999";
       el.style.pointerEvents = "auto";
+      // anchor the origin exactly at the geo point regardless of zoom
+      el.style.width = "0px";
+      el.style.height = "0px";
+      el.style.overflow = "visible";
+      el.style.margin = "0";
+      el.style.padding = "0";
       el.style.position = "relative";
       el.style.pointerEvents = "auto";
       const labelIndex = htmlElements.findIndex((item) => item.id === d.id);
@@ -308,6 +314,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
             gap: 6px;
             position: relative;
             pointer-events: none;
+            width: max-content;
           ">
             <!-- 좌측 국기 이모지 -->
             <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${displayFlag}</span>
@@ -352,6 +359,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               display: flex;
               align-items: center;
               justify-content: center;
+              width: max-content;
               pointer-events: none;
             ">
               <span style="
@@ -385,10 +393,11 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
               height: 32px;
               display: flex;
               align-items: center;
-              justify-content: space-between;
+              justify-content: center;
               gap: 6px;
               position: relative;
               pointer-events: none;
+              width: max-content;
             ">
               <!-- 좌측 국기 이모지 -->
               <span style="font-size: 16px; line-height: 16px; pointer-events: none;">${flagEmoji}</span>
@@ -700,7 +709,7 @@ const ReactGlobe: React.FC<ReactGlobeProps> = ({
       onPolygonClick={handlePolygonClick}
       htmlElementsData={htmlElements}
       htmlElement={getHtmlElement}
-      htmlAltitude={() => GLOBE_CONFIG.HTML_ALTITUDE}
+      htmlAltitude={() => 0}
       enablePointerInteraction={true}
       onZoom={handleZoomChange}
     />
