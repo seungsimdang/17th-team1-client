@@ -7,13 +7,13 @@ import { GlobeFooter } from "@/components/globe/GlobeFooter";
 // Components
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import { PatternSelector } from "@/components/globe/PatternSelector";
-import type { ReactGlobeRef } from "@/components/ReactGlobe";
+import type { ReactGlobeRef } from "@/components/react-globe/ReactGlobe";
 import { travelPatterns } from "@/data/travelPatterns";
 import { useClustering } from "@/hooks/useClustering";
 import { useGlobeState } from "@/hooks/useGlobeState";
 
 // ReactGlobe을 동적 import로 로드 (SSR 방지)
-const ReactGlobe = dynamic(() => import("@/components/ReactGlobe"), {
+const ReactGlobe = dynamic(() => import("@/components/react-globe/ReactGlobe"), {
   ssr: false,
   loading: () => <div>🌍 지구본 생성 중...</div>,
 });

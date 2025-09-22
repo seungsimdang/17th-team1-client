@@ -1,4 +1,4 @@
-import { COLORS, ISO_CODE_MAP, LABEL_OFFSET } from "./constants";
+import { COLORS, ISO_CODE_MAP, LABEL_OFFSET } from "@/constants/globe";
 
 // ISO 코드 변환 유틸리티
 export const getISOCode = (countryId: string): string => {

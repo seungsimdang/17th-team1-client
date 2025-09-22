@@ -1,5 +1,5 @@
-import { COLORS } from "./constants";
-import { calculateDottedLine } from "./utils";
+import { COLORS } from "@/constants/globe";
+import { calculateDottedLine } from "@/utils/globeUtils";
 
 // 개별 라벨 스타일 생성
 // styles.ts

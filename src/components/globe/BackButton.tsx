@@ -1,4 +1,4 @@
-import type { ReactGlobeRef } from "@/components/ReactGlobe";
+import type { ReactGlobeRef } from "@/components/react-globe/ReactGlobe";
 
 interface BackButtonProps {
   isZoomed: boolean;
@@ -24,7 +24,7 @@ export const BackButton = ({ isZoomed, globeRef, onReset }: BackButtonProps) => 
 
   return (
     <div
-      className={`absolute bottom-4 right-4 transition-opacity duration-500 ${isZoomed ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+      className={`absolute bottom-4 right-4 transition-opacity duration-500 z-50 ${isZoomed ? "opacity-100" : "opacity-0 pointer-events-none"}`}
     >
       <button
         type="button"
