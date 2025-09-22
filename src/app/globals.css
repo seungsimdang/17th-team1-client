@@ -90,3 +90,34 @@ body {
   font-family:
     "Pretendard Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
+
+/* Radix Toast fade animations */
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.toast-anim[data-state="open"] {
+  animation: toastFadeIn 200ms ease-out;
+}
+
+.toast-anim[data-state="closed"] {
+  animation: toastFadeOut 200ms ease-in forwards;
+}
