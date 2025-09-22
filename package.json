@@ -31,6 +31,7 @@
     "react-globe.gl": "^2.36.0",
     "react-hot-toast": "^2.6.0",
     "three": "^0.180.0",
+    "world-countries": "^5.1.0",
     "zod": "^4.1.5",
     "zustand": "^5.0.8"
   },
