@@ -1,3 +1,4 @@
+import ReturnIcon from "@/assets/icons/return.svg";
 import type { ReactGlobeRef } from "@/components/react-globe/ReactGlobe";
 
 interface BackButtonProps {
@@ -29,26 +30,10 @@ export const BackButton = ({ isZoomed, globeRef, onReset }: BackButtonProps) => 
       <button
         type="button"
         onClick={handleBackClick}
-        className="flex items-center gap-2 bg-surface-placeholder--16 backdrop-blur-sm text-text-primary px-4 py-3 rounded-full font-medium text-sm hover:bg-surface-placeholder--8 transition-all duration-200"
+        className="flex items-center gap-2 bg-surface-placeholder--16 backdrop-blur-sm text-text-primary px-4 py-3 rounded-full font-medium text-sm hover:bg-surface-placeholder--8 transition-all duration-200 cursor-pointer"
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-          <path d="M19 12H5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          <path
-            d="M12 5L5 12L12 19"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
         돌아가기
+        <ReturnIcon width={20} height={20} aria-hidden="true" />
       </button>
     </div>
   );
