@@ -3,12 +3,12 @@
 import dynamic from "next/dynamic";
 import type React from "react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import type { ReactGlobeProps } from "../../types/globe";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
-import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
-import { renderHtmlElement } from "./htmlElementRenderer";
 import { useHtmlElements } from "@/hooks/useHtmlElements";
+import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
 import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "@/utils/globeUtils";
+import type { ReactGlobeProps } from "../../types/globe";
+import { renderHtmlElement } from "./htmlElementRenderer";
 
 const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
@@ -301,7 +301,7 @@ const ReactGlobe = forwardRef<ReactGlobeRef, ReactGlobeProps>(
     return (
       <Globe
         ref={globeRef}
-        width={Math.min(600, windowSize.width)}
+        width={Math.min(512, windowSize.width)}
         height={Math.min(800, windowSize.width)}
         backgroundColor="rgba(0,0,0,0)"
         globeImageUrl={globeImageUrl}
