@@ -1,20 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
+import { ZOOM_LEVELS } from "@/constants/zoomLevels";
 import type { CountryData, TravelPattern } from "@/data/travelPatterns";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export const useGlobeState = (patterns: TravelPattern[]) => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [currentGlobeIndex, setCurrentGlobeIndex] = useState(0);
-  const [zoomLevel, setZoomLevel] = useState(2.5);
+  const [zoomLevel, setZoomLevel] = useState(ZOOM_LEVELS.DEFAULT);
   const [selectedClusterData, setSelectedClusterData] = useState<CountryData[] | null>(null);
   const [zoomStack, setZoomStack] = useState<number[]>([]);
-  const [snapZoomTo, setSnapZoomTo] = useState<number | null>(2.5);
+  const [snapZoomTo, setSnapZoomTo] = useState<number | null>(ZOOM_LEVELS.DEFAULT);
   const [selectionStack, setSelectionStack] = useState<(CountryData[] | null)[]>([]);
   const [isZoomed, setIsZoomed] = useState(false);
 
   // 줌 상태 감지 (초기 줌 레벨 2.5에서 줌 인 했을 때 줌된 것으로 간주)
   useEffect(() => {
-    const isCurrentlyZoomed = zoomLevel < 2.4; // 2.5보다 작으면 줌 인 된 것
+    const isCurrentlyZoomed = zoomLevel < ZOOM_LEVELS.ZOOM_THRESHOLD; // 기본값보다 작으면 줌 인 된 것
     console.log("Zoom debug:", { zoomLevel, isCurrentlyZoomed });
     setIsZoomed(isCurrentlyZoomed);
   }, [zoomLevel]);
@@ -59,7 +60,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
         }
 
         // 줌아웃 시작을 감지하면 직전 단계로 스냅
-        if (rounded > prev + 0.01 && zoomStack.length > 0) {
+        if (rounded > prev + ZOOM_LEVELS.THRESHOLDS.ZOOM_DETECTION && zoomStack.length > 0) {
           const last = zoomStack[zoomStack.length - 1];
           setSnapZoomTo(last);
           setZoomStack((s) => s.slice(0, -1));
@@ -86,7 +87,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
         }
 
         // 스냅 스택이 없는 일반 줌아웃 경로에서 임계값 교차 시 상위로 복원
-        if (rounded > prev + 0.01 && zoomStack.length === 0) {
+        if (rounded > prev + ZOOM_LEVELS.THRESHOLDS.ZOOM_DETECTION && zoomStack.length === 0) {
           // 도시 → 나라 경계 상향 교차
           if (prev <= CITY_TO_COUNTRY_OUT && rounded >= CITY_TO_COUNTRY_OUT) {
             setSelectionStack((stack) => {
@@ -133,7 +134,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
     setCurrentGlobeIndex(index);
     setSelectedCountry(null);
     setSelectedClusterData(null);
-    setZoomLevel(2.5);
+    setZoomLevel(ZOOM_LEVELS.DEFAULT);
     setZoomStack([]);
     setSnapZoomTo(null);
     setSelectionStack([]);
@@ -143,7 +144,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
     setSelectedClusterData(null);
     setZoomStack([]);
     setSelectionStack([]);
-    setZoomLevel(2.5);
+    setZoomLevel(ZOOM_LEVELS.DEFAULT);
     setSnapZoomTo(null);
   }, []);
 

@@ -1,4 +1,5 @@
 import { ANIMATION_DURATION, GLOBE_CONFIG } from "@/constants/globe";
+import { GROUP_RADIUS, ZOOM_LEVELS } from "@/constants/zoomLevels";
 import { createClusterLabelStyles } from "@/styles/globeStyles";
 import * as THREE from "three";
 
@@ -58,7 +59,7 @@ export const calculateLabelPosition = (
   const currentPos = calculateScreenPosition(d.lat, d.lng, globeRef);
 
   // 주변 라벨들을 그룹핑하여 균등 각도 배치
-  const groupRadius = zoomLevel <= 0.2 ? 120 : 140; // 도시단계에서 조금 더 타이트하게
+  const groupRadius = zoomLevel <= ZOOM_LEVELS.RENDERING.CITY_LEVEL ? GROUP_RADIUS.CITY_LEVEL : GROUP_RADIUS.DEFAULT; // 도시단계에서 조금 더 타이트하게
   const neighbors = htmlElements
     .filter((other) => {
       const otherPos = calculateScreenPosition(other.lat, other.lng, globeRef);

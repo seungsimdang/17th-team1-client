@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { getContinent, getContinentClusterName, getCountryName } from "@/constants/countryMapping";
+import { CLUSTERING_DISTANCE_MAP, ZOOM_LEVELS } from "@/constants/zoomLevels";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface CountryData {
   id: string;
@@ -37,13 +38,13 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
   const getClusterDistance = useCallback((zoom: number): number => {
     // 줌 레벨이 높을수록(멀리서 볼 때) 클러스터링 거리를 크게 설정
     // 줌 레벨이 낮을수록(가까이서 볼 때) 클러스터링 거리를 작게 설정
-    if (zoom >= 2.0) return 12; // 매우 멀리서 볼 때는 가까운 국가들만 클러스터링
-    if (zoom >= 1.5) return 8; // 멀리서 볼 때는 중간 거리로 클러스터링
-    if (zoom >= 1.0) return 5; // 중간 거리에서 볼 때는 작은 거리로 클러스터링
-    if (zoom >= 0.5) return 3; // 가까이서 볼 때는 매우 작은 거리로 클러스터링
-    if (zoom >= 0.3) return 2; // 매우 가까이서 볼 때는 작은 거리로 클러스터링
-    if (zoom >= 0.2) return 1.5; // 줌인 상태에서도 같은 국가 클러스터링 유지
-    if (zoom >= 0.1) return 1; // 더 가까워도 같은 국가는 클러스터링
+    if (zoom >= ZOOM_LEVELS.CLUSTERING.VERY_FAR) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.VERY_FAR]; // 매우 멀리서 볼 때는 가까운 국가들만 클러스터링
+    if (zoom >= ZOOM_LEVELS.CLUSTERING.FAR) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.FAR]; // 멀리서 볼 때는 중간 거리로 클러스터링
+    if (zoom >= ZOOM_LEVELS.CLUSTERING.MEDIUM) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.MEDIUM]; // 중간 거리에서 볼 때는 작은 거리로 클러스터링
+    if (zoom >= ZOOM_LEVELS.CLUSTERING.CLOSE) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.CLOSE]; // 가까이서 볼 때는 매우 작은 거리로 클러스터링
+    if (zoom >= ZOOM_LEVELS.CLUSTERING.VERY_CLOSE) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.VERY_CLOSE]; // 매우 가까이서 볼 때는 작은 거리로 클러스터링
+    if (zoom >= ZOOM_LEVELS.CLUSTERING.ZOOMED_IN) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.ZOOMED_IN]; // 줌인 상태에서도 같은 국가 클러스터링 유지
+    if (zoom >= ZOOM_LEVELS.CLUSTERING.DETAILED) return CLUSTERING_DISTANCE_MAP[ZOOM_LEVELS.CLUSTERING.DETAILED]; // 더 가까워도 같은 국가는 클러스터링
     return 1; // 최대로 가까울 때도 같은 국가는 클러스터링
   }, []);
 
@@ -281,9 +282,9 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
     if (
       selectedClusterData &&
       selectedClusterData.length > 0 &&
-      zoomLevel > 0.2 &&
-      zoomLevel >= 0.3 &&
-      zoomLevel <= 0.55
+      zoomLevel > ZOOM_LEVELS.RENDERING.CITY_LEVEL &&
+      zoomLevel >= ZOOM_LEVELS.RENDERING.COUNTRY_MIN &&
+      zoomLevel <= ZOOM_LEVELS.RENDERING.COUNTRY_MAX
     ) {
       const grouped = new Map<string, CountryData[]>();
       dataToCluster.forEach((item) => {
