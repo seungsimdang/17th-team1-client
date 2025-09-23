@@ -1,12 +1,12 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
 import { ZOOM_LEVELS } from "@/constants/zoomLevels";
 import type { CountryData, TravelPattern } from "@/data/travelPatterns";
-import { useCallback, useEffect, useMemo, useState } from "react";
 
 export const useGlobeState = (patterns: TravelPattern[]) => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [currentGlobeIndex, setCurrentGlobeIndex] = useState(0);
-  const [zoomLevel, setZoomLevel] = useState(ZOOM_LEVELS.DEFAULT);
+  const [zoomLevel, setZoomLevel] = useState<number>(ZOOM_LEVELS.DEFAULT);
   const [selectedClusterData, setSelectedClusterData] = useState<CountryData[] | null>(null);
   const [zoomStack, setZoomStack] = useState<number[]>([]);
   const [snapZoomTo, setSnapZoomTo] = useState<number | null>(ZOOM_LEVELS.DEFAULT);

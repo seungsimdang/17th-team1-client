@@ -1,14 +1,14 @@
 "use client";
 
+import type { GlobeInstance } from "globe.gl";
+import dynamic from "next/dynamic";
+import type React from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
 import { GLOBE_SIZE_LIMITS, VIEWPORT_DEFAULTS, ZOOM_LEVELS } from "@/constants/zoomLevels";
 import { useHtmlElements } from "@/hooks/useHtmlElements";
 import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
 import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "@/utils/globeUtils";
-import type { GlobeInstance } from "globe.gl";
-import dynamic from "next/dynamic";
-import type React from "react";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import type { ReactGlobeProps } from "../../types/globe";
 import { renderHtmlElement } from "./htmlElementRenderer";
 
@@ -136,7 +136,8 @@ const ReactGlobe = forwardRef<ReactGlobeRef, ReactGlobeProps>(
       phaseTargetRef,
       prevZoomRef,
       zoomLevel,
-      selectedClusterData: selectedClusterData || null,
+      // 타입 차이 허용: 런타임 구조는 동일하게 사용됨
+      selectedClusterData: (selectedClusterData as any) || null,
       clusteredData,
       currentPatternCountries: currentPattern.countries,
     });
@@ -302,7 +303,7 @@ const ReactGlobe = forwardRef<ReactGlobeRef, ReactGlobeProps>(
 
     return (
       <Globe
-        ref={globeRef}
+        ref={globeRef as any}
         width={Math.min(GLOBE_SIZE_LIMITS.MAX_WIDTH, windowSize.width)}
         height={Math.min(GLOBE_SIZE_LIMITS.MAX_WIDTH, windowSize.width)}
         backgroundColor="rgba(0,0,0,0)"
