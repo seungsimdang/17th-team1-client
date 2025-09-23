@@ -1,6 +1,7 @@
 "use client";
 
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
+import { VIEWPORT_DEFAULTS, GLOBE_SIZE_LIMITS } from "@/constants/zoomLevels";
 import { useHtmlElements } from "@/hooks/useHtmlElements";
 import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
 import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "@/utils/globeUtils";
@@ -43,8 +44,8 @@ const ReactGlobe = forwardRef<ReactGlobeRef, ReactGlobeProps>(
     const [globeLoading, setGlobeLoading] = useState(true);
     const [globeError, setGlobeError] = useState<string | null>(null);
     const [windowSize, setWindowSize] = useState({
-      width: typeof window !== "undefined" ? window.innerWidth : 600,
-      height: typeof window !== "undefined" ? window.innerHeight : 800,
+      width: typeof window !== "undefined" ? window.innerWidth : VIEWPORT_DEFAULTS.WIDTH,
+      height: typeof window !== "undefined" ? window.innerHeight : VIEWPORT_DEFAULTS.HEIGHT,
     });
     const currentPattern = travelPatterns[currentGlobeIndex];
 
@@ -302,8 +303,8 @@ const ReactGlobe = forwardRef<ReactGlobeRef, ReactGlobeProps>(
     return (
       <Globe
         ref={globeRef}
-        width={Math.min(512, windowSize.width)}
-        height={Math.min(800, windowSize.width)}
+        width={Math.min(GLOBE_SIZE_LIMITS.MAX_WIDTH, windowSize.width)}
+        height={Math.min(GLOBE_SIZE_LIMITS.MAX_HEIGHT, windowSize.height)}
         backgroundColor="rgba(0,0,0,0)"
         globeImageUrl={globeImageUrl}
         showAtmosphere={true}
