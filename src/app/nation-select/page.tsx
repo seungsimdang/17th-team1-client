@@ -1,3 +1,165 @@
-export default function NationSelect() {
-  return <div>나라 선택 페이지</div>;
+"use client";
+
+import { useState } from "react";
+import { CloseIcon, PlusIcon } from "@/assets/icons";
+import { Button } from "@/components/common/button";
+import { Chip } from "@/components/common/chip";
+import { SearchInput } from "@/components/common/input";
+
+// 도시 데이터 타입 (더미 데이터)
+type City = {
+  id: string;
+  name: string;
+  country: string;
+  flag: string;
+  selected?: boolean;
+};
+
+// 인기 여행지 (더미 데이터)
+const popularCities: City[] = [
+  { id: "1", name: "도쿄", country: "일본", flag: "🇯🇵" },
+  { id: "2", name: "오사카", country: "일본", flag: "🇯🇵" },
+  { id: "3", name: "상하이", country: "중국", flag: "🇨🇳" },
+  { id: "4", name: "베이징", country: "중국", flag: "🇨🇳" },
+  { id: "5", name: "방콕", country: "태국", flag: "🇹🇭" },
+  { id: "6", name: "싱가포르", country: "싱가포르", flag: "🇸🇬" },
+  { id: "7", name: "런던", country: "영국", flag: "🇬🇧" },
+];
+
+const selectedCities: City[] = [
+  { id: "8", name: "로마", country: "이탈리아", flag: "🇮🇹", selected: true },
+  { id: "9", name: "파리", country: "프랑스", flag: "🇫🇷", selected: true },
+];
+
+export default function NationSelectPage() {
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedCityList, setSelectedCityList] = useState<City[]>(selectedCities);
+  const [isButtonEnabled, setIsButtonEnabled] = useState(selectedCities.length > 0);
+
+  const handleAddCity = (city: City) => {
+    // 이미 선택된 도시인지 확인
+    const isAlreadySelected = selectedCityList.some((selectedCity) => selectedCity.id === city.id);
+    if (isAlreadySelected) return;
+
+    const newCity = { ...city, selected: true };
+    setSelectedCityList((prev) => [...prev, newCity]);
+    setIsButtonEnabled(true);
+  };
+
+  const handleRemoveCity = (cityId: string) => {
+    setSelectedCityList((prev) => {
+      const filtered = prev.filter((city) => city.id !== cityId);
+      setIsButtonEnabled(filtered.length > 0);
+      return filtered;
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-surface-secondary flex flex-col">
+      {/* Status Bar */}
+      <div className="flex justify-between items-center px-4 pt-4 pb-3"></div>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto px-4">
+        <div className="pb-40">
+          {/* Header Section */}
+          <div className="mb-8">
+            <h1 className="text-text-primary text-2xl font-bold leading-[31px] mb-10">
+              그동안 여행했던 도시들을
+              <br />
+              선택해보세요.
+            </h1>
+
+            <SearchInput
+              placeholder="도시/나라를 검색해주세요."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </div>
+
+          {/* Popular Cities Section */}
+          <div>
+            <h2 className="text-text-primary text-lg font-bold mb-4">인기 여행지</h2>
+
+            <div className="space-y-0">
+              {/* Selected Cities */}
+              {selectedCityList.map((city, index) => (
+                <div key={city.id}>
+                  <div className="flex items-center justify-between py-[18px]">
+                    <span className="text-[#66717D] font-medium">
+                      {city.flag} {city.name}, {city.country}
+                    </span>
+                    <Button
+                      variant="gray"
+                      size="xs"
+                      onClick={() => handleRemoveCity(city.id)}
+                      className="w-6 items-center justify-center bg-transparent"
+                    >
+                      <CloseIcon width={10} height={10} />
+                    </Button>
+                  </div>
+                  {(index < selectedCityList.length - 1 ||
+                    (index === selectedCityList.length - 1 && popularCities.filter(city => !selectedCityList.some(selected => selected.id === city.id)).length > 0)) && (
+                      <div className="border-b border-surface-placeholder--8"></div>
+                    )}
+                </div>
+              ))}
+
+              {/* Popular Cities List */}
+              {popularCities
+                .filter((city) => !selectedCityList.some((selected) => selected.id === city.id))
+                .map((city, index, filteredArray) => (
+                  <div key={city.id}>
+                    <div className="flex items-center justify-between py-[18px]">
+                      <span className="text-text-primary text-base font-medium">
+                        {city.flag} {city.name}, {city.country}
+                      </span>
+                      <Button
+                        variant="gray"
+                        size="xs"
+                        onClick={() => handleAddCity(city)}
+                        className="w-6 items-center justify-center"
+                      >
+                        <PlusIcon width={10} height={10} />
+                      </Button>
+                    </div>
+                    {index < filteredArray.length - 1 && <div className="border-b border-surface-placeholder--8"></div>}
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Button */}
+      <div className="fixed bottom-0 left-0 right-0 bg-surface-thirdly px-4 py-6">
+        {/* Selected Cities Chips */}
+        {selectedCityList.length > 0 && (
+          <div className="mb-4">
+            <p className="text-text-thirdly text-xs mb-3 font-bold">
+              {selectedCityList.length}개 도시 방문
+            </p>
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+              {selectedCityList.map((city) => (
+                <Chip
+                  key={city.id}
+                  variant="gray"
+                  size="md"
+                  removable
+                  onRemove={() => handleRemoveCity(city.id)}
+                  className="flex-shrink-0"
+                >
+                  {city.flag} {city.name}
+                </Chip>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <Button variant="primary" size="lg" className={"w-full"}>
+          내 지구본 생성하기
+        </Button>
+      </div>
+    </div>
+  );
 }
