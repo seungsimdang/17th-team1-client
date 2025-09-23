@@ -1,7 +1,7 @@
 "use client";
 
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
-import { VIEWPORT_DEFAULTS, GLOBE_SIZE_LIMITS } from "@/constants/zoomLevels";
+import { GLOBE_SIZE_LIMITS, VIEWPORT_DEFAULTS, ZOOM_LEVELS } from "@/constants/zoomLevels";
 import { useHtmlElements } from "@/hooks/useHtmlElements";
 import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
 import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "@/utils/globeUtils";
@@ -192,13 +192,13 @@ const ReactGlobe = forwardRef<ReactGlobeRef, ReactGlobeProps>(
           }
 
           // 줌 아웃 시 단계별 뷰 변경 및 선택 초기화
-          if (!isAnimating && displayPhase === "city" && newZoom > 0.22) {
+          if (!isAnimating && displayPhase === "city" && newZoom > ZOOM_LEVELS.RENDERING.CITY_TO_COUNTRY) {
             setDisplayPhase("country");
           }
-          if (!isAnimating && newZoom > 0.45) {
+          if (!isAnimating && newZoom > ZOOM_LEVELS.RENDERING.COUNTRY_TO_ROOT) {
             setDisplayPhase("root");
           }
-          if (!isAnimating && newZoom > 0.3) {
+          if (!isAnimating && newZoom > ZOOM_LEVELS.RENDERING.COUNTRY_MIN) {
             setActiveCountryItemIdList(null);
             setActiveCountryFlag(null);
             activeCountryFlagRef.current = null;

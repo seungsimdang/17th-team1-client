@@ -81,8 +81,8 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
   // 거리 기반 클러스터링 함수 (메모화)
   const clusterLocations = useCallback(
     (locations: CountryData[], clusterDistance: number, currentZoomLevel: number): ClusterData[] => {
-      // 매우 가까운 줌 (0.1 이하)에서는 클러스터링 완전 해제하여 개별 도시 표시
-      if (currentZoomLevel <= 0.1 || clusterDistance <= 0) {
+      // 매우 가까운 줌 (DETAILED 이하)에서는 클러스터링 완전 해제하여 개별 도시 표시
+      if (currentZoomLevel <= ZOOM_LEVELS.CLUSTERING.DETAILED || clusterDistance <= 0) {
         return locations.map((location) => {
           return {
             id: `${location.id}_${location.lat}_${location.lng}`,
@@ -121,7 +121,7 @@ export const useClustering = ({ countries, zoomLevel, selectedClusterData }: Use
           // 줌 레벨에 따른 클러스터링 조건
           let shouldCluster = false;
 
-          if (currentZoomLevel >= 2.5) {
+          if (currentZoomLevel >= ZOOM_LEVELS.DEFAULT) {
             // 디폴트 줌(3.0): 같은 대륙끼리만 클러스터링
             const sameContinent = getContinent(location.id) === getContinent(otherLocation.id);
             shouldCluster = sameContinent;

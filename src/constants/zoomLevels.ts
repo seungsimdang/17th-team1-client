@@ -25,13 +25,21 @@ export const ZOOM_LEVELS = {
   // 렌더링 관련 줌 레벨
   RENDERING: {
     CITY_LEVEL: 0.2, // 도시 단계 렌더링 기준
+    CITY_TO_COUNTRY: 0.22, // 도시에서 국가로 전환 임계값
     COUNTRY_MIN: 0.3, // 국가 레벨 최소 줌
+    COUNTRY_TO_ROOT: 0.45, // 국가에서 루트로 전환 임계값
     COUNTRY_MAX: 0.55, // 국가 레벨 최대 줌
   },
 
   // 기타 줌 관련 임계값
   THRESHOLDS: {
     ZOOM_DETECTION: 0.01, // 줌 변화 감지 임계값
+    CITY_TO_COUNTRY_IN: 0.24, // 도시→나라 (줌인 시 진입 기준)
+    CITY_TO_COUNTRY_OUT: 0.3, // 도시→나라 (줌아웃 시 이탈 기준)
+    COUNTRY_TO_ROOT_IN: 0.55, // 나라→루트 (줌인 시 진입 기준)
+    COUNTRY_TO_ROOT_OUT: 0.8, // 나라→루트 (줌아웃 시 이탈 기준)
+    SMOOTH_ZOOM_JUMP: 0.1, // 부드러운 줌 점프 임계값
+    SMOOTH_ZOOM_THRESHOLD: 0.02, // 부드러운 줌 변화 임계값
   },
 } as const;
 

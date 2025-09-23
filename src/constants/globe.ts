@@ -4,12 +4,12 @@ import worldCountries from "world-countries";
 export const GLOBE_CONFIG = {
   WIDTH: 600, // 지구본 컴포넌트 너비 (px)
   HEIGHT: 800, // 지구본 컴포넌트 높이 (px)
-  INITIAL_ALTITUDE: 2.5, // 초기 카메라 고도 (지구 반지름 배수)
+  INITIAL_ALTITUDE: 2.5, // 초기 카메라 고도 (지구 반지름 배수) - ZOOM_LEVELS.DEFAULT와 동일
   MIN_ZOOM: 0.01, // 최소 줌 레벨
-  MAX_ZOOM: 2.5, // 최대 줌 레벨
-  CLUSTER_ZOOM_STAGE1: 0.5, // 1단계 줌 (하위 클러스터가 보이는 수준)
+  MAX_ZOOM: 2.5, // 최대 줌 레벨 - ZOOM_LEVELS.DEFAULT와 동일
+  CLUSTER_ZOOM_STAGE1: 0.5, // 1단계 줌 (하위 클러스터가 보이는 수준) - ZOOM_LEVELS.CLUSTERING.CLOSE와 동일
   CLUSTER_ZOOM: 0.17, // 2단계 줌 (나라 단위가 보이는 수준)
-  FOCUS_ZOOM: 0.1, // 국가 포커스 시 줌 레벨 (더 가까이)
+  FOCUS_ZOOM: 0.1, // 국가 포커스 시 줌 레벨 (더 가까이) - ZOOM_LEVELS.CLUSTERING.DETAILED와 동일
   MIN_DISTANCE: 50, // 클러스터링 최소 거리 (px)
   MAX_DISTANCE: 500, // 클러스터링 최대 거리 (px)
   ATMOSPHERE_ALTITUDE: 0, // 대기권 두께 (지구 반지름 배수)

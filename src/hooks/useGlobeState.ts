@@ -44,10 +44,10 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
   }, []);
 
   // 히스테리시스 임계값 (줌인/줌아웃 다르게)
-  const CITY_TO_COUNTRY_IN = 0.24; // 도시→나라 (줌인 시 진입 기준)
-  const CITY_TO_COUNTRY_OUT = 0.3; // 도시→나라 (줌아웃 시 이탈 기준)
-  const COUNTRY_TO_ROOT_IN = 0.55; // 나라→루트 (줌인 시 진입 기준)
-  const COUNTRY_TO_ROOT_OUT = 0.8; // 나라→루트 (줌아웃 시 이탈 기준)
+  const CITY_TO_COUNTRY_IN = ZOOM_LEVELS.THRESHOLDS.CITY_TO_COUNTRY_IN; // 도시→나라 (줌인 시 진입 기준)
+  const CITY_TO_COUNTRY_OUT = ZOOM_LEVELS.THRESHOLDS.CITY_TO_COUNTRY_OUT; // 도시→나라 (줌아웃 시 이탈 기준)
+  const COUNTRY_TO_ROOT_IN = ZOOM_LEVELS.THRESHOLDS.COUNTRY_TO_ROOT_IN; // 나라→루트 (줌인 시 진입 기준)
+  const COUNTRY_TO_ROOT_OUT = ZOOM_LEVELS.THRESHOLDS.COUNTRY_TO_ROOT_OUT; // 나라→루트 (줌아웃 시 이탈 기준)
 
   const handleZoomChange = useCallback(
     (newZoomLevel: number) => {
@@ -55,7 +55,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
         const rounded = Number(newZoomLevel.toFixed(2));
 
         // 클릭으로 인한 줌인인 경우 즉시 반영 (부드러운 애니메이션을 위해)
-        if (rounded < prev - 0.1) {
+        if (rounded < prev - ZOOM_LEVELS.THRESHOLDS.SMOOTH_ZOOM_JUMP) {
           return rounded;
         }
 
@@ -101,7 +101,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
         }
 
         // 작은 변화도 반영 (더 부드러운 줌)
-        if (Math.abs(prev - rounded) >= 0.02) {
+        if (Math.abs(prev - rounded) >= ZOOM_LEVELS.THRESHOLDS.SMOOTH_ZOOM_THRESHOLD) {
           return rounded;
         }
 
