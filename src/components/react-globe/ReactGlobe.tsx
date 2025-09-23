@@ -304,7 +304,7 @@ const ReactGlobe = forwardRef<ReactGlobeRef, ReactGlobeProps>(
       <Globe
         ref={globeRef}
         width={Math.min(GLOBE_SIZE_LIMITS.MAX_WIDTH, windowSize.width)}
-        height={Math.min(GLOBE_SIZE_LIMITS.MAX_HEIGHT, windowSize.height)}
+        height={Math.min(GLOBE_SIZE_LIMITS.MAX_WIDTH, windowSize.width)}
         backgroundColor="rgba(0,0,0,0)"
         globeImageUrl={globeImageUrl}
         showAtmosphere={true}
