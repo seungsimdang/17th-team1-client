@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useRef } from "react";
-import { BackButton } from "@/components/globe/BackButton";
+import { BackButton } from "@/components/common/button";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 // Components
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
