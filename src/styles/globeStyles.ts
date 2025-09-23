@@ -1,15 +1,9 @@
-import { LABEL_OFFSET, COLORS } from "./constants";
-import { calculateDottedLine } from "./utils";
+import { COLORS } from "@/constants/globe";
+import { calculateDottedLine } from "@/utils/globeUtils";
 
 // 개별 라벨 스타일 생성
 // styles.ts
-export const createSingleLabelStyles = (
-  d: any,
-  index: number = 0,
-  angleOffset: number = 0,
-  distance: number = 50
-) => {
-
+export const createSingleLabelStyles = (index: number = 0, angleOffset: number = 0, distance: number = 50) => {
   // 기본 각도 + 오프셋 각도
   const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315]; // 8방향
   const baseAngle = baseAngles[index % baseAngles.length];
@@ -31,8 +25,8 @@ export const createSingleLabelStyles = (
       left: -3px;
       width: 6px;
       height: 6px;
-      background-color: rgba(255,255,255,0.9);
-      border: 2px solid ${COLORS.WHITE_BORDER};
+      background-color: #fff;
+      border: 2px solid #fff;
       border-radius: 50%;
       z-index: 10;
     `,
@@ -44,8 +38,8 @@ export const createSingleLabelStyles = (
       height: 2px;
       background: repeating-linear-gradient(
         to right,
-        rgba(255,255,255,0.8) 0px,
-        rgba(255,255,255,0.8) 4px,
+        #fff 0px,
+        #fff 4px,
         transparent 4px,
         transparent 8px
       );
@@ -66,10 +60,10 @@ export const createSingleLabelStyles = (
       cursor: pointer;
       user-select: none;
       transition: all 0.2s ease;
-      min-width: 80px;
       display: flex;
       align-items: center;
       justify-content: center;
+      width: max-content;
       gap: 6px;
       pointer-events: auto;
       position: absolute;
@@ -83,13 +77,7 @@ export const createSingleLabelStyles = (
 };
 
 // 클러스터 라벨 스타일 생성
-export const createClusterLabelStyles = (
-  d: any,
-  index: number = 0,
-  angleOffset: number = 0
-) => {
-  const distance = 100; // 중심점에서 라벨까지의 거리 (클러스터는 조금 더 멀리)
-
+export const createClusterLabelStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
   // 기본 각도 + 오프셋 각도
   const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315];
   const baseAngle = baseAngles[index % baseAngles.length];
@@ -111,7 +99,7 @@ export const createClusterLabelStyles = (
       left: -3px;
       width: 6px;
       height: 6px;
-      background-color: ${COLORS.CLUSTER};
+      background-color: #fff;
       border-radius: 50%;
       z-index: 10;
     `,
@@ -121,8 +109,13 @@ export const createClusterLabelStyles = (
       left: 0;
       width: ${lineLength}px;
       height: 2px;
-      background: linear-gradient(to right, ${COLORS.CLUSTER} 50%, transparent 50%);
-      background-size: 8px 2px;
+      background: repeating-linear-gradient(
+        to right,
+        #fff 0px,
+        #fff 4px,
+        transparent 4px,
+        transparent 8px
+      );
       transform: rotate(${angle}deg);
       transform-origin: 0 1px;
       z-index: 5;
@@ -140,7 +133,6 @@ export const createClusterLabelStyles = (
       cursor: pointer;
       user-select: none;
       transition: all 0.2s ease;
-      min-width: 100px;
       pointer-events: auto;
       position: absolute;
       z-index: ${20 + index};

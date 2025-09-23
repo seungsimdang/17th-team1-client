@@ -1,16 +1,18 @@
+import worldCountries from "world-countries";
+
 // Globe 설정 상수
 export const GLOBE_CONFIG = {
-  WIDTH: 500, // 지구본 컴포넌트 너비 (px)
-  HEIGHT: 500, // 지구본 컴포넌트 높이 (px)
-  INITIAL_ALTITUDE: 2.5, // 초기 카메라 고도 (지구 반지름 배수)
+  WIDTH: 600, // 지구본 컴포넌트 너비 (px)
+  HEIGHT: 800, // 지구본 컴포넌트 높이 (px)
+  INITIAL_ALTITUDE: 2.5, // 초기 카메라 고도 (지구 반지름 배수) - ZOOM_LEVELS.DEFAULT와 동일
   MIN_ZOOM: 0.01, // 최소 줌 레벨
-  MAX_ZOOM: 3.0, // 최대 줌 레벨
-  CLUSTER_ZOOM_STAGE1: 0.5, // 1단계 줌 (하위 클러스터가 보이는 수준)
+  MAX_ZOOM: 2.5, // 최대 줌 레벨 - ZOOM_LEVELS.DEFAULT와 동일
+  CLUSTER_ZOOM_STAGE1: 0.5, // 1단계 줌 (하위 클러스터가 보이는 수준) - ZOOM_LEVELS.CLUSTERING.CLOSE와 동일
   CLUSTER_ZOOM: 0.17, // 2단계 줌 (나라 단위가 보이는 수준)
-  FOCUS_ZOOM: 0.1, // 국가 포커스 시 줌 레벨 (더 가까이)
+  FOCUS_ZOOM: 0.1, // 국가 포커스 시 줌 레벨 (더 가까이) - ZOOM_LEVELS.CLUSTERING.DETAILED와 동일
   MIN_DISTANCE: 50, // 클러스터링 최소 거리 (px)
   MAX_DISTANCE: 500, // 클러스터링 최대 거리 (px)
-  ATMOSPHERE_ALTITUDE: 0.15, // 대기권 두께 (지구 반지름 배수)
+  ATMOSPHERE_ALTITUDE: 0, // 대기권 두께 (지구 반지름 배수)
   POLYGON_ALTITUDE: 0.01, // 국경선/폴리곤 높이 (지구 표면 기준)
   HTML_ALTITUDE: 0.01, // HTML 라벨 높이 (지구 표면 기준)
 } as const;
@@ -34,38 +36,29 @@ export const COLORS = {
   ATMOSPHERE: "#4a90e2", // 대기권 색상 (파란색)
   CLUSTER: "#4a90e2", // 클러스터 마커 색상
   CLUSTER_BG: "#2c3e50", // 클러스터 배경 색상 (어두운 회색)
-  POLYGON_SIDE: "rgba(100,100,100,0.1)", // 폴리곤 측면 색상
-  POLYGON_STROKE: "#fff", // 국경선 색상
-  INACTIVE_POLYGON: "rgba(100, 100, 100, 0.02)", // 비활성 폴리곤 색상 (매우 연한 회색)
+  POLYGON_SIDE: "rgba(100,100,100, 0.1)", // 폴리곤 측면 색상
+  POLYGON_STROKE: "gray", // 국경선 색상 (흰색 10%와 유사)
+  INACTIVE_POLYGON: "#94cbff33", // 비활성 폴리곤 색상 (매우 연한 회색)
+  GLOBE_LV1: "#0084b0", // 지구본 레벨 1 색상
+  GLOBE_LV2: "#00caed", // 지구본 레벨 2 색상
+  GLOBE_LV3: "#67e8ff", // 지구본 레벨 3 색상
   WHITE_LABEL: "rgba(255,255,255,0.8)", // 흰색 라벨 텍스트 색상
   WHITE_BORDER: "rgba(255,255,255,0.6)", // 흰색 테두리 색상
 } as const;
 
-// ISO 코드 매핑 (국가 코드 표준화)
-export const ISO_CODE_MAP: { [key: string]: string } = {
-  JPN: "JPN", // 일본
-  JPN2: "JPN", // 일본 (추가 코드)
-  JPN3: "JPN", // 일본 (추가 코드)
-  KOR: "KOR", // 한국
-  TWN: "TWN", // 대만
-  THA: "THA", // 태국
-  SGP: "SGP", // 싱가포르
-  USA: "USA", // 미국
-  FRA: "FRA", // 프랑스
-  EGY: "EGY", // 이집트
-  BRA: "BRA", // 브라질
-  AUS: "AUS", // 호주
-  ITA: "ITA", // 이탈리아
-  ESP: "ESP", // 스페인
-  GBR: "GBR", // 영국
-  DEU: "DEU", // 독일
-  CHE: "CHE", // 스위스
-} as const;
+// ISO 3166-1 국가코드 매핑 (world-countries 기반)
+export const ISO_CODE_MAP: { [key: string]: string } = worldCountries.reduce<{ [key: string]: string }>(
+  (acc, country) => {
+    const code = country.cca3;
+    acc[code] = code; // ISO 코드를 그대로 매핑
+    return acc;
+  },
+  {},
+);
 
 // 외부 리소스 URL
 export const EXTERNAL_URLS = {
   // 세계 지도 GeoJSON 데이터 URL
-  WORLD_GEOJSON:
-    "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson",
+  WORLD_GEOJSON: "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson",
   NIGHT_SKY_IMAGE: "//unpkg.com/three-globe/example/img/night-sky.png", // 배경 별하늘 이미지 URL
 } as const;
