@@ -21,9 +21,8 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 USER nextjs
 
-# Next.js 빌드 아티팩트 복사
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+# Next.js standalone 빌드 아티팩트만 복사 (중요!)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder /app/next.config.ts .
@@ -35,4 +34,4 @@ ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
 
 ENV PORT=80
-CMD ["pnpm", "start"]
+CMD ["node", "server.js"]
