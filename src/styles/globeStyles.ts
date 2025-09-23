@@ -3,7 +3,7 @@ import { calculateDottedLine } from "@/utils/globeUtils";
 
 // 개별 라벨 스타일 생성
 // styles.ts
-export const createSingleLabelStyles = (d: any, index: number = 0, angleOffset: number = 0, distance: number = 50) => {
+export const createSingleLabelStyles = (index: number = 0, angleOffset: number = 0, distance: number = 50) => {
   // 기본 각도 + 오프셋 각도
   const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315]; // 8방향
   const baseAngle = baseAngles[index % baseAngles.length];
@@ -77,12 +77,7 @@ export const createSingleLabelStyles = (d: any, index: number = 0, angleOffset: 
 };
 
 // 클러스터 라벨 스타일 생성
-export const createClusterLabelStyles = (
-  d: any,
-  index: number = 0,
-  angleOffset: number = 0,
-  distance: number = 100,
-) => {
+export const createClusterLabelStyles = (index: number = 0, angleOffset: number = 0, distance: number = 100) => {
   // 기본 각도 + 오프셋 각도
   const baseAngles = [0, 45, 90, 135, 180, 225, 270, 315];
   const baseAngle = baseAngles[index % baseAngles.length];

@@ -1,6 +1,6 @@
-import * as THREE from "three";
 import { ANIMATION_DURATION, GLOBE_CONFIG } from "@/constants/globe";
 import { createClusterLabelStyles } from "@/styles/globeStyles";
+import * as THREE from "three";
 
 interface RenderElementParams {
   d: any;
@@ -432,11 +432,11 @@ export const renderHtmlElement = (params: RenderElementParams): HTMLElement => {
     const baseItem = d.items && d.items.length === 1 ? d.items[0] : d;
     const displayFlag = baseItem.flag ?? d.flag;
     const cityName = (baseItem.name ?? d.name).split(",")[0];
-    const styles = createClusterLabelStyles(d, labelIndex, angleOffset, clampedDistance);
+    const styles = createClusterLabelStyles(labelIndex, angleOffset, clampedDistance);
 
     el.innerHTML = createCityHTML(d, styles, displayFlag, cityName);
   } else {
-    const styles = createClusterLabelStyles(d, labelIndex, angleOffset, clampedDistance);
+    const styles = createClusterLabelStyles(labelIndex, angleOffset, clampedDistance);
 
     // 대륙 클러스터인지 국가 클러스터인지 판단 (클러스터 이름으로 구분)
     const isContinentCluster =

@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { HeadlessToast, HeadlessToastProvider } from "@/components/common/toast";
+import { useState } from "react";
 
 interface GlobeFooterProps {
   isZoomed: boolean;
@@ -9,7 +9,10 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
   const [open, setOpen] = useState<boolean>(false);
 
   return (
-    <div className={`px-4 pb-4 transition-opacity duration-500 ${isZoomed ? "opacity-0" : "opacity-100"}`}>
+    <div
+      aria-hidden={isZoomed}
+      className={`px-4 pb-4 transition-opacity duration-500 ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+    >
       <div className="relative space-y-2 flex flex-col items-center">
         <HeadlessToastProvider viewportClassName="absolute bottom-full left-0 right-0 translate-y-[-16px] w-full max-w-[400px] mx-auto bg-[#21272D] rounded-xl">
           <HeadlessToast

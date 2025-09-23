@@ -1,3 +1,4 @@
+import type { ClusterData, CountryData } from "@/types/globe";
 import { useMemo } from "react";
 
 interface UseHtmlElementsParams {
@@ -6,9 +7,9 @@ interface UseHtmlElementsParams {
   phaseTargetRef: React.MutableRefObject<"root" | "country" | "city" | null>;
   prevZoomRef: React.MutableRefObject<number | null>;
   zoomLevel: number;
-  selectedClusterData: any[] | null;
-  clusteredData: any[];
-  currentPatternCountries: any[];
+  selectedClusterData: ClusterData[] | null;
+  clusteredData: ClusterData[];
+  currentPatternCountries: CountryData[];
 }
 
 export const useHtmlElements = ({

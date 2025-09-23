@@ -1,12 +1,13 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import type React from "react";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
 import { useHtmlElements } from "@/hooks/useHtmlElements";
 import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
 import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "@/utils/globeUtils";
+import type { GlobeInstance } from "globe.gl";
+import dynamic from "next/dynamic";
+import type React from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import type { ReactGlobeProps } from "../../types/globe";
 import { renderHtmlElement } from "./htmlElementRenderer";
 
@@ -34,7 +35,7 @@ const ReactGlobe = forwardRef<ReactGlobeRef, ReactGlobeProps>(
     },
     ref,
   ) => {
-    const globeRef = useRef<any>(null);
+    const globeRef = useRef<GlobeInstance | null>(null);
     const activeCountryFlagRef = useRef<string | null>(null);
     const [activeCountryFlag, setActiveCountryFlag] = useState<string | null>(null);
     const [activeCountryItemIdList, setActiveCountryItemIdList] = useState<string[] | null>(null);
