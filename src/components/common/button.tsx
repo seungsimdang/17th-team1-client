@@ -1,14 +1,14 @@
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { Camera, X } from "lucide-react";
+import Image from "next/image";
+import { useId, useRef, useState } from "react";
 import ReturnIcon from "@/assets/icons/return.svg";
 import { EMOJI_LIST } from "@/constants/emoji";
 import { ZOOM_LEVELS } from "@/constants/zoomLevels";
 import useImage from "@/hooks/useImage";
 import type { BackButtonProps } from "@/types/button";
 import { cn } from "@/utils/cn";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
-import { Camera, X } from "lucide-react";
-import Image from "next/image";
-import { useId, useRef, useState } from "react";
 
 type ImageUploadButtonProps = {
   photoType: string;
@@ -24,14 +24,16 @@ const iconButtonStyles = cn(
 export const buttonVariants = cva("inline-flex justify-center items-center rounded-md disabled:opacity-40", {
   variants: {
     variant: {
-      primary: "bg-primary-600 enabled:hover:bg-primary-700 text-white",
-      secondary: "bg-gray-200 enabled:hover:bg-gray-300 text-gray-700",
-      outlined: "outline outline-gray-200 bg-white enabled:hover:bg-gray-50 text-gray-700",
+      primary: "bg-blue-theme enabled:hover:bg-blue-200 text-black",
+      gray: "bg-[#293949] enabled:hover:bg-gray-1000 text-white",
+      black: "bg-[#0C0D15] enabled:hover:bg-gray-1000 text-white",
+      disabled: "bg-[#243146] enabled:hover:bg-gray-800 text-text-thirdly",
     },
     size: {
+      xs: "p-1 h-6 text-xs",
       sm: "px-8 py-6 h-30 text-xs",
       md: "px-10 py-8 h-36 text-sm",
-      lg: "p-10 h-41 text-sm",
+      lg: "px-12 py-[18px] h-14 text-lg font-bold rounded-3xl",
     },
   },
   defaultVariants: {

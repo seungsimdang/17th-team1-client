@@ -10,18 +10,12 @@ export const badgeVariants = cva(
       variant: {
         primary: "bg-primary-100 text-primary-600",
         gray: "bg-gray-100 text-gray-600",
-        red: "bg-red-100 text-red-600",
-        orange: "bg-orange-100 text-orange-600",
-        yellow: "bg-yellow-100 text-yellow-600",
-        lime: "bg-lime-100 text-lime-600",
-        green: "bg-green-100 text-green-600",
-        cyan: "bg-cyan-100 text-cyan-600",
-        sky: "bg-sky-100 text-sky-600",
-        blue: "bg-blue-100 text-blue-600",
-        indigo: "bg-indigo-100 text-indigo-600",
-        purple: "bg-purple-100 text-purple-600",
-        pink: "bg-pink-100 text-pink-600",
-        rose: "bg-rose-100 text-rose-600",
+      },
+      size: {
+        xs: "px-8 py-4 text-xs",
+        sm: "px-10 py-6 text-sm",
+        md: "px-12 py-8 text-md",
+        lg: "px-14 py-10 text-lg",
       },
     },
     defaultVariants: {
@@ -33,10 +27,11 @@ export const badgeVariants = cva(
 export const Badge = ({
   className,
   variant,
+  size,
   asChild = false,
   ...props
 }: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) => {
   const Comp: any = asChild ? Slot : "span";
 
-  return <Comp data-slot="badge" className={cn(badgeVariants({ variant }), className)} {...props} />;
+  return <Comp data-slot="badge" className={cn(badgeVariants({ variant, size }), className)} {...props} />;
 };

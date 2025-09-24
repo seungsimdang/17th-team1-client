@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { Upload } from "lucide-react";
+import { Search, Upload } from "lucide-react";
 import SearchIcon from "@/assets/icons/search.svg";
 import { cn } from "@/utils/cn";
 
@@ -41,9 +41,13 @@ export const Input = ({
 export const SearchInput = ({ className, ...props }: React.ComponentProps<"input">) => {
   return (
     <div className={cn("relative", className)}>
-      <input type="text" data-slot="search-input" className={cn(inputVariants(), "pl-10 pr-3")} {...props} />
-      <div className={iconStyles} style={{ width: 24, height: 24 }}>
-        <SearchIcon size={24} />
+      <div className="bg-surface-thirdly border border-surface-placeholder--4 rounded-2xl p-4 flex items-center gap-3">
+        <Search className="w-6 h-6 text-text-thirdly" />
+        <input
+          type="text"
+          className="flex-1 bg-transparent text-text-primary placeholder-text-thirdly text-base font-medium outline-none"
+          {...props}
+        />
       </div>
     </div>
   );
