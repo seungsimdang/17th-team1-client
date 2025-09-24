@@ -36,6 +36,9 @@ const NationSelectPage = () => {
   const [selectedCityList, setSelectedCityList] = useState<City[]>(selectedCities);
   const isButtonEnabled = selectedCityList.length > 0;
 
+  const notSelectedPopularCities = popularCities.filter(city => !selectedCityList.some(({ id }) => id === city.id));
+  const hasAvailablePopularCities = notSelectedPopularCities.length > 0;
+
   const handleAddCity = (city: City) => {
     const isAlreadySelected = selectedCityList.some((({ id }) => id === city.id));
     if (isAlreadySelected) return;
@@ -95,36 +98,39 @@ const NationSelectPage = () => {
                       <CloseIcon width={10} height={10} />
                     </Button>
                   </div>
-                  {(index < selectedCityList.length - 1 ||
-                    (index === selectedCityList.length - 1 && popularCities.filter(city => !selectedCityList.some(({ id }) => id === city.id)).length > 0)) && (
+                  {(() => {
+                    const isNotLastSelectedCity = index < selectedCityList.length - 1;
+                    const isLastSelectedCity = index === selectedCityList.length - 1;
+                    const shouldShowDividerBetweenSections = isLastSelectedCity && hasAvailablePopularCities;
+
+                    return (isNotLastSelectedCity || shouldShowDividerBetweenSections) && (
                       <div className="border-b border-surface-placeholder--8" />
-                    )}
+                    );
+                  })()}
                 </div>
               ))}
 
               {/* Popular Cities List */}
-              {popularCities
-                .filter((city) => !selectedCityList.some((({ id }) => id === city.id)))
-                .map((city, index, filteredArray) => (
-                  <div key={city.id}>
-                    <div className="flex items-center justify-between py-[18px]">
-                      <span className="text-text-primary text-base font-medium">
-                        {city.flag} {city.name}, {city.country}
-                      </span>
-                      <Button
-                        variant="gray"
-                        size="xs"
-                        onClick={() => handleAddCity(city)}
-                        className="w-6 items-center justify-center"
-                      >
-                        <PlusIcon width={10} height={10} />
-                      </Button>
-                    </div>
-                    {index < filteredArray.length - 1 ? (
-                      <div className="border-b border-surface-placeholder--8" />
-                    ) : null}
+              {notSelectedPopularCities.map((city, index, filteredArray) => (
+                <div key={city.id}>
+                  <div className="flex items-center justify-between py-[18px]">
+                    <span className="text-text-primary text-base font-medium">
+                      {city.flag} {city.name}, {city.country}
+                    </span>
+                    <Button
+                      variant="gray"
+                      size="xs"
+                      onClick={() => handleAddCity(city)}
+                      className="w-6 items-center justify-center"
+                    >
+                      <PlusIcon width={10} height={10} />
+                    </Button>
                   </div>
-                ))}
+                  {index < filteredArray.length - 1 ? (
+                    <div className="border-b border-surface-placeholder--8" />
+                  ) : null}
+                </div>
+              ))}
             </div>
           </div>
         </div>
