@@ -34,7 +34,7 @@ const selectedCities: City[] = [
 const NationSelectPage = () => {
   const [searchValue, setSearchValue] = useState("");
   const [selectedCityList, setSelectedCityList] = useState<City[]>(selectedCities);
-  const [isButtonEnabled, setIsButtonEnabled] = useState(selectedCities.length > 0);
+  const isButtonEnabled = selectedCityList.length > 0;
 
   const handleAddCity = (city: City) => {
     const isAlreadySelected = selectedCityList.some((({ id }) => id === city.id));
@@ -42,13 +42,11 @@ const NationSelectPage = () => {
 
     const newCity = { ...city, selected: true };
     setSelectedCityList((prev) => [...prev, newCity]);
-    setIsButtonEnabled(true);
   };
 
   const handleRemoveCity = (cityId: string) => {
     setSelectedCityList((prev) => {
       const filtered = prev.filter((({ id }) => id !== cityId));
-      setIsButtonEnabled(filtered.length > 0);
       return filtered;
     });
   };
