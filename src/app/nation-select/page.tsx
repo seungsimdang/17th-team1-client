@@ -37,8 +37,7 @@ const NationSelectPage = () => {
   const [isButtonEnabled, setIsButtonEnabled] = useState(selectedCities.length > 0);
 
   const handleAddCity = (city: City) => {
-    // 이미 선택된 도시인지 확인
-    const isAlreadySelected = selectedCityList.some((selectedCity) => selectedCity.id === city.id);
+    const isAlreadySelected = selectedCityList.some((({ id }) => id === city.id));
     if (isAlreadySelected) return;
 
     const newCity = { ...city, selected: true };
@@ -48,7 +47,7 @@ const NationSelectPage = () => {
 
   const handleRemoveCity = (cityId: string) => {
     setSelectedCityList((prev) => {
-      const filtered = prev.filter((city) => city.id !== cityId);
+      const filtered = prev.filter((({ id }) => id !== cityId));
       setIsButtonEnabled(filtered.length > 0);
       return filtered;
     });
@@ -99,7 +98,7 @@ const NationSelectPage = () => {
                     </Button>
                   </div>
                   {(index < selectedCityList.length - 1 ||
-                    (index === selectedCityList.length - 1 && popularCities.filter(city => !selectedCityList.some(selected => selected.id === city.id)).length > 0)) && (
+                    (index === selectedCityList.length - 1 && popularCities.filter(city => !selectedCityList.some(({ id }) => id === city.id)).length > 0)) && (
                       <div className="border-b border-surface-placeholder--8"></div>
                     )}
                 </div>
@@ -107,7 +106,7 @@ const NationSelectPage = () => {
 
               {/* Popular Cities List */}
               {popularCities
-                .filter((city) => !selectedCityList.some((selected) => selected.id === city.id))
+                .filter((city) => !selectedCityList.some((({ id }) => id === city.id)))
                 .map((city, index, filteredArray) => (
                   <div key={city.id}>
                     <div className="flex items-center justify-between py-[18px]">
