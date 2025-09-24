@@ -31,7 +31,7 @@ const selectedCities: City[] = [
   { id: "9", name: "파리", country: "프랑스", flag: "🇫🇷", selected: true },
 ];
 
-export default function NationSelectPage() {
+const NationSelectPage = () => {
   const [searchValue, setSearchValue] = useState("");
   const [selectedCityList, setSelectedCityList] = useState<City[]>(selectedCities);
   const [isButtonEnabled, setIsButtonEnabled] = useState(selectedCities.length > 0);
@@ -171,3 +171,5 @@ export default function NationSelectPage() {
     </div>
   );
 }
+
+export default NationSelectPage;
