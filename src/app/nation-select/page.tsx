@@ -132,33 +132,35 @@ export default function NationSelectPage() {
       </div>
 
       {/* Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-surface-thirdly px-4 py-6">
-        {/* Selected Cities Chips */}
-        {selectedCityList.length > 0 && (
-          <div className="mb-4">
-            <p className="text-text-thirdly text-xs mb-3 font-bold">
-              {selectedCityList.length}개 도시 방문
-            </p>
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-              {selectedCityList.map((city) => (
-                <Chip
-                  key={city.id}
-                  variant="gray"
-                  size="md"
-                  removable
-                  onRemove={() => handleRemoveCity(city.id)}
-                  className="flex-shrink-0"
-                >
-                  {city.flag} {city.name}
-                </Chip>
-              ))}
+      <div className="sticky bottom-0">
+        <div className="bg-surface-thirdly mx-auto w-full max-w-[512px] px-4 py-6">
+          {/* Selected Cities Chips */}
+          {selectedCityList.length > 0 && (
+            <div className="mb-4">
+              <p className="text-text-thirdly text-xs mb-3 font-bold">
+                {selectedCityList.length}개 도시 방문
+              </p>
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+                {selectedCityList.map((city) => (
+                  <Chip
+                    key={city.id}
+                    variant="gray"
+                    size="md"
+                    removable
+                    onRemove={() => handleRemoveCity(city.id)}
+                    className="flex-shrink-0"
+                  >
+                    {city.flag} {city.name}
+                  </Chip>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <Button variant="primary" size="lg" className={"w-full"}>
-          내 지구본 생성하기
-        </Button>
+          <Button variant="primary" size="lg" className={"w-full"}>
+            내 지구본 생성하기
+          </Button>
+        </div>
       </div>
     </div>
   );
