@@ -142,16 +142,16 @@ const NationSelectPage = () => {
                 {selectedCityList.length}개 도시 방문
               </p>
               <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
-                {selectedCityList.map((city) => (
+                {selectedCityList.map(({ id, flag, name, country }) => (
                   <Chip
-                    key={city.id}
+                    key={id}
                     variant="gray"
                     size="md"
                     removable
-                    onRemove={() => handleRemoveCity(city.id)}
+                    onRemove={() => handleRemoveCity(id)}
                     className="flex-shrink-0"
                   >
-                    {city.flag} {city.name}
+                    {flag} {name}, {country}
                   </Chip>
                 ))}
               </div>
