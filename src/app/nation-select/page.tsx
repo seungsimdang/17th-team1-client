@@ -157,7 +157,13 @@ export default function NationSelectPage() {
             </div>
           )}
 
-          <Button variant="primary" size="lg" className={"w-full"}>
+          <Button
+            variant={isButtonEnabled ? "primary" : "disabled"}
+            size="lg"
+            className="w-full"
+            disabled={!isButtonEnabled}
+            onClick={() => { }}
+          >
             내 지구본 생성하기
           </Button>
         </div>
