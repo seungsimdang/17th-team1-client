@@ -56,7 +56,7 @@ const NationSelectPage = () => {
   return (
     <div className="min-h-screen bg-surface-secondary flex flex-col">
       {/* Status Bar */}
-      <div className="flex justify-between items-center px-4 pt-4 pb-3"></div>
+      <div className="flex justify-between items-center px-4 pt-4 pb-3" />
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto px-4">
@@ -99,7 +99,7 @@ const NationSelectPage = () => {
                   </div>
                   {(index < selectedCityList.length - 1 ||
                     (index === selectedCityList.length - 1 && popularCities.filter(city => !selectedCityList.some(({ id }) => id === city.id)).length > 0)) && (
-                      <div className="border-b border-surface-placeholder--8"></div>
+                      <div className="border-b border-surface-placeholder--8" />
                     )}
                 </div>
               ))}
@@ -122,7 +122,9 @@ const NationSelectPage = () => {
                         <PlusIcon width={10} height={10} />
                       </Button>
                     </div>
-                    {index < filteredArray.length - 1 && <div className="border-b border-surface-placeholder--8"></div>}
+                    {index < filteredArray.length - 1 ? (
+                      <div className="border-b border-surface-placeholder--8" />
+                    ) : null}
                   </div>
                 ))}
             </div>
