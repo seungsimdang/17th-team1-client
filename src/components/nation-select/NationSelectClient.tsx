@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { City } from "@/types/city";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { useCitySearch } from "@/hooks/useCitySearch";
 import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
 import { NationSelectFooter } from "./NationSelectFooter";
@@ -14,37 +15,37 @@ interface NationSelectClientProps {
 export const NationSelectClient = ({
   initialCities,
 }: NationSelectClientProps) => {
-  const [searchValue, setSearchValue] = useState("");
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
 
-  // 무한 스크롤 훅 사용
   const {
     cities: allCities,
     isLoading,
-    hasMore,
     error,
-    loadMore,
-    refresh,
   } = useInfiniteScroll({
     initialData: initialCities,
     limit: 20,
   });
 
-  // 검색 필터링
-  const filteredCities = allCities.filter(
-    (city) =>
-      city.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      city.country.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const {
+    searchResults,
+    isSearching,
+    searchError,
+    searchKeyword,
+    setSearchKeyword,
+    clearSearch,
+    hasSearched,
+  } = useCitySearch();
+
+  const isSearchingMode = searchKeyword.trim().length > 0;
+  const displayCities = isSearchingMode ? searchResults : allCities;
+  const displayError = isSearchingMode ? searchError : error;
+  const displayLoading = isSearchingMode ? isSearching : isLoading;
 
   const selectedCityIds = new Set(selectedCityList.map((city) => city.id));
 
   const handleAddCity = (city: City) => {
-    const isAlreadySelected = selectedCityIds.has(city.id);
-    if (isAlreadySelected) return;
-
-    const newCity = { ...city, selected: true };
-    setSelectedCityList((prev) => [...prev, newCity]);
+    if (selectedCityIds.has(city.id)) return;
+    setSelectedCityList((prev) => [...prev, { ...city, selected: true }]);
   };
 
   const handleRemoveCity = (cityId: string) => {
@@ -52,41 +53,49 @@ export const NationSelectClient = ({
   };
 
   const handleCreateGlobe = () => {
-    // TODO: 지구본 생성 로직 구현
     console.log("Selected cities:", selectedCityList);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchKeyword(value);
+    if (value.trim().length === 0) {
+      clearSearch();
+    }
   };
 
   return (
     <div className="min-h-screen bg-surface-secondary flex flex-col">
-      {/* Status Bar */}
       <div className="flex justify-between items-center px-4 pt-4 pb-3" />
 
-      {/* Main Content */}
       <div className="flex-1 overflow-y-auto px-4">
-        <div className="pb-40">
+        <div className="">
           <NationSelectHeader
-            searchValue={searchValue}
-            onSearchChange={setSearchValue}
+            searchValue={searchKeyword}
+            onSearchChange={handleSearchChange}
           />
 
-          {/* Popular Cities Section */}
           <div>
             <h2 className="text-text-primary text-lg font-bold mb-4">
-              인기 여행지
+              {isSearchingMode ? `"${searchKeyword}" 검색 결과` : "인기 여행지"}
             </h2>
 
-            {error && (
+            {displayError && (
               <div className="text-red-500 text-center py-4">
-                도시를 불러오는 중 오류가 발생했습니다: {error}
+                {isSearchingMode
+                  ? "검색 중 오류가 발생했습니다"
+                  : "도시를 불러오는 중 오류가 발생했습니다"}
+                : {displayError}
               </div>
             )}
 
             <PopularCitiesList
-              cities={filteredCities}
+              cities={displayCities}
               selectedCityIds={selectedCityIds}
               onAddCity={handleAddCity}
               onRemoveCity={handleRemoveCity}
-              isLoading={isLoading}
+              isLoading={displayLoading}
+              isSearching={isSearchingMode && isSearching}
+              hasSearched={isSearchingMode && hasSearched}
             />
           </div>
         </div>

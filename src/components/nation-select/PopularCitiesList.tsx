@@ -7,6 +7,8 @@ interface PopularCitiesListProps {
   onAddCity: (city: City) => void;
   onRemoveCity: (cityId: string) => void;
   isLoading?: boolean;
+  isSearching?: boolean;
+  hasSearched?: boolean;
 }
 
 export const PopularCitiesList = ({
@@ -15,15 +17,28 @@ export const PopularCitiesList = ({
   onAddCity,
   onRemoveCity,
   isLoading = false,
+  isSearching = false,
+  hasSearched = false,
 }: PopularCitiesListProps) => {
   const selectedCities = cities.filter((city) => selectedCityIds.has(city.id));
   const availableCities = cities.filter(
     (city) => !selectedCityIds.has(city.id)
   );
 
+  if (cities.length === 0 && !isLoading && !isSearching && hasSearched) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div className="text-text-thirdly text-sm">검색 결과가 없습니다</div>
+      </div>
+    );
+  }
+
+  if (cities.length === 0 && (isSearching || !hasSearched)) {
+    return null;
+  }
+
   return (
     <div className="space-y-0">
-      {/* Selected Cities */}
       {selectedCities.map((city, index) => (
         <CityItem
           key={city.id}
@@ -37,7 +52,6 @@ export const PopularCitiesList = ({
         />
       ))}
 
-      {/* Available Cities */}
       {availableCities.map((city, index) => (
         <CityItem
           key={city.id}
@@ -48,13 +62,6 @@ export const PopularCitiesList = ({
           showDivider={index < availableCities.length - 1}
         />
       ))}
-
-      {/* Loading Indicator */}
-      {isLoading && (
-        <div className="flex justify-center py-4">
-          <div className="text-text-thirdly text-sm">도시를 불러오는 중...</div>
-        </div>
-      )}
     </div>
   );
 };
