@@ -1,9 +1,7 @@
 import { env } from "@/config/env";
 
-// 기본 API 클라이언트 설정
 const API_BASE_URL = env.API_BASE_URL;
 
-// API 에러 타입
 export class ApiError extends Error {
   constructor(message: string, public status: number, public endpoint: string) {
     super(message);
@@ -11,20 +9,17 @@ export class ApiError extends Error {
   }
 }
 
-// 공통 헤더 설정
 const getDefaultHeaders = () => ({
   accept: "*/*",
   "Content-Type": "application/json",
 });
 
-// 인증이 필요한 경우의 헤더 (향후 토큰 추가 시 사용)
 const getAuthHeaders = (token?: string) => ({
   ...getDefaultHeaders(),
   ...(token && { Authorization: `Bearer ${token}` }),
 });
 
-// GET 요청
-export const apiGet = async <T = any>(
+export const apiGet = async <T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
   token?: string
@@ -47,7 +42,6 @@ export const apiGet = async <T = any>(
     const response = await fetch(url, {
       method: "GET",
       headers: token ? getAuthHeaders(token) : getDefaultHeaders(),
-      // 서버 사이드에서 더 안정적인 요청을 위한 옵션
       cache: "no-store",
     });
 
@@ -66,10 +60,9 @@ export const apiGet = async <T = any>(
   }
 };
 
-// POST 요청
-export const apiPost = async <T = any>(
+export const apiPost = async <T>(
   endpoint: string,
-  data?: any,
+  data?: unknown,
   token?: string
 ): Promise<T> => {
   try {
@@ -96,10 +89,9 @@ export const apiPost = async <T = any>(
   }
 };
 
-// PUT 요청
-export const apiPut = async <T = any>(
+export const apiPut = async <T>(
   endpoint: string,
-  data?: any,
+  data?: unknown,
   token?: string
 ): Promise<T> => {
   try {
@@ -126,8 +118,7 @@ export const apiPut = async <T = any>(
   }
 };
 
-// DELETE 요청
-export const apiDelete = async <T = any>(
+export const apiDelete = async <T>(
   endpoint: string,
   token?: string
 ): Promise<T> => {

@@ -17,10 +17,6 @@ interface UseInfiniteScrollReturn {
   refresh: () => void;
 }
 
-/**
- * 무한 스크롤을 위한 커스텀 훅
- * 스크롤 이벤트에 스로틀링을 적용하여 성능을 최적화합니다.
- */
 export const useInfiniteScroll = ({
   initialData = [],
   limit = 20,
@@ -66,7 +62,6 @@ export const useInfiniteScroll = ({
     setError(null);
   }, [initialData]);
 
-  // 스크롤 이벤트 핸들러 (스로틀링 적용)
   const handleScroll = useCallback(() => {
     if (throttleTimeoutRef.current) return;
 
