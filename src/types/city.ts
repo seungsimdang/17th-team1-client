@@ -30,3 +30,13 @@ export interface CityApiParams {
   offset?: number;
   [key: string]: string | number | undefined;
 }
+
+// 검색 API 응답 타입
+export interface CitySearchResponse {
+  cities: CityApiData[];
+}
+
+// 검색 API 요청 파라미터 타입
+export interface CitySearchParams {
+  keyword: string;
+}
