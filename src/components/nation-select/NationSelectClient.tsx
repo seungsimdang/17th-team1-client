@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { City } from "@/types/city";
-import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
@@ -18,15 +17,6 @@ export const NationSelectClient = ({
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
 
   const {
-    cities: allCities,
-    isLoading,
-    error,
-  } = useInfiniteScroll({
-    initialData: initialCities,
-    limit: 20,
-  });
-
-  const {
     searchResults,
     isSearching,
     searchError,
@@ -37,9 +27,9 @@ export const NationSelectClient = ({
   } = useCitySearch();
 
   const isSearchingMode = searchKeyword.trim().length > 0;
-  const displayCities = isSearchingMode ? searchResults : allCities;
-  const displayError = isSearchingMode ? searchError : error;
-  const displayLoading = isSearchingMode ? isSearching : isLoading;
+  const displayCities = isSearchingMode ? searchResults : initialCities;
+  const displayError = isSearchingMode ? searchError : null;
+  const displayLoading = isSearchingMode ? isSearching : false;
 
   const selectedCityIds = new Set(selectedCityList.map((city) => city.id));
 
