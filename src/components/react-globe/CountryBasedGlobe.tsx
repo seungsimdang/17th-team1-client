@@ -1,20 +1,43 @@
-"use client";
+'use client';
 
-import type { GlobeInstance } from "globe.gl";
-import dynamic from "next/dynamic";
-import type React from "react";
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
-import { GLOBE_SIZE_LIMITS, VIEWPORT_DEFAULTS } from "@/constants/zoomLevels";
-import { type ClusterData, useCountryBasedClustering } from "@/hooks/useCountryBasedClustering";
-import { useGlobeState } from "@/hooks/useGlobeState";
+import type { GlobeInstance } from 'globe.gl';
+import dynamic from 'next/dynamic';
+import type React from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
+import {
+  ANIMATION_DURATION,
+  COLORS,
+  EXTERNAL_URLS,
+  GLOBE_CONFIG,
+} from '@/constants/globe';
+import { GLOBE_SIZE_LIMITS, VIEWPORT_DEFAULTS } from '@/constants/zoomLevels';
+import {
+  type ClusterData,
+  useCountryBasedClustering,
+} from '@/hooks/useCountryBasedClustering';
+import { useGlobeState } from '@/hooks/useGlobeState';
 import {
   createContinentClusterStyles,
   createCountryClusterStyles,
   createSingleLabelStyles,
-} from "@/styles/globeStyles";
-import { createGlobeImageUrl } from "@/utils/globeImageGenerator";
-import { createZoomPreventListeners, getISOCode, getPolygonColor, getPolygonLabel } from "@/utils/globeUtils";
+} from '@/styles/globeStyles';
+import {
+  calculateAnimationDuration,
+  calculateAutoFitCamera,
+} from '@/utils/autoFitUtils';
+import { createGlobeImageUrl } from '@/utils/globeImageGenerator';
+import {
+  createZoomPreventListeners,
+  getISOCode,
+  getPolygonColor,
+} from '@/utils/globeUtils';
 import {
   calculateClampedDistance,
   calculateLabelPosition,
@@ -23,9 +46,9 @@ import {
   createClusterClickHandler,
   createContinentClusterHTML,
   createCountryClusterHTML,
-} from "./htmlElementRenderer";
+} from './htmlElementRenderer';
 
-const Globe = dynamic(() => import("react-globe.gl"), {
+const Globe = dynamic(() => import('react-globe.gl'), {
   ssr: false,
 });
 
@@ -41,15 +64,33 @@ export interface CountryBasedGlobeRef {
   globeRef: React.RefObject<any>;
 }
 
-const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProps>(
-  ({ travelPatterns, currentGlobeIndex, onCountrySelect, onClusterSelect, onZoomChange }, ref) => {
+const CountryBasedGlobe = forwardRef<
+  CountryBasedGlobeRef,
+  CountryBasedGlobeProps
+>(
+  (
+    {
+      travelPatterns,
+      currentGlobeIndex,
+      onCountrySelect,
+      onClusterSelect,
+      onZoomChange,
+    },
+    ref
+  ) => {
     const globeRef = useRef<GlobeInstance | null>(null);
     const [globeLoading, setGlobeLoading] = useState(true);
     const [globeError, setGlobeError] = useState<string | null>(null);
     const [countriesData, setCountriesData] = useState<any[]>([]);
     const [windowSize, setWindowSize] = useState({
-      width: typeof window !== "undefined" ? window.innerWidth : VIEWPORT_DEFAULTS.WIDTH,
-      height: typeof window !== "undefined" ? window.innerHeight : VIEWPORT_DEFAULTS.HEIGHT,
+      width:
+        typeof window !== 'undefined'
+          ? window.innerWidth
+          : VIEWPORT_DEFAULTS.WIDTH,
+      height:
+        typeof window !== 'undefined'
+          ? window.innerHeight
+          : VIEWPORT_DEFAULTS.HEIGHT,
     });
 
     // Globe state 관리
@@ -112,7 +153,8 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
           setCountriesData(features);
           setGlobeLoading(false);
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
           setGlobeError(`국가 데이터 로드 실패: ${errorMessage}`);
           setGlobeLoading(false);
           setCountriesData([]);
@@ -125,74 +167,140 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
     // HTML 요소 렌더링
     const getHtmlElement = useCallback(
       (d: any) => {
-        if (typeof window === "undefined" || !document) {
-          const el = document.createElement("div");
-          el.style.display = "none";
+        if (typeof window === 'undefined' || !document) {
+          const el = document.createElement('div');
+          el.style.display = 'none';
           return el;
         }
 
-        const el = document.createElement("div");
+        const el = document.createElement('div');
         // HTML 컨테이너는 정확히 지구본의 좌표에 위치 (0,0 기준점)
-        el.style.position = "absolute";
-        el.style.top = "0px";
-        el.style.left = "0px";
-        el.style.width = "0px";
-        el.style.height = "0px";
-        el.style.overflow = "visible";
-        el.style.pointerEvents = "none"; // 컨테이너는 이벤트 차단
-        el.style.zIndex = "999";
+        el.style.position = 'absolute';
+        el.style.top = '0px';
+        el.style.left = '0px';
+        el.style.width = '0px';
+        el.style.height = '0px';
+        el.style.overflow = 'visible';
+        el.style.pointerEvents = 'none'; // 컨테이너는 이벤트 차단
+        el.style.zIndex = '999';
 
-        const { angleOffset, dynamicDistance } = calculateLabelPosition(d, visibleItems, zoomLevel, globeRef);
+        const { angleOffset, dynamicDistance } = calculateLabelPosition(
+          d,
+          visibleItems,
+          zoomLevel,
+          globeRef
+        );
 
         const clampedDistance = calculateClampedDistance(
           dynamicDistance,
           angleOffset,
           { x: 0, y: 0 },
           d.count === 1,
-          globeRef,
+          globeRef
         );
 
         // 기획에 맞는 스타일 선택
-        let styles;
-        if (d.clusterType === "continent_cluster") {
-          styles = createContinentClusterStyles(0, angleOffset, clampedDistance);
-        } else if (d.clusterType === "country_cluster") {
+        let styles: {
+          dot: string;
+          horizontalLine: string;
+          label: string;
+        };
+
+        if (d.clusterType === 'continent_cluster') {
+          styles = createContinentClusterStyles(
+            0,
+            angleOffset,
+            clampedDistance
+          );
+        } else if (d.clusterType === 'country_cluster') {
           styles = createCountryClusterStyles(0, angleOffset, clampedDistance);
         } else {
           // 개별 도시는 기존 스타일 유지
           styles = createSingleLabelStyles(0, angleOffset, clampedDistance);
         }
 
-        if (d.clusterType === "individual_city") {
+        if (d.clusterType === 'individual_city') {
           // 개별 도시 표시
-          const cityName = d.name.split(",")[0];
+          const cityName = d.name.split(',')[0];
           el.innerHTML = createCityHTML(styles, d.flag, cityName);
 
           const clickHandler = createCityClickHandler(d.name);
-          el.addEventListener("click", clickHandler);
-        } else if (d.clusterType === "continent_cluster") {
+          el.addEventListener('click', clickHandler);
+        } else if (d.clusterType === 'continent_cluster') {
           // 대륙 클러스터 표시 (텍스트로 +숫자) - 클릭 불가능
-          el.innerHTML = createContinentClusterHTML(styles, d.name, d.count, d.flag);
+          el.innerHTML = createContinentClusterHTML(
+            styles,
+            d.name,
+            d.count,
+            d.flag
+          );
           // 대륙 클러스터는 클릭 핸들러를 추가하지 않음 (클릭 불가능)
-        } else if (d.clusterType === "country_cluster") {
+        } else if (d.clusterType === 'country_cluster') {
           // 국가 클러스터 표시 (원 안의 숫자)
           el.innerHTML = createCountryClusterHTML(
             styles,
             d.name,
             d.count,
             d.flag,
-            mode === "city" && selectedClusterData !== null, // 도시 모드에서 확장된 것으로 표시
+            mode === 'city' && selectedClusterData !== null // 도시 모드에서 확장된 것으로 표시
           );
 
-          const clickHandler = createClusterClickHandler(d.id, (clusterId: string) => {
-            const cluster = clusteredData.find((c) => c.id === clusterId);
-            if (cluster && localHandleClusterSelect) {
-              const clusterItems = localHandleClusterSelect(cluster);
-              globalHandleClusterSelect({ ...cluster, items: clusterItems });
-              onClusterSelect?.(cluster);
+          const clickHandler = createClusterClickHandler(
+            d.id,
+            (clusterId: string) => {
+              const cluster = clusteredData.find((c) => c.id === clusterId);
+              if (cluster && localHandleClusterSelect) {
+                const clusterItems = localHandleClusterSelect(cluster);
+                globalHandleClusterSelect({ ...cluster, items: clusterItems });
+                onClusterSelect?.(cluster);
+
+                // 자동 fit 기능: 클러스터의 도시들이 모두 보이도록 카메라 이동
+                if (
+                  clusterItems &&
+                  clusterItems.length > 0 &&
+                  globeRef.current
+                ) {
+                  const autoFitCamera = calculateAutoFitCamera(clusterItems);
+                  const currentPov = globeRef.current.pointOfView();
+
+                  const animationDuration = calculateAnimationDuration(
+                    currentPov.lat || 0,
+                    currentPov.lng || 0,
+                    currentPov.altitude || 2.5,
+                    autoFitCamera.lat,
+                    autoFitCamera.lng,
+                    autoFitCamera.altitude
+                  );
+
+                  // 개발 환경에서 디버깅 정보 출력
+                  if (process.env.NODE_ENV === 'development') {
+                    console.log('Auto-fit camera calculation:', {
+                      clusterName: d.name,
+                      cityCount: clusterItems.length,
+                      boundingBox: autoFitCamera.boundingBox,
+                      targetPosition: {
+                        lat: autoFitCamera.lat,
+                        lng: autoFitCamera.lng,
+                        altitude: autoFitCamera.altitude,
+                      },
+                      animationDuration,
+                    });
+                  }
+
+                  // 부드러운 카메라 이동
+                  globeRef.current.pointOfView(
+                    {
+                      lat: autoFitCamera.lat,
+                      lng: autoFitCamera.lng,
+                      altitude: autoFitCamera.altitude,
+                    },
+                    animationDuration
+                  );
+                }
+              }
             }
-          });
-          el.addEventListener("click", clickHandler);
+          );
+          el.addEventListener('click', clickHandler);
         }
 
         return el;
@@ -206,30 +314,36 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         localHandleClusterSelect,
         globalHandleClusterSelect,
         onClusterSelect,
-      ],
+      ]
     );
 
     // 줌 변경 핸들러
     const handleZoomChangeInternal = useCallback(
       (pov: any) => {
-        if (pov && typeof pov.altitude === "number") {
+        if (pov && typeof pov.altitude === 'number') {
           let newZoom = pov.altitude;
 
           // 줌 범위 제한
           if (newZoom < GLOBE_CONFIG.MIN_ZOOM) {
             newZoom = GLOBE_CONFIG.MIN_ZOOM;
             if (globeRef.current) {
-              globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.MIN_ZOOM }, 0);
+              globeRef.current.pointOfView(
+                { altitude: GLOBE_CONFIG.MIN_ZOOM },
+                0
+              );
             }
           } else if (newZoom > GLOBE_CONFIG.MAX_ZOOM) {
             newZoom = GLOBE_CONFIG.MAX_ZOOM;
             if (globeRef.current) {
-              globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.MAX_ZOOM }, 0);
+              globeRef.current.pointOfView(
+                { altitude: GLOBE_CONFIG.MAX_ZOOM },
+                0
+              );
             }
           }
 
           // 외부에서 스냅 지시가 있으면 해당 값으로 고정
-          if (typeof snapZoomTo === "number") {
+          if (typeof snapZoomTo === 'number') {
             newZoom = snapZoomTo;
             if (globeRef.current) {
               globeRef.current.pointOfView({ altitude: newZoom }, 0);
@@ -242,16 +356,16 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         }
 
         // 지구본 회전 감지
-        if (pov && typeof pov.lat === "number" && typeof pov.lng === "number") {
+        if (pov && typeof pov.lat === 'number' && typeof pov.lng === 'number') {
           handleGlobeRotation(pov.lat, pov.lng);
         }
       },
-      [globalHandleZoomChange, snapZoomTo, onZoomChange, handleGlobeRotation],
+      [globalHandleZoomChange, snapZoomTo, onZoomChange, handleGlobeRotation]
     );
 
     // 윈도우 리사이즈 감지
     useEffect(() => {
-      if (typeof window === "undefined") return;
+      if (typeof window === 'undefined') return;
 
       const handleResize = () => {
         setWindowSize({
@@ -260,13 +374,13 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         });
       };
 
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     // Globe 초기 설정
     useEffect(() => {
-      if (typeof window === "undefined") return;
+      if (typeof window === 'undefined') return;
 
       // Timer 변수들을 배열로 관리
       const timers: NodeJS.Timeout[] = [];
@@ -278,7 +392,10 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       const trySetupControls = () => {
         if (globeRef.current && !globeLoading) {
           // 초기 시점 설정
-          globeRef.current.pointOfView({ altitude: GLOBE_CONFIG.INITIAL_ALTITUDE }, ANIMATION_DURATION.INITIAL_SETUP);
+          globeRef.current.pointOfView(
+            { altitude: GLOBE_CONFIG.INITIAL_ALTITUDE },
+            ANIMATION_DURATION.INITIAL_SETUP
+          );
 
           // 줌 제한 설정
           try {
@@ -291,7 +408,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
               return; // 성공, 더 이상 시도하지 않음
             }
           } catch (error) {
-            console.error("Error accessing controls:", error);
+            console.error('Error accessing controls:', error);
           }
         }
 
@@ -304,26 +421,36 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       };
 
       // 첫 번째 시도
-      const initialTimer = setTimeout(trySetupControls, ANIMATION_DURATION.SETUP_DELAY);
+      const initialTimer = setTimeout(
+        trySetupControls,
+        ANIMATION_DURATION.SETUP_DELAY
+      );
       timers.push(initialTimer);
 
-      const { preventZoom, preventKeyboardZoom, preventTouchZoom } = createZoomPreventListeners();
+      const { preventZoom, preventKeyboardZoom, preventTouchZoom } =
+        createZoomPreventListeners();
 
-      document.addEventListener("wheel", preventZoom, { passive: false });
-      document.addEventListener("keydown", preventKeyboardZoom);
-      document.addEventListener("touchstart", preventTouchZoom, { passive: false });
+      document.addEventListener('wheel', preventZoom, { passive: false });
+      document.addEventListener('keydown', preventKeyboardZoom);
+      document.addEventListener('touchstart', preventTouchZoom, {
+        passive: false,
+      });
 
       return () => {
-        document.removeEventListener("wheel", preventZoom);
-        document.removeEventListener("keydown", preventKeyboardZoom);
-        document.removeEventListener("touchstart", preventTouchZoom);
+        document.removeEventListener('wheel', preventZoom);
+        document.removeEventListener('keydown', preventKeyboardZoom);
+        document.removeEventListener('touchstart', preventTouchZoom);
         // 모든 타이머 정리
-        timers.forEach((timer) => clearTimeout(timer));
+        timers.forEach((timer) => {
+          clearTimeout(timer);
+        });
       };
     }, [globeLoading]);
 
     if (globeLoading) {
-      return <div className="text-text-secondary text-sm">🌍 지구본 로딩 중...</div>;
+      return (
+        <div className="text-text-secondary text-sm">🌍 지구본 로딩 중...</div>
+      );
     }
 
     if (globeError) {
@@ -332,20 +459,23 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
           style={{
             width: GLOBE_CONFIG.WIDTH,
             height: GLOBE_CONFIG.HEIGHT,
-            borderRadius: "50%",
-            background: "radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "white",
-            fontSize: "14px",
-            textAlign: "center",
-            flexDirection: "column",
-            gap: "10px",
+            borderRadius: '50%',
+            background:
+              'radial-gradient(circle at 30% 30%, #2c3e50 0%, #1a252f 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '14px',
+            textAlign: 'center',
+            flexDirection: 'column',
+            gap: '10px',
           }}
         >
           <div>⚠️ 지구본 로딩 실패</div>
-          <div style={{ fontSize: "12px", opacity: 0.8 }}>인터넷 연결을 확인해주세요</div>
+          <div style={{ fontSize: '12px', opacity: 0.8 }}>
+            인터넷 연결을 확인해주세요
+          </div>
         </div>
       );
     }
@@ -353,11 +483,11 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
     return (
       <div
         style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <Globe
@@ -371,11 +501,23 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
           atmosphereColor={COLORS.ATMOSPHERE}
           atmosphereAltitude={GLOBE_CONFIG.ATMOSPHERE_ALTITUDE}
           polygonsData={countriesData}
-          polygonCapColor={(feature: any) => getPolygonColor(feature, currentPattern?.countries || [], getISOCode)}
+          polygonCapColor={(feature: any) =>
+            getPolygonColor(
+              feature,
+              currentPattern?.countries || [],
+              getISOCode
+            )
+          }
           polygonSideColor={() => COLORS.POLYGON_SIDE}
           polygonStrokeColor={() => COLORS.POLYGON_STROKE}
           polygonAltitude={GLOBE_CONFIG.POLYGON_ALTITUDE}
-          polygonLabel={(feature: any) => getPolygonLabel(feature, currentPattern?.countries || [], getISOCode)}
+          polygonLabel={(feature: any) =>
+            getPolygonLabel(
+              feature,
+              currentPattern?.countries || [],
+              getISOCode
+            )
+          }
           htmlElementsData={visibleItems}
           htmlElement={getHtmlElement}
           htmlAltitude={() => 0}
@@ -385,9 +527,9 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         />
       </div>
     );
-  },
+  }
 );
 
-CountryBasedGlobe.displayName = "CountryBasedGlobe";
+CountryBasedGlobe.displayName = 'CountryBasedGlobe';
 
 export default CountryBasedGlobe;
