@@ -67,7 +67,7 @@ export const Button = ({
   }) => {
   const Comp = asChild ? Slot : "button";
 
-  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size }), className)} {...(props as any)} />;
+  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size }), className)} {...props} />;
 };
 
 export const IconButton = ({
@@ -85,7 +85,7 @@ export const IconButton = ({
   const Comp = asChild ? Slot : "button";
 
   return (
-    <Comp data-slot="icon-button" className={cn(iconButtonVariants({ size }), className)} {...(props as any)}>
+    <Comp data-slot="icon-button" className={cn(iconButtonVariants({ size }), className)} {...props}>
       {icon}
       {children}
     </Comp>
