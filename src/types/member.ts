@@ -44,3 +44,11 @@ export interface GlobeResponse {
   status: string;
   data: GlobeData;
 }
+
+// AI 인사이트 응답
+export interface TravelInsightResponse {
+  status: string;
+  data: {
+    title: string;
+  };
+}
