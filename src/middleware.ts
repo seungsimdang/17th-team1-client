@@ -24,6 +24,7 @@ function isPublicPath(pathname: string): boolean {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("kakao_access_token")?.value;
+  const memberId = request.cookies.get("member_id")?.value;
 
   if (token && pathname === "/login") {
     console.log(
@@ -42,8 +43,6 @@ export function middleware(request: NextRequest) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
-
-  console.log(`[Middleware] Allowing access to ${pathname}`);
   return NextResponse.next();
 }
 
