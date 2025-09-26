@@ -1,4 +1,4 @@
-import type { TravelPattern } from "@/data/travelPatterns";
+import type { TravelPattern } from "@/types/travelPatterns";
 
 interface PatternSelectorProps {
   patterns: TravelPattern[];

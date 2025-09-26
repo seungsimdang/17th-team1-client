@@ -14,7 +14,7 @@ export const GlobeFooter = ({ isZoomed }: GlobeFooterProps) => {
       className={`px-4 pb-4 transition-opacity duration-500 w-full max-w-[512px] mx-auto ${isZoomed ? "opacity-0 pointer-events-none" : "opacity-100"}`}
     >
       <div className="space-y-2">
-        <HeadlessToastProvider viewportClassName="absolute bottom-full left-0 right-0 translate-y-[-16px] w-full max-w-[400px] mx-auto bg-[#21272D] rounded-xl">
+        <HeadlessToastProvider viewportClassName="absolute bottom-full left-4 right-4 translate-y-[-16px] max-w-[400px] mx-auto">
           <HeadlessToast
             open={open}
             onOpenChange={setOpen}

@@ -133,7 +133,7 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
   };
 };
 
-// 도시 클릭 핸들러 (기존 로직 유지)
+// 도시 클릭 핸들러 (일시적으로 비활성화)
 export const createCityClickHandler = (cityName: string) => {
   return (
     // biome-ignore lint/suspicious/noExplicitAny: Event handler type
@@ -142,8 +142,8 @@ export const createCityClickHandler = (cityName: string) => {
     event.preventDefault();
     event.stopPropagation();
 
-    // 개별 도시 클릭 시 image-metadata로 이동
-    const q = encodeURIComponent(cityName.split(",")[0]);
-    window.location.href = `/image-metadata?city=${q}`;
+    // 도시 클릭 비활성화 - image-metadata 이동 막음
+    // const q = encodeURIComponent(cityName.split(",")[0]);
+    // window.location.href = `/image-metadata?city=${q}`;
   };
 };

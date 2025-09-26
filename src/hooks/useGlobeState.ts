@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
 import { ZOOM_LEVELS } from "@/constants/zoomLevels";
-import type { CountryData, TravelPattern } from "@/data/travelPatterns";
 import type { ClusterData } from "@/hooks/useCountryBasedClustering";
+import type { CountryData, TravelPattern } from "@/types/travelPatterns";
 
 export const useGlobeState = (patterns: TravelPattern[]) => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const [currentGlobeIndex, setCurrentGlobeIndex] = useState(0);
+  const currentGlobeIndex = 0; // 항상 첫 번째 패턴만 사용
   const [zoomLevel, setZoomLevel] = useState<number>(ZOOM_LEVELS.DEFAULT);
   const [selectedClusterData, setSelectedClusterData] = useState<CountryData[] | null>(null);
   const [zoomStack, setZoomStack] = useState<number[]>([]);
@@ -35,7 +35,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
 
   const currentPattern = useMemo(
     () => travelPatternsWithFlags[currentGlobeIndex],
-    [travelPatternsWithFlags, currentGlobeIndex],
+    [travelPatternsWithFlags],
   );
 
   // 핸들러 함수들
@@ -130,15 +130,6 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
     }
   }, [snapZoomTo]);
 
-  const handlePatternChange = useCallback((index: number) => {
-    setCurrentGlobeIndex(index);
-    setSelectedCountry(null);
-    setSelectedClusterData(null);
-    setZoomLevel(ZOOM_LEVELS.DEFAULT);
-    setZoomStack([]);
-    setSnapZoomTo(null);
-    setSelectionStack([]);
-  }, []);
 
   const resetGlobe = useCallback(() => {
     setSelectedClusterData(null);
@@ -163,7 +154,6 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
     handleCountrySelect,
     handleZoomChange,
     handleClusterSelect,
-    handlePatternChange,
     resetGlobe,
   };
 };

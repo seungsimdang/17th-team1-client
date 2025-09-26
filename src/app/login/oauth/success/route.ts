@@ -54,8 +54,8 @@ export async function GET(request: NextRequest) {
       // 신규 사용자 - 도시 선택 페이지로 이동
       return NextResponse.redirect(new URL("/nation-select", request.url));
     } else {
-      // 기존 사용자 - 지구본 페이지로 이동
-      return NextResponse.redirect(new URL("/globe", request.url));
+      // 기존 사용자 - 홈 페이지로 이동하여 여행 데이터 확인 후 라우팅
+      return NextResponse.redirect(new URL("/", request.url));
     }
   } catch (error) {
     console.error("멤버 ID 조회 중 오류:", error);
@@ -81,8 +81,8 @@ export async function GET(request: NextRequest) {
       // 신규 사용자 - 도시 선택 페이지로 이동
       return NextResponse.redirect(new URL("/nation-select", request.url));
     } else {
-      // 기존 사용자 - 지구본 페이지로 이동
-      return NextResponse.redirect(new URL("/globe", request.url));
+      // 기존 사용자 - 홈 페이지로 이동하여 여행 데이터 확인 후 라우팅
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 }
