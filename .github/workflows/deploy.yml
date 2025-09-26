@@ -6,7 +6,7 @@ on:
     branches:
       - main
       - develop
-      - fix/GLB-125
+      - feat/GLB-125
     paths:
       - "src/**"
       - "package.json"
