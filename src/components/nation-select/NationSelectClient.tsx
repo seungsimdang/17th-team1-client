@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { City } from "@/types/city";
 import { useCitySearch } from "@/hooks/useCitySearch";
+import { createMemberTravels } from "@/services/memberService";
 import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
 import { NationSelectFooter } from "./NationSelectFooter";
@@ -15,6 +17,7 @@ export const NationSelectClient = ({
   initialCities,
 }: NationSelectClientProps) => {
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
+  const router = useRouter();
 
   const {
     searchResults,
@@ -42,8 +45,16 @@ export const NationSelectClient = ({
     setSelectedCityList((prev) => prev.filter((city) => city.id !== cityId));
   };
 
-  const handleCreateGlobe = () => {
-    console.log("Selected cities:", selectedCityList);
+  const handleCreateGlobe = async () => {
+    if (selectedCityList.length === 0) return;
+
+    try {
+      await createMemberTravels(selectedCityList);
+      router.push("/globe");
+    } catch (error) {
+      console.error("여행 기록 생성 실패:", error);
+      alert("여행 기록 생성에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   const handleSearchChange = (value: string) => {
