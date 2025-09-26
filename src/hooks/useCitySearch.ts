@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { City } from "@/types/city";
 import { searchCities } from "@/services/cityService";
 
@@ -19,6 +19,7 @@ interface UseCitySearchReturn {
 export const useCitySearch = ({
   debounceDelay = 500,
 }: UseCitySearchOptions = {}): UseCitySearchReturn => {
+  const latestRequestIdRef = useRef(0);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchResults, setSearchResults] = useState<City[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -33,21 +34,28 @@ export const useCitySearch = ({
       return;
     }
 
+    const requestId = ++latestRequestIdRef.current;
     setIsSearching(true);
     setSearchError(null);
 
     try {
       const results = await searchCities(keyword);
-      setSearchResults(results);
-      setHasSearched(true);
+      if (requestId === latestRequestIdRef.current) {
+        setSearchResults(results);
+        setHasSearched(true);
+      }
     } catch (error) {
-      setSearchError(
-        error instanceof Error ? error.message : "검색 중 오류가 발생했습니다"
-      );
-      setSearchResults([]);
-      setHasSearched(true);
+      if (requestId === latestRequestIdRef.current) {
+        setSearchError(
+          error instanceof Error ? error.message : "검색 중 오류가 발생했습니다"
+        );
+        setSearchResults([]);
+        setHasSearched(true);
+      }
     } finally {
-      setIsSearching(false);
+      if (requestId === latestRequestIdRef.current) {
+        setIsSearching(false);
+      }
     }
   }, []);
 
