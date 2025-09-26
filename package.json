@@ -11,7 +11,8 @@
     "check": "biome check --write",
     "reporter": "biome check --reporter=summary",
     "ci": "biome ci",
-    "tokens:build": "node scripts/build-tokens.js"
+    "tokens:build": "node scripts/build-tokens.js",
+    "prepare": "husky"
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.2",
@@ -47,6 +48,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "^0.180.0",
+    "husky": "^9.1.7",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
