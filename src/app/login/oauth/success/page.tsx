@@ -10,9 +10,16 @@ const OauthSuccessContent = () => {
 
   useEffect(() => {
     const accessToken = searchParams.get("accessToken");
+    const firstLogin = searchParams.get("firstLogin");
+
     if (accessToken) {
       localStorage.setItem("kakao_access_token", accessToken);
-      router.push("/globe");
+
+      if (firstLogin === "true") {
+        router.push("/nation-select");
+      } else {
+        router.push("/globe");
+      }
     } else {
       console.error("URL에서 accessToken을 찾을 수 없습니다.");
       router.push("/login");
