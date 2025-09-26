@@ -31,12 +31,14 @@ export async function GET(request: NextRequest) {
       path: "/",
       maxAge: maxAgeSeconds,
       httpOnly: false,
+      domain: ".globber-fe.store",
     });
 
     cookieStore.set("member_id", memberId.toString(), {
       path: "/",
       maxAge: maxAgeSeconds,
       httpOnly: false,
+      domain: ".globber-fe.store",
     });
 
     if (uuid) {
@@ -44,6 +46,7 @@ export async function GET(request: NextRequest) {
         path: "/",
         maxAge: maxAgeSeconds,
         httpOnly: false,
+        domain: ".globber-fe.store",
       });
     }
 
@@ -70,6 +73,7 @@ export async function GET(request: NextRequest) {
       path: "/",
       maxAge: maxAgeSeconds,
       httpOnly: false,
+      domain: ".globber-fe.store",
     });
 
     if (uuid) {
@@ -77,6 +81,7 @@ export async function GET(request: NextRequest) {
         path: "/",
         maxAge: maxAgeSeconds,
         httpOnly: false,
+        domain: ".globber-fe.store",
       });
     }
 
