@@ -52,3 +52,27 @@ export interface TravelInsightResponse {
     title: string;
   };
 }
+
+// 멤버 여행 데이터 조회 응답
+export interface MemberTravelCity {
+  cityId: number;
+  cityName: string;
+  countryName: string;
+  countryCode: string;
+  lat: number;
+  lng: number;
+}
+
+export interface MemberTravel {
+  cities: MemberTravelCity[];
+}
+
+export interface MemberTravelsData {
+  memberId: number;
+  travels: MemberTravel[];
+}
+
+export interface MemberTravelsResponse {
+  status: string;
+  data: MemberTravelsData;
+}
