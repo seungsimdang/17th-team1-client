@@ -12,8 +12,8 @@ export const NationSelectFooter = ({ selectedCities, onRemoveCity, onCreateGlobe
   const isButtonEnabled = selectedCities.length > 0;
 
   return (
-    <div className="sticky bottom-0">
-      <div className="bg-surface-thirdly mx-auto w-full px-4 py-6">
+    <div className="sticky bottom-0 flex justify-center">
+      <div className="bg-surface-thirdly w-full max-w-[512px] px-4 py-6">
         <SelectedCities selectedCities={selectedCities} onRemoveCity={onRemoveCity} />
 
         <Button
