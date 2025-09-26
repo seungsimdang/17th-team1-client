@@ -6,6 +6,7 @@ import { BackButton } from "@/components/common/button";
 import { GlobeFooter } from "@/components/globe/GlobeFooter";
 // Components
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
+import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import type { CountryBasedGlobeRef } from "@/components/react-globe/CountryBasedGlobe";
 import { useGlobeState } from "@/hooks/useGlobeState";
 import { getGlobeData } from "@/services/memberService";
@@ -16,7 +17,8 @@ import { mapGlobeDataToTravelPatterns } from "@/utils/globeDataMapper";
 // CountryBasedGlobe을 동적 import로 로드 (SSR 방지)
 const CountryBasedGlobe = dynamic(() => import("@/components/react-globe/CountryBasedGlobe"), {
   ssr: false,
-  loading: () => <div>🌍 지구본 생성 중...</div>,
+  // loading: () => <div>🌍 지구본 생성 중...</div>,
+  loading: () => <div></div>,
 });
 
 const GlobePrototype = () => {
@@ -44,23 +46,23 @@ const GlobePrototype = () => {
         }
       } catch {
         // 에러 처리
-      } finally {
-        setIsLoading(false);
       }
     };
 
+    // API 데이터만 먼저 로드
     loadGlobeData();
   }, []);
 
   const hasBackButton = isZoomed || selectedClusterData !== null;
 
+  // 로딩 완료 콜백
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+  };
+
   // 로딩 중이거나 데이터가 없는 경우
   if (isLoading) {
-    return (
-      <div className="w-full h-screen flex items-center justify-center bg-gradient-to-b from-gray-800 to-gray-900">
-        <div className="text-white text-xl">🌍 지구본 데이터 로딩 중...</div>
-      </div>
-    );
+    return <GlobeLoading onComplete={handleLoadingComplete} />;
   }
 
   if (travelPatterns.length === 0) {
