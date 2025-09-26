@@ -1,21 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { useCitySearch } from "@/hooks/useCitySearch";
+import { useRouter } from "next/navigation";
 import type { City } from "@/types/city";
-import { NationSelectFooter } from "./NationSelectFooter";
+import { useCitySearch } from "@/hooks/useCitySearch";
+import { createMemberTravels } from "@/services/memberService";
 import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
+import { NationSelectFooter } from "./NationSelectFooter";
 
 interface NationSelectClientProps {
   initialCities: City[];
 }
 
-export const NationSelectClient = ({ initialCities }: NationSelectClientProps) => {
+export const NationSelectClient = ({
+  initialCities,
+}: NationSelectClientProps) => {
   const [selectedCityList, setSelectedCityList] = useState<City[]>([]);
+  const router = useRouter();
 
-  const { searchResults, isSearching, searchError, searchKeyword, setSearchKeyword, clearSearch, hasSearched } =
-    useCitySearch();
+  const {
+    searchResults,
+    isSearching,
+    searchError,
+    searchKeyword,
+    setSearchKeyword,
+    clearSearch,
+    hasSearched,
+  } = useCitySearch();
 
   const isSearchingMode = searchKeyword.trim().length > 0;
   const displayCities = isSearchingMode ? searchResults : initialCities;
@@ -33,8 +45,16 @@ export const NationSelectClient = ({ initialCities }: NationSelectClientProps) =
     setSelectedCityList((prev) => prev.filter((city) => city.id !== cityId));
   };
 
-  const handleCreateGlobe = () => {
-    console.log("Selected cities:", selectedCityList);
+  const handleCreateGlobe = async () => {
+    if (selectedCityList.length === 0) return;
+
+    try {
+      await createMemberTravels(selectedCityList);
+      router.push("/globe");
+    } catch (error) {
+      console.error("여행 기록 생성 실패:", error);
+      alert("여행 기록 생성에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   const handleSearchChange = (value: string) => {
@@ -50,7 +70,10 @@ export const NationSelectClient = ({ initialCities }: NationSelectClientProps) =
 
       <div className="flex-1 overflow-y-auto px-4">
         <div className="">
-          <NationSelectHeader searchValue={searchKeyword} onSearchChange={handleSearchChange} />
+          <NationSelectHeader
+            searchValue={searchKeyword}
+            onSearchChange={handleSearchChange}
+          />
 
           <div>
             <h2 className="text-text-primary text-lg font-bold mb-4">
@@ -58,10 +81,18 @@ export const NationSelectClient = ({ initialCities }: NationSelectClientProps) =
             </h2>
 
             {displayError && (
-              <div className="text-red-500 text-center py-4" role="alert" aria-live="polite">
-                {isSearchingMode ? "검색 중 오류가 발생했습니다" : "도시를 불러오는 중 오류가 발생했습니다"}
+              <div
+                className="text-red-500 text-center py-4"
+                role="alert"
+                aria-live="polite"
+              >
+                {isSearchingMode
+                  ? "검색 중 오류가 발생했습니다"
+                  : "도시를 불러오는 중 오류가 발생했습니다"}
                 <div className="mt-1 text-xs text-text-thirdly break-words">
-                  {typeof displayError === "string" ? displayError : String(displayError)}
+                  {typeof displayError === "string"
+                    ? displayError
+                    : String(displayError)}
                 </div>
               </div>
             )}

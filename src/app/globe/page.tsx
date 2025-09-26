@@ -12,10 +12,13 @@ import { travelPatterns } from "@/data/travelPatterns";
 import { useGlobeState } from "@/hooks/useGlobeState";
 
 // CountryBasedGlobe을 동적 import로 로드 (SSR 방지)
-const CountryBasedGlobe = dynamic(() => import("@/components/react-globe/CountryBasedGlobe"), {
-  ssr: false,
-  loading: () => <div>🌍 지구본 생성 중...</div>,
-});
+const CountryBasedGlobe = dynamic(
+  () => import("@/components/react-globe/CountryBasedGlobe"),
+  {
+    ssr: false,
+    loading: () => <div>🌍 지구본 생성 중...</div>,
+  }
+);
 
 const GlobePrototype = () => {
   const globeRef = useRef<CountryBasedGlobeRef>(null);
@@ -71,7 +74,11 @@ const GlobePrototype = () => {
       </div>
 
       {/* 돌아가기 버튼 */}
-      <BackButton isZoomed={hasBackButton} globeRef={globeRef} onReset={resetGlobe} />
+      <BackButton
+        isZoomed={hasBackButton}
+        globeRef={globeRef}
+        onReset={resetGlobe}
+      />
     </div>
   );
 };

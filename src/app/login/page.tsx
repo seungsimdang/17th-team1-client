@@ -11,8 +11,12 @@ const LoginPage = () => {
 
         <section className="relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl px-6 py-8 shadow-2xl">
           <header className="mb-6 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">🌍 글로버에 오신 것을 환영해요 🌍</h1>
-            <p className="mt-2 text-sm text-white/70">여행 기록을 멋진 지구본 위에 남겨보세요!</p>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              🌍 글로버에 오신 것을 환영해요 🌍
+            </h1>
+            <p className="mt-2 text-sm text-white/70">
+              여행 기록을 멋진 지구본 위에 남겨보세요!
+            </p>
           </header>
 
           <div className="space-y-3">
