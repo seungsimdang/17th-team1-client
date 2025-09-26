@@ -46,7 +46,7 @@ export const createClusterSelectHandler = (
           ...prev,
           isZoomAnimating: false,
         }));
-      }, 1600); // 1500ms + 100ms 여유시간
+      }, 3000); // 최대 animation duration 고려
 
       // 선택 스택에 현재 클러스터 데이터 저장
       setSelectionStack((stack) => [...stack, selectedClusterData || null]);

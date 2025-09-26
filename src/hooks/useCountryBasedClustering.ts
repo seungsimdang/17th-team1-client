@@ -83,12 +83,12 @@ export const useCountryBasedClustering = ({
   // 핸들러 생성 - 기획 요구사항에 맞게 업데이트
   const handleClusterSelect = useCallback(
     createClusterSelectHandler(setState, setSelectionStack, setLastRotation, selectedClusterData),
-    [],
+    [setState, setSelectionStack, setLastRotation, selectedClusterData],
   );
 
   const handleZoomChange = useCallback(
     createZoomChangeHandler(setState, setZoomStack, setSelectionStack, state.mode),
-    [],
+    [setState, setZoomStack, setSelectionStack, state.mode],
   );
 
   const handleGlobeRotation = useCallback(

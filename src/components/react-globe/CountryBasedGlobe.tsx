@@ -2,7 +2,7 @@
 
 import type { GlobeInstance } from 'globe.gl';
 import dynamic from 'next/dynamic';
-import type React from 'react';
+import React from 'react';
 import {
   forwardRef,
   useCallback,
@@ -61,7 +61,7 @@ interface CountryBasedGlobeProps {
 }
 
 export interface CountryBasedGlobeRef {
-  globeRef: React.RefObject<any>;
+  globeRef: React.RefObject<GlobeInstance | null>;
   resetGlobe: () => void;
 }
 
@@ -499,7 +499,6 @@ const CountryBasedGlobe = forwardRef<
         <Globe
           ref={globeRef as any}
           width={windowSize.width}
-          // height={Math.min(512, windowSize.width)}
           height={windowSize.height}
           backgroundColor="rgba(0,0,0,0)"
           globeImageUrl={globeImageUrl}
