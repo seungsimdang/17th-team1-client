@@ -6,6 +6,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Globber",
   description: "Depromeet 17th Team 1 Project",
+  icons: {
+    icon: "assets/globe.png",
+  },
 };
 
 export default function RootLayout({
