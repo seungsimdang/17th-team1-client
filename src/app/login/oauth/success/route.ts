@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const accessToken = searchParams.get("accessToken");
   const firstLogin = searchParams.get("firstLogin");
+  const uuid = searchParams.get("uuid");
 
   if (!accessToken) {
     console.error("URL에서 accessToken을 찾을 수 없습니다.");
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const maxAgeSeconds = 60 * 60 * 24 * 7; // 7 days
 
-    // 토큰과 멤버 ID 모두 쿠키에 저장
+    // 토큰, 멤버 ID, UUID 모두 쿠키에 저장
     cookieStore.set("kakao_access_token", cleanToken, {
       path: "/",
       maxAge: maxAgeSeconds,
@@ -37,7 +38,17 @@ export async function GET(request: NextRequest) {
       httpOnly: false,
     });
 
-    console.log(`멤버 ID 저장 완료: ${memberId}`);
+    if (uuid) {
+      cookieStore.set("uuid", uuid, {
+        path: "/",
+        maxAge: maxAgeSeconds,
+        httpOnly: false,
+      });
+    }
+
+    console.log(
+      `멤버 ID 저장 완료: ${memberId}${uuid ? `, UUID: ${uuid}` : ""}`
+    );
 
     if (firstLogin === "true") {
       return NextResponse.redirect(new URL("/nation-select", request.url));
@@ -55,6 +66,14 @@ export async function GET(request: NextRequest) {
       maxAge: maxAgeSeconds,
       httpOnly: false,
     });
+
+    if (uuid) {
+      cookieStore.set("uuid", uuid, {
+        path: "/",
+        maxAge: maxAgeSeconds,
+        httpOnly: false,
+      });
+    }
 
     if (firstLogin === "true") {
       return NextResponse.redirect(new URL("/nation-select", request.url));

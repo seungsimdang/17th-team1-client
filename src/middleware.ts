@@ -25,10 +25,13 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("kakao_access_token")?.value;
   const memberId = request.cookies.get("member_id")?.value;
+  const uuid = request.cookies.get("user_uuid")?.value;
 
   if (token && pathname === "/login") {
     console.log(
-      `[Middleware] Redirecting authenticated user from /login to /globe`
+      `[Middleware] Redirecting authenticated user from /login to /globe (Token: exists, MemberID: ${
+        memberId || "none"
+      }, UUID: ${uuid || "none"})`
     );
     const url = request.nextUrl.clone();
     url.pathname = "/globe";
@@ -43,6 +46,12 @@ export function middleware(request: NextRequest) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
+
+  console.log(
+    `[Middleware] Allowing access to ${pathname} (Token: ${
+      token ? "exists" : "none"
+    }, MemberID: ${memberId || "none"}, UUID: ${uuid || "none"})`
+  );
   return NextResponse.next();
 }
 
