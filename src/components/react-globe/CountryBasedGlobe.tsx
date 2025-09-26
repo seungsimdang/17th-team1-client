@@ -2,7 +2,7 @@
 
 import type { GlobeInstance } from 'globe.gl';
 import dynamic from 'next/dynamic';
-import React from 'react';
+import type React from 'react';
 import {
   forwardRef,
   useCallback,
@@ -192,7 +192,8 @@ const CountryBasedGlobe = forwardRef<
 
         const { angleOffset, dynamicDistance } = calculateLabelPosition(
           d,
-          visibleItems,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          visibleItems as any[],
           zoomLevel,
           globeRef
         );
@@ -516,7 +517,7 @@ const CountryBasedGlobe = forwardRef<
           polygonSideColor={() => COLORS.POLYGON_SIDE}
           polygonStrokeColor={() => COLORS.POLYGON_STROKE}
           polygonAltitude={GLOBE_CONFIG.POLYGON_ALTITUDE}
-          htmlElementsData={visibleItems}
+          htmlElementsData={visibleItems as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
           htmlElement={getHtmlElement}
           htmlAltitude={() => 0}
           enablePointerInteraction={true}

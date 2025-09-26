@@ -38,20 +38,6 @@ export const getPolygonColor = (
   return COLORS.GLOBE_LV1; // 1개 이상: 어두운 파란색
 };
 
-// 폴리곤 레이블 생성
-export const getPolygonLabel = (
-  // biome-ignore lint/suspicious/noExplicitAny: GeoJSON feature type
-  feature: any,
-  // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
-  countries: any[],
-  getISOCode: (id: string) => string,
-): string => {
-  const isoCode = feature.properties?.ISO_A3 || feature.id;
-  // biome-ignore lint/suspicious/noExplicitAny: Dynamic country data
-  const countryData = countries.find((c: any) => getISOCode(c.id) === isoCode);
-  return countryData ? `${countryData.flag} ${countryData.name}` : "";
-};
-
 // 브라우저 줌 방지 이벤트 리스너
 export const createZoomPreventListeners = () => {
   const preventZoom = (e: WheelEvent) => {

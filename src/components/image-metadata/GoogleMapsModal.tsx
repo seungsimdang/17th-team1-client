@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ImageMetadata } from '@/types/imageMetadata';
 
 interface GoogleMapsModalProps {
@@ -63,7 +63,7 @@ export function GoogleMapsModal({
         ) {
           const nearestPlace = results[0];
           const detailsRequest: google.maps.places.PlaceDetailsRequest = {
-            placeId: nearestPlace.place_id!,
+            placeId: nearestPlace.place_id || '',
             fields: ['name', 'formatted_address'],
             language: 'ko',
             region: 'kr',
@@ -166,7 +166,9 @@ export function GoogleMapsModal({
               results.length > 0
             ) {
               const place = results[0];
-              getPlaceDetails(place.place_id!, place);
+              if (place.place_id) {
+                getPlaceDetails(place.place_id, place);
+              }
             } else {
               searchIndex++;
               tryNextSearch();
@@ -262,23 +264,7 @@ export function GoogleMapsModal({
     coordinateSearch();
   };
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    function waitForGoogleMaps() {
-      if (window.google?.maps?.places) {
-        initMap();
-      } else {
-        setTimeout(waitForGoogleMaps, 200);
-      }
-    }
-
-    waitForGoogleMaps();
-
-    return () => {};
-  }, [isOpen, initMap]);
-
-  const initMap = () => {
+  const initMap = useCallback(() => {
     if (!mapRef.current || !imageMetadata?.location) return;
 
     const initialLat = imageMetadata.location.latitude;
@@ -337,7 +323,23 @@ export function GoogleMapsModal({
     setTimeout(() => {
       getPlaceInfoFromLocation(initialLat, initialLng, mapInstance);
     }, 100);
-  };
+  }, [imageMetadata?.location]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function waitForGoogleMaps() {
+      if (window.google?.maps?.places) {
+        initMap();
+      } else {
+        setTimeout(waitForGoogleMaps, 200);
+      }
+    }
+
+    waitForGoogleMaps();
+
+    return () => {};
+  }, [isOpen, initMap]);
 
   // 장소 검색
   const handleSearch = async () => {

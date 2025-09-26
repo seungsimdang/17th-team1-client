@@ -1,6 +1,6 @@
 "use client";
 
-import { City } from "@/types/city";
+import type { City } from "@/types/city";
 import { CityItem } from "./CityItem";
 
 interface PopularCitiesListProps {

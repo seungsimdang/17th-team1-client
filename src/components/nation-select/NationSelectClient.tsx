@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { City } from "@/types/city";
+import type { City } from "@/types/city";
 import { useCitySearch } from "@/hooks/useCitySearch";
 import { NationSelectHeader } from "./NationSelectHeader";
 import { PopularCitiesList } from "./PopularCitiesList";
