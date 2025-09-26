@@ -1,3 +1,5 @@
+"use client";
+
 import { City } from "@/types/city";
 import { CityItem } from "./CityItem";
 
