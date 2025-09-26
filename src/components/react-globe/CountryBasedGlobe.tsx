@@ -511,13 +511,6 @@ const CountryBasedGlobe = forwardRef<
           polygonSideColor={() => COLORS.POLYGON_SIDE}
           polygonStrokeColor={() => COLORS.POLYGON_STROKE}
           polygonAltitude={GLOBE_CONFIG.POLYGON_ALTITUDE}
-          polygonLabel={(feature: any) =>
-            getPolygonLabel(
-              feature,
-              currentPattern?.countries || [],
-              getISOCode
-            )
-          }
           htmlElementsData={visibleItems}
           htmlElement={getHtmlElement}
           htmlAltitude={() => 0}
