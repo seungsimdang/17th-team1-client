@@ -42,8 +42,7 @@ export const Chip = ({
   children,
   ...props
 }: ChipProps) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const Comp: any = asChild ? Slot : "div";
+  const Comp = asChild ? Slot : "div";
 
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();

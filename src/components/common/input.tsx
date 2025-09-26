@@ -1,6 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { Search, Upload } from "lucide-react";
-import SearchIcon from "@/assets/icons/search.svg";
 import { cn } from "@/utils/cn";
 
 const inputVariants = cva(

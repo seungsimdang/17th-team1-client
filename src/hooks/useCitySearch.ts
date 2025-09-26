@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import type { City } from "@/types/city";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { searchCities } from "@/services/cityService";
+import type { City } from "@/types/city";
 
 interface UseCitySearchOptions {
   debounceDelay?: number;
@@ -16,9 +16,7 @@ interface UseCitySearchReturn {
   hasSearched: boolean;
 }
 
-export const useCitySearch = ({
-  debounceDelay = 500,
-}: UseCitySearchOptions = {}): UseCitySearchReturn => {
+export const useCitySearch = ({ debounceDelay = 500 }: UseCitySearchOptions = {}): UseCitySearchReturn => {
   const latestRequestIdRef = useRef(0);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchResults, setSearchResults] = useState<City[]>([]);
@@ -46,9 +44,7 @@ export const useCitySearch = ({
       }
     } catch (error) {
       if (requestId === latestRequestIdRef.current) {
-        setSearchError(
-          error instanceof Error ? error.message : "검색 중 오류가 발생했습니다"
-        );
+        setSearchError(error instanceof Error ? error.message : "검색 중 오류가 발생했습니다");
         setSearchResults([]);
         setHasSearched(true);
       }

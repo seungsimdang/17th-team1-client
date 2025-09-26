@@ -3,7 +3,11 @@ import { env } from "@/config/env";
 const API_BASE_URL = env.API_BASE_URL;
 
 export class ApiError extends Error {
-  constructor(message: string, public status: number, public endpoint: string) {
+  constructor(
+    message: string,
+    public status: number,
+    public endpoint: string,
+  ) {
     super(message);
     this.name = "ApiError";
   }
@@ -35,7 +39,7 @@ const parseJsonSafely = async <T>(response: Response): Promise<T> => {
 export const apiGet = async <T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
-  token?: string
+  token?: string,
 ): Promise<T> => {
   try {
     const searchParams = new URLSearchParams();
@@ -48,9 +52,7 @@ export const apiGet = async <T>(
       });
     }
 
-    const url = `${API_BASE_URL}${endpoint}${
-      searchParams.toString() ? `?${searchParams.toString()}` : ""
-    }`;
+    const url = `${API_BASE_URL}${endpoint}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
     const response = await fetch(url, {
       method: "GET",
@@ -59,11 +61,7 @@ export const apiGet = async <T>(
     });
 
     if (!response.ok) {
-      throw new ApiError(
-        `HTTP error! status: ${response.status}`,
-        response.status,
-        endpoint
-      );
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
     }
 
     return await parseJsonSafely<T>(response);
@@ -73,11 +71,7 @@ export const apiGet = async <T>(
   }
 };
 
-export const apiPost = async <T>(
-  endpoint: string,
-  data?: unknown,
-  token?: string
-): Promise<T> => {
+export const apiPost = async <T>(endpoint: string, data?: unknown, token?: string): Promise<T> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
 
@@ -88,11 +82,7 @@ export const apiPost = async <T>(
     });
 
     if (!response.ok) {
-      throw new ApiError(
-        `HTTP error! status: ${response.status}`,
-        response.status,
-        endpoint
-      );
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
     }
 
     return await parseJsonSafely<T>(response);
@@ -102,11 +92,7 @@ export const apiPost = async <T>(
   }
 };
 
-export const apiPut = async <T>(
-  endpoint: string,
-  data?: unknown,
-  token?: string
-): Promise<T> => {
+export const apiPut = async <T>(endpoint: string, data?: unknown, token?: string): Promise<T> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
 
@@ -117,11 +103,7 @@ export const apiPut = async <T>(
     });
 
     if (!response.ok) {
-      throw new ApiError(
-        `HTTP error! status: ${response.status}`,
-        response.status,
-        endpoint
-      );
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
     }
 
     return await parseJsonSafely<T>(response);
@@ -131,10 +113,7 @@ export const apiPut = async <T>(
   }
 };
 
-export const apiDelete = async <T>(
-  endpoint: string,
-  token?: string
-): Promise<T> => {
+export const apiDelete = async <T>(endpoint: string, token?: string): Promise<T> => {
   try {
     const url = `${API_BASE_URL}${endpoint}`;
 
@@ -144,11 +123,7 @@ export const apiDelete = async <T>(
     });
 
     if (!response.ok) {
-      throw new ApiError(
-        `HTTP error! status: ${response.status}`,
-        response.status,
-        endpoint
-      );
+      throw new ApiError(`HTTP error! status: ${response.status}`, response.status, endpoint);
     }
 
     return await parseJsonSafely<T>(response);

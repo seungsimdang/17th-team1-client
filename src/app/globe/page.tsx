@@ -28,7 +28,6 @@ const GlobePrototype = () => {
     currentGlobeIndex,
     isZoomed,
     selectedClusterData,
-    handleCountrySelect,
     handleClusterSelect,
     handleZoomChange,
     handlePatternChange,
@@ -63,7 +62,6 @@ const GlobePrototype = () => {
             ref={globeRef}
             travelPatterns={travelPatterns}
             currentGlobeIndex={currentGlobeIndex}
-            onCountrySelect={handleCountrySelect}
             onClusterSelect={handleClusterSelect}
             onZoomChange={handleZoomChange}
           />

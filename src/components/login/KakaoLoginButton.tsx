@@ -1,14 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { env } from "@/config/env";
 
 const KakaoLoginButton = () => {
   const router = useRouter();
 
   const handleLogin = () => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    const envRedirect = process.env.NEXT_PUBLIC_REDIRECT_ORIGIN;
-    const redirectOrigin = envRedirect ?? origin;
+    const redirectOrigin = env.REDIRECT_ORIGIN;
 
     const url = "https://globber.store/oauth2/authorization/kakao";
     const finalUrl = `${url}?redirect=${encodeURIComponent(redirectOrigin)}`;
