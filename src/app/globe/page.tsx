@@ -48,14 +48,12 @@ const GlobePrototype = () => {
 
       {/* Country Based Globe 컴포넌트 - 전체 화면 사용 */}
       <div className="w-full h-full relative">
-        {/* 패턴 선택 버튼들 - 테스트용 */}
-        <div className="absolute top-1/2 left-4 transform -translate-y-1/2 z-10 max-w-[512px] mx-auto">
-          <PatternSelector
-            patterns={travelPatterns}
-            currentIndex={currentGlobeIndex}
-            onPatternChange={handlePatternChange}
-          />
-        </div>
+        {/* 패턴 선택 버튼들 */}
+        <PatternSelector
+          patterns={travelPatterns}
+          currentIndex={currentGlobeIndex}
+          onPatternChange={handlePatternChange}
+        />
 
         <div className="w-full h-full">
           <CountryBasedGlobe
