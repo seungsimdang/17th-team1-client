@@ -19,3 +19,28 @@ export interface CreateTravelRecordsResponse {
   message: string;
   data?: any;
 }
+
+// 지구본 조회 API 응답
+export interface GlobeData {
+  cityCount: number;
+  countryCount: number;
+  regions: Region[];
+}
+
+export interface Region {
+  regionName: string;
+  cityCount: number;
+  cities: GlobeCity[];
+}
+
+export interface GlobeCity {
+  name: string;
+  lat: number;
+  lng: number;
+  countryCode: string;
+}
+
+export interface GlobeResponse {
+  status: string;
+  data: GlobeData;
+}

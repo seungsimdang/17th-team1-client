@@ -51,8 +51,10 @@ export async function GET(request: NextRequest) {
     );
 
     if (firstLogin === "true") {
+      // 신규 사용자 - 도시 선택 페이지로 이동
       return NextResponse.redirect(new URL("/nation-select", request.url));
     } else {
+      // 기존 사용자 - 지구본 페이지로 이동
       return NextResponse.redirect(new URL("/globe", request.url));
     }
   } catch (error) {
@@ -76,8 +78,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (firstLogin === "true") {
+      // 신규 사용자 - 도시 선택 페이지로 이동
       return NextResponse.redirect(new URL("/nation-select", request.url));
     } else {
+      // 기존 사용자 - 지구본 페이지로 이동
       return NextResponse.redirect(new URL("/globe", request.url));
     }
   }
