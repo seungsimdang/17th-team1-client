@@ -8,16 +8,17 @@ interface GlobeLoadingProps {
   onComplete?: () => void; // 로딩 완료 콜백
 }
 
-export const GlobeLoading = ({ duration = 5000, onComplete }: GlobeLoadingProps) => {
+export const GlobeLoading = ({ duration = 3000, onComplete }: GlobeLoadingProps) => {
   const [progress, setProgress] = useState(1);
   const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
-    const progressDuration = 3000; // 퍼센트 증가는 3초
+    if (!duration) return;
+
     const completionDuration = 1000; // "완성" 표시는 1초
 
     const totalSteps = 99; // 1에서 100까지 99단계
-    const stepDuration = progressDuration / totalSteps; // 각 단계당 시간
+    const stepDuration = duration / totalSteps; // 각 단계당 시간
 
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -37,7 +38,7 @@ export const GlobeLoading = ({ duration = 5000, onComplete }: GlobeLoadingProps)
     }, stepDuration);
 
     return () => clearInterval(interval);
-  }, [onComplete]);
+  }, [onComplete, duration]);
   return (
     <div className="w-full h-screen relative overflow-hidden bg-gradient-to-b from-[#001d39] to-[#0d0c14]">
       {/* Globe Background - Centered */}
@@ -52,7 +53,7 @@ export const GlobeLoading = ({ duration = 5000, onComplete }: GlobeLoadingProps)
         >
           {/* Globe Image */}
           <div className="relative w-full h-full rounded-full overflow-hidden">
-            <Image src="/assets/globe.png" alt="Globe" fill className="object-contain " priority />
+            <img src="/assets/globe.png" alt="Globe" className="w-full h-full object-contain" />
           </div>
         </div>
       </div>
