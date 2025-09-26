@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - develop
+      - fix/GLB-123
     paths:
       - "src/**"
       - "package.json"
