@@ -24,6 +24,14 @@ export const useCitySearch = ({ debounceDelay = 500 }: UseCitySearchOptions = {}
   const [searchError, setSearchError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
+  useEffect(() => {
+    if (searchKeyword.trim()) {
+      setIsSearching(true);
+    } else {
+      setIsSearching(false);
+    }
+  }, [searchKeyword]);
+
   const performSearch = useCallback(async (keyword: string) => {
     if (!keyword.trim()) {
       setSearchResults([]);
@@ -33,7 +41,6 @@ export const useCitySearch = ({ debounceDelay = 500 }: UseCitySearchOptions = {}
     }
 
     const requestId = ++latestRequestIdRef.current;
-    setIsSearching(true);
     setSearchError(null);
 
     try {
