@@ -62,6 +62,7 @@ interface CountryBasedGlobeProps {
 
 export interface CountryBasedGlobeRef {
   globeRef: React.RefObject<any>;
+  resetGlobe: () => void;
 }
 
 const CountryBasedGlobe = forwardRef<
@@ -122,6 +123,7 @@ const CountryBasedGlobe = forwardRef<
       handleClusterSelect: localHandleClusterSelect,
       handleZoomChange: localHandleZoomChange,
       handleGlobeRotation,
+      resetGlobe: resetClustering,
     } = useCountryBasedClustering({
       countries: currentPattern?.countries || [],
       zoomLevel,
@@ -129,9 +131,13 @@ const CountryBasedGlobe = forwardRef<
       globeRef,
     });
 
-    // 부모 컴포넌트에 globeRef 노출
+    // 부모 컴포넌트에 globeRef와 리셋 함수들 노출
     useImperativeHandle(ref, () => ({
       globeRef,
+      resetGlobe: () => {
+        resetGlobe(); // useGlobeState의 resetGlobe
+        resetClustering(); // useCountryBasedClustering의 resetGlobe
+      },
     }));
 
     const globeImageUrl = createGlobeImageUrl();

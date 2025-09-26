@@ -97,7 +97,7 @@ export const calculateOptimalZoom = (
   }
 
   // 지구본의 가시 영역을 고려한 패딩 (여백 포함)
-  const padding = 0.5; // 50% 여백으로 증가 (더 여유있게)
+  const padding = 2;
   const effectiveLatRange = latRange * (1 + padding);
   const effectiveLngRange = lngRange * (1 + padding);
 
