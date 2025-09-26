@@ -5,9 +5,28 @@ import dynamic from "next/dynamic";
 import type React from "react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
-import { GLOBE_SIZE_LIMITS, VIEWPORT_DEFAULTS } from "@/constants/zoomLevels";
+import { VIEWPORT_DEFAULTS } from "@/constants/zoomLevels";
+import type { TravelPattern } from "@/data/travelPatterns";
 import { type ClusterData, useCountryBasedClustering } from "@/hooks/useCountryBasedClustering";
 import { useGlobeState } from "@/hooks/useGlobeState";
+
+// 타입 정의
+interface PointOfView {
+  lat?: number;
+  lng?: number;
+  altitude?: number;
+}
+
+interface GeoJSONFeature {
+  properties: {
+    NAME?: string;
+    ISO_A2?: string;
+    [key: string]: unknown;
+  };
+  geometry: unknown;
+  type: string;
+}
+
 import {
   createContinentClusterStyles,
   createCountryClusterStyles,
@@ -31,9 +50,8 @@ const Globe = dynamic(() => import("react-globe.gl"), {
 });
 
 interface CountryBasedGlobeProps {
-  travelPatterns: any[];
+  travelPatterns: TravelPattern[];
   currentGlobeIndex: number;
-  onCountrySelect: (countryId: string | null) => void;
   onClusterSelect?: (cluster: ClusterData) => void;
   onZoomChange?: (zoom: number) => void;
 }
@@ -44,11 +62,11 @@ export interface CountryBasedGlobeRef {
 }
 
 const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProps>(
-  ({ travelPatterns, currentGlobeIndex, onCountrySelect, onClusterSelect, onZoomChange }, ref) => {
+  ({ travelPatterns, currentGlobeIndex, onClusterSelect, onZoomChange }, ref) => {
     const globeRef = useRef<GlobeInstance | null>(null);
     const [globeLoading, setGlobeLoading] = useState(true);
     const [globeError, setGlobeError] = useState<string | null>(null);
-    const [countriesData, setCountriesData] = useState<any[]>([]);
+    const [countriesData, setCountriesData] = useState<GeoJSONFeature[]>([]);
     const [windowSize, setWindowSize] = useState({
       width: typeof window !== "undefined" ? window.innerWidth : VIEWPORT_DEFAULTS.WIDTH,
       height: typeof window !== "undefined" ? window.innerHeight : VIEWPORT_DEFAULTS.HEIGHT,
@@ -56,14 +74,10 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
 
     // Globe state 관리
     const {
-      selectedCountry,
       zoomLevel,
       selectedClusterData,
       snapZoomTo,
-      isZoomed,
-      travelPatternsWithFlags,
       currentPattern,
-      handleCountrySelect: globalHandleCountrySelect,
       handleZoomChange: globalHandleZoomChange,
       handleClusterSelect: globalHandleClusterSelect,
       handlePatternChange: localHandlePatternChange, // 이름 변경
@@ -115,7 +129,6 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       visibleItems,
       mode,
       handleClusterSelect: localHandleClusterSelect,
-      handleZoomChange: localHandleZoomChange,
       handleGlobeRotation,
       resetGlobe: resetClustering,
     } = useCountryBasedClustering({
@@ -166,7 +179,8 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
 
     // HTML 요소 렌더링
     const getHtmlElement = useCallback(
-      (d: any) => {
+      (d: unknown) => {
+        const clusterData = d as ClusterData;
         if (typeof window === "undefined" || !document) {
           const el = document.createElement("div");
           el.style.display = "none";
@@ -185,9 +199,9 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         el.style.zIndex = "999";
 
         const { angleOffset, dynamicDistance } = calculateLabelPosition(
-          d,
+          clusterData,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          visibleItems as any[],
+          visibleItems as ClusterData[],
           zoomLevel,
           globeRef,
         );
@@ -196,7 +210,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
           dynamicDistance,
           angleOffset,
           { x: 0, y: 0 },
-          d.count === 1,
+          clusterData.count === 1,
           globeRef,
         );
 
@@ -207,37 +221,37 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
           label: string;
         };
 
-        if (d.clusterType === "continent_cluster") {
+        if (clusterData.clusterType === "continent_cluster") {
           styles = createContinentClusterStyles(0, angleOffset, clampedDistance);
-        } else if (d.clusterType === "country_cluster") {
+        } else if (clusterData.clusterType === "country_cluster") {
           styles = createCountryClusterStyles(0, angleOffset, clampedDistance);
         } else {
           // 개별 도시는 기존 스타일 유지
           styles = createSingleLabelStyles(0, angleOffset, clampedDistance);
         }
 
-        if (d.clusterType === "individual_city") {
+        if (clusterData.clusterType === "individual_city") {
           // 개별 도시 표시
-          const cityName = d.name.split(",")[0];
-          el.innerHTML = createCityHTML(styles, d.flag, cityName);
+          const cityName = clusterData.name.split(",")[0];
+          el.innerHTML = createCityHTML(styles, clusterData.flag, cityName);
 
-          const clickHandler = createCityClickHandler(d.name);
+          const clickHandler = createCityClickHandler(clusterData.name);
           el.addEventListener("click", clickHandler);
-        } else if (d.clusterType === "continent_cluster") {
+        } else if (clusterData.clusterType === "continent_cluster") {
           // 대륙 클러스터 표시 (텍스트로 +숫자) - 클릭 불가능
-          el.innerHTML = createContinentClusterHTML(styles, d.name, d.count, d.flag);
+          el.innerHTML = createContinentClusterHTML(styles, clusterData.name, clusterData.count, clusterData.flag);
           // 대륙 클러스터는 클릭 핸들러를 추가하지 않음 (클릭 불가능)
-        } else if (d.clusterType === "country_cluster") {
+        } else if (clusterData.clusterType === "country_cluster") {
           // 국가 클러스터 표시 (원 안의 숫자)
           el.innerHTML = createCountryClusterHTML(
             styles,
-            d.name,
-            d.count,
-            d.flag,
+            clusterData.name,
+            clusterData.count,
+            clusterData.flag,
             mode === "city" && selectedClusterData !== null, // 도시 모드에서 확장된 것으로 표시
           );
 
-          const clickHandler = createClusterClickHandler(d.id, (clusterId: string) => {
+          const clickHandler = createClusterClickHandler(clusterData.id, (clusterId: string) => {
             const cluster = clusteredData.find((c) => c.id === clusterId);
             if (cluster && localHandleClusterSelect) {
               const clusterItems = localHandleClusterSelect(cluster);
@@ -261,7 +275,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
                 // 개발 환경에서 디버깅 정보 출력
                 if (process.env.NODE_ENV === "development") {
                   console.log("Auto-fit camera calculation:", {
-                    clusterName: d.name,
+                    clusterName: clusterData.name,
                     cityCount: clusterItems.length,
                     boundingBox: autoFitCamera.boundingBox,
                     targetPosition: {
@@ -304,7 +318,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
 
     // 줌 변경 핸들러
     const handleZoomChangeInternal = useCallback(
-      (pov: any) => {
+      (pov: PointOfView) => {
         if (pov && typeof pov.altitude === "number") {
           let newZoom = pov.altitude;
 
@@ -458,7 +472,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
         }}
       >
         <Globe
-          ref={globeRef as any}
+          ref={globeRef as React.RefObject<GlobeInstance>}
           width={windowSize.width}
           height={windowSize.height}
           backgroundColor="rgba(0,0,0,0)"
@@ -467,11 +481,13 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
           atmosphereColor={COLORS.ATMOSPHERE}
           atmosphereAltitude={GLOBE_CONFIG.ATMOSPHERE_ALTITUDE}
           polygonsData={countriesData}
-          polygonCapColor={(feature: any) => getPolygonColor(feature, currentPattern?.countries || [], getISOCode)}
+          polygonCapColor={(feature: unknown) =>
+            getPolygonColor(feature as GeoJSONFeature, currentPattern?.countries || [], getISOCode)
+          }
           polygonSideColor={() => COLORS.POLYGON_SIDE}
           polygonStrokeColor={() => COLORS.POLYGON_STROKE}
           polygonAltitude={GLOBE_CONFIG.POLYGON_ALTITUDE}
-          htmlElementsData={visibleItems as any /* eslint-disable-line @typescript-eslint/no-explicit-any */}
+          htmlElementsData={visibleItems as ClusterData[]}
           htmlElement={getHtmlElement}
           htmlAltitude={() => 0}
           enablePointerInteraction={true}

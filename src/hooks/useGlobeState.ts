@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { COUNTRY_CODE_TO_FLAG } from "@/constants/countryMapping";
 import { ZOOM_LEVELS } from "@/constants/zoomLevels";
 import type { CountryData, TravelPattern } from "@/data/travelPatterns";
+import type { ClusterData } from "@/hooks/useCountryBasedClustering";
 
 export const useGlobeState = (patterns: TravelPattern[]) => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
@@ -112,7 +113,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
 
   // 클러스터 선택 핸들러
   const handleClusterSelect = useCallback(
-    (cluster: any) => {
+    (cluster: ClusterData) => {
       // 현재 줌/선택을 스택에 저장하고 선택 갱신
       setZoomStack((prev) => [...prev, zoomLevel]);
       setSelectionStack((stack) => [...stack, selectedClusterData ? [...selectedClusterData] : null]);
