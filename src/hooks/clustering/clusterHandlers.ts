@@ -29,7 +29,7 @@ export const createClusterSelectHandler = (
       // 현재 위치를 기록 (지구본 회전 감지용)
       setLastRotation((prev) => ({ ...prev }));
 
-      // 상태 업데이트: 도시 모드로 전환
+      // 상태 업데이트: 도시 모드로 전환 및 줌 애니메이션 시작
       setState((prev) => ({
         ...prev,
         mode: "city",
@@ -37,7 +37,16 @@ export const createClusterSelectHandler = (
         selectedCluster: cluster.id,
         clickBasedExpansion: true,
         lastInteraction: Date.now(),
+        isZoomAnimating: true, // 줌 애니메이션 시작
       }));
+
+      // 줌 애니메이션 완료 후 상태 해제 (ANIMATION_DURATION.CAMERA_MOVE + 여유시간)
+      setTimeout(() => {
+        setState((prev) => ({
+          ...prev,
+          isZoomAnimating: false,
+        }));
+      }, 1600); // 1500ms + 100ms 여유시간
 
       // 선택 스택에 현재 클러스터 데이터 저장
       setSelectionStack((stack) => [...stack, selectedClusterData || null]);
@@ -59,8 +68,14 @@ export const createGlobeRotationHandler = (
   selectedCluster: string | null,
   lastRotation: { lat: number; lng: number },
   selectionStackLength: number,
+  isZoomAnimating: boolean, // 줌 애니메이션 상태 추가
 ) => {
   return (lat: number, lng: number) => {
+    // 줌 애니메이션 중에는 회전 로직 비활성화
+    if (isZoomAnimating) {
+      return;
+    }
+
     // 도시 모드에서만 회전 감지하여 국가 클러스터로 복귀
     if (mode === "city" && selectedCluster) {
       const isRotated = isSignificantRotation(lat, lng, lastRotation.lat, lastRotation.lng);

@@ -31,6 +31,7 @@ export interface ClusteringState {
   clickBasedExpansion: boolean;
   rotationPosition: { lat: number; lng: number };
   lastSignificantRotation: number;
+  isZoomAnimating: boolean; // 줌 애니메이션 중인지 여부
 }
 
 import type { GlobeInstance } from "globe.gl";
