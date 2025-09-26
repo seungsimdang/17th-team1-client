@@ -19,6 +19,19 @@ const getAuthHeaders = (token?: string) => ({
   ...(token && { Authorization: `Bearer ${token}` }),
 });
 
+const parseJsonSafely = async <T>(response: Response): Promise<T> => {
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const bodyText = await response.text();
+  if (!bodyText) {
+    return undefined as T;
+  }
+
+  return JSON.parse(bodyText) as T;
+};
+
 export const apiGet = async <T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
@@ -53,7 +66,7 @@ export const apiGet = async <T>(
       );
     }
 
-    return await response.json();
+    return await parseJsonSafely<T>(response);
   } catch (error) {
     console.error(`API GET Error (${endpoint}):`, error);
     throw error;
@@ -82,7 +95,7 @@ export const apiPost = async <T>(
       );
     }
 
-    return await response.json();
+    return await parseJsonSafely<T>(response);
   } catch (error) {
     console.error(`API POST Error (${endpoint}):`, error);
     throw error;
@@ -111,7 +124,7 @@ export const apiPut = async <T>(
       );
     }
 
-    return await response.json();
+    return await parseJsonSafely<T>(response);
   } catch (error) {
     console.error(`API PUT Error (${endpoint}):`, error);
     throw error;
@@ -138,7 +151,7 @@ export const apiDelete = async <T>(
       );
     }
 
-    return await response.json();
+    return await parseJsonSafely<T>(response);
   } catch (error) {
     console.error(`API DELETE Error (${endpoint}):`, error);
     throw error;
