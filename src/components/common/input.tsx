@@ -1,5 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { Search, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
+import { useState } from "react";
+import { SearchIcon } from "@/assets/icons";
 import { cn } from "@/utils/cn";
 
 const inputVariants = cva(
@@ -33,13 +35,17 @@ export const Input = ({
 };
 
 export const SearchInput = ({ className, ...props }: React.ComponentProps<"input">) => {
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
     <div className={cn("relative", className)}>
       <div className="bg-surface-thirdly border border-surface-placeholder--4 rounded-2xl p-4 flex items-center gap-3">
-        <Search className="w-6 h-6 text-text-thirdly" />
+        <SearchIcon className="w-6 h-6 transition-colors" color={isFocused ? "white" : "#778A9B"} />
         <input
           type="text"
           className="flex-1 bg-transparent text-text-primary placeholder-text-thirdly text-base font-medium outline-none"
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           {...props}
         />
       </div>
