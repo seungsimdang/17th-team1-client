@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const PUBLIC_PATHS: readonly string[] = [
-  "/",
   "/login",
   "/login/oauth/success",
   "/_next",
@@ -25,7 +24,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("kakao_access_token")?.value;
   const memberId = request.cookies.get("member_id")?.value;
-  const uuid = request.cookies.get("user_uuid")?.value;
+  const uuid = request.cookies.get("uuid")?.value;
 
   if (token && pathname === "/login") {
     console.log(
