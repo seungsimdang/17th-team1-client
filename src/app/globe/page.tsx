@@ -26,6 +26,8 @@ const GlobePrototype = () => {
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [travelInsight, setTravelInsight] = useState<string>("");
+  const [cityCount, setCityCount] = useState<number>(0);
+  const [countryCount, setCountryCount] = useState<number>(0);
 
   // Globe 상태 관리
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
@@ -48,6 +50,10 @@ const GlobePrototype = () => {
         if (globeResponse?.data) {
           const mappedPatterns = mapGlobeDataToTravelPatterns(globeResponse.data);
           setTravelPatterns(mappedPatterns);
+
+          // 도시와 국가 개수 설정
+          setCityCount(globeResponse.data.cityCount);
+          setCountryCount(globeResponse.data.countryCount);
         }
 
         setTravelInsight(insightResponse || "");
@@ -92,7 +98,12 @@ const GlobePrototype = () => {
     >
       {/* 상단 헤더 - position absolute */}
       <div className="absolute top-0 left-0 right-0 z-10 px-4">
-        <GlobeHeader isZoomed={isZoomed || selectedClusterData !== null} travelInsight={travelInsight} />
+        <GlobeHeader
+          isZoomed={isZoomed || selectedClusterData !== null}
+          travelInsight={travelInsight}
+          cityCount={cityCount}
+          countryCount={countryCount}
+        />
       </div>
 
       {/* Country Based Globe 컴포넌트 - 전체 화면 사용 */}

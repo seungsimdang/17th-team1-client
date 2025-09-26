@@ -1,6 +1,8 @@
 interface GlobeHeaderProps {
   isZoomed: boolean;
   travelInsight?: string;
+  cityCount?: number;
+  countryCount?: number;
 }
 
 // 마크다운 문법 제거 함수
@@ -11,7 +13,7 @@ const removeMarkdown = (text?: string) => {
   return text.replace(/\*\*(.*?)\*\*/g, "$1");
 };
 
-export const GlobeHeader = ({ isZoomed, travelInsight }: GlobeHeaderProps) => {
+export const GlobeHeader = ({ isZoomed, travelInsight, cityCount = 0, countryCount = 0 }: GlobeHeaderProps) => {
   return (
     <div
       className={`text-center pt-20 pb-4 transition-opacity duration-700 ease-out max-w-[512px] mx-auto ${
@@ -30,7 +32,7 @@ export const GlobeHeader = ({ isZoomed, travelInsight }: GlobeHeaderProps) => {
           isZoomed ? "opacity-0 scale-95" : "opacity-100 scale-100"
         }`}
       >
-        N개 도시, N개국 여행자
+        {cityCount}개 도시, {countryCount}개국 여행자
       </h1>
     </div>
   );
