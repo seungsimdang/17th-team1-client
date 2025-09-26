@@ -67,7 +67,7 @@ export const Button = ({
   }) => {
   const Comp = asChild ? Slot : "button";
 
-  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size }), className)} {...(props as any)} />;
+  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size }), className)} {...props} />;
 };
 
 export const IconButton = ({
@@ -85,7 +85,7 @@ export const IconButton = ({
   const Comp = asChild ? Slot : "button";
 
   return (
-    <Comp data-slot="icon-button" className={cn(iconButtonVariants({ size }), className)} {...(props as any)}>
+    <Comp data-slot="icon-button" className={cn(iconButtonVariants({ size }), className)} {...props}>
       {icon}
       {children}
     </Comp>
@@ -290,9 +290,15 @@ export const BackButton = ({ isZoomed, globeRef, onReset }: BackButtonProps) => 
     if (globeRef.current?.globeRef?.current) {
       globeRef.current.globeRef.current.pointOfView({ altitude: ZOOM_LEVELS.DEFAULT }, 1000);
 
-      // 애니메이션 완료 후 상태 업데이트
+      // 애니메이션 완료 후 상태 업데이트 및 클러스터링 초기화
       setTimeout(() => {
-        onReset();
+        // Globe ref의 resetGlobe 메서드 호출 (클러스터링 포함한 모든 상태 초기화)
+        if (globeRef.current?.resetGlobe) {
+          globeRef.current.resetGlobe();
+        } else {
+          // fallback - ref의 resetGlobe가 없는 경우 기존 onReset 사용
+          onReset();
+        }
       }, 1100); // 애니메이션 시간보다 약간 더 긴 시간
     } else {
       // fallback - ref가 없는 경우 즉시 상태 업데이트

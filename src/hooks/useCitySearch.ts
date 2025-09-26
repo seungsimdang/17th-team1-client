@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { City } from "@/types/city";
+import type { City } from "@/types/city";
 import { searchCities } from "@/services/cityService";
 
 interface UseCitySearchOptions {

@@ -7,86 +7,73 @@ import { GlobeFooter } from "@/components/globe/GlobeFooter";
 // Components
 import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import { PatternSelector } from "@/components/globe/PatternSelector";
-import type { ReactGlobeRef } from "@/components/react-globe/ReactGlobe";
+import type { CountryBasedGlobeRef } from "@/components/react-globe/CountryBasedGlobe";
 import { travelPatterns } from "@/data/travelPatterns";
-import { useClustering } from "@/hooks/useClustering";
 import { useGlobeState } from "@/hooks/useGlobeState";
 
-// ReactGlobe을 동적 import로 로드 (SSR 방지)
-const ReactGlobe = dynamic(() => import("@/components/react-globe/ReactGlobe"), {
+// CountryBasedGlobe을 동적 import로 로드 (SSR 방지)
+const CountryBasedGlobe = dynamic(() => import("@/components/react-globe/CountryBasedGlobe"), {
   ssr: false,
   loading: () => <div>🌍 지구본 생성 중...</div>,
 });
 
 const GlobePrototype = () => {
-  const globeRef = useRef<ReactGlobeRef>(null);
+  const globeRef = useRef<CountryBasedGlobeRef>(null);
 
-  // 커스텀 훅으로 지구본 상태 관리
+  // Globe 상태 관리
   const {
-    selectedCountry,
     currentGlobeIndex,
-    zoomLevel,
-    selectedClusterData,
-    snapZoomTo,
     isZoomed,
-    travelPatternsWithFlags,
-    currentPattern,
+    selectedClusterData,
     handleCountrySelect,
-    handleZoomChange,
     handleClusterSelect,
+    handleZoomChange,
     handlePatternChange,
     resetGlobe,
   } = useGlobeState(travelPatterns);
 
-  // 클러스터링 훅 사용
-  const { clusteredData, shouldShowClusters } = useClustering({
-    countries: currentPattern.countries,
-    zoomLevel,
-    selectedClusterData: selectedClusterData || undefined,
-  });
+  const hasBackButton = isZoomed || selectedClusterData !== null;
 
   return (
     <div
-      className="w-full overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900 text-text-primary flex flex-col max-w-[512px] mx-auto relative font-sans px-4"
+      className="w-full overflow-hidden bg-gradient-to-b from-gray-800 to-gray-900 text-text-primary relative font-sans"
       style={{
         height: "100dvh", // Dynamic Viewport Height - 모바일 브라우저의 실제 보이는 영역
       }}
     >
-      {/* 상단 헤더 */}
-      <GlobeHeader isZoomed={isZoomed} />
+      {/* 상단 헤더 - position absolute */}
+      <div className="absolute top-0 left-0 right-0 z-10 px-4">
+        <GlobeHeader isZoomed={isZoomed || selectedClusterData !== null} />
+      </div>
 
-      {/* React Globe 컴포넌트 */}
-      <div className="flex-1 flex items-center justify-center relative">
-        {/* 패턴 선택 버튼들 - 테스트용 */}
+      {/* Country Based Globe 컴포넌트 - 전체 화면 사용 */}
+      <div className="w-full h-full relative">
+        {/* 패턴 선택 버튼들 */}
         <PatternSelector
           patterns={travelPatterns}
           currentIndex={currentGlobeIndex}
           onPatternChange={handlePatternChange}
         />
 
-        <div className="w-full h-full flex items-center justify-center">
-          <ReactGlobe
+        <div className="w-full h-full">
+          <CountryBasedGlobe
             ref={globeRef}
-            travelPatterns={travelPatternsWithFlags}
+            travelPatterns={travelPatterns}
             currentGlobeIndex={currentGlobeIndex}
-            selectedCountry={selectedCountry}
             onCountrySelect={handleCountrySelect}
-            onZoomChange={handleZoomChange}
             onClusterSelect={handleClusterSelect}
-            clusteredData={clusteredData}
-            shouldShowClusters={shouldShowClusters}
-            zoomLevel={zoomLevel}
-            selectedClusterData={selectedClusterData || undefined}
-            snapZoomTo={snapZoomTo}
+            onZoomChange={handleZoomChange}
           />
         </div>
       </div>
 
-      {/* 하단 버튼들 */}
-      <GlobeFooter isZoomed={isZoomed} />
+      {/* 하단 버튼들 - position absolute */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 px-4">
+        <GlobeFooter isZoomed={isZoomed} />
+      </div>
 
       {/* 돌아가기 버튼 */}
-      <BackButton isZoomed={isZoomed} globeRef={globeRef} onReset={resetGlobe} />
+      <BackButton isZoomed={hasBackButton} globeRef={globeRef} onReset={resetGlobe} />
     </div>
   );
 };

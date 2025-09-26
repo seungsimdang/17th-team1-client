@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -11,11 +11,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.GOOGLE_MAPS_API_KEY}&language=ko&region=kr`
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.GOOGLE_MAPS_API_KEY}&language=ko&region=kr`,
     );
     const data = await response.json();
     return NextResponse.json({ results: data.results });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ error: "Geocoding failed" }, { status: 500 });
   }
 }

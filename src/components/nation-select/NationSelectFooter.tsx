@@ -1,4 +1,4 @@
-import { City } from "@/types/city";
+import type { City } from "@/types/city";
 import { Button } from "@/components/common/button";
 import { SelectedCities } from "./SelectedCities";
 

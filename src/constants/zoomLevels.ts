@@ -6,10 +6,10 @@
 // 기본 줌 레벨
 export const ZOOM_LEVELS = {
   // 초기/기본 줌 레벨
-  DEFAULT: 2.5,
+  DEFAULT: 7,
 
   // 줌 상태 판단 기준
-  ZOOM_THRESHOLD: 2.4, // 이보다 작으면 줌인된 상태
+  ZOOM_THRESHOLD: 4, // 이보다 작으면 줌인된 상태
 
   // 클러스터링 거리 계산용 줌 레벨
   CLUSTERING: {
@@ -62,14 +62,34 @@ export const GROUP_RADIUS = {
 
 // 브라우저 뷰포트 기본값 (SSR 폴백용)
 export const VIEWPORT_DEFAULTS = {
-  WIDTH: 600,   // SSR 시 기본 너비
-  HEIGHT: 800,  // SSR 시 기본 높이
+  WIDTH: 600, // SSR 시 기본 너비
+  HEIGHT: 800, // SSR 시 기본 높이
 } as const;
 
 // Globe 컴포넌트 크기 제한
 export const GLOBE_SIZE_LIMITS = {
-  MAX_WIDTH: 512,   // Globe 최대 너비 (성능 최적화)
-  MAX_HEIGHT: 800,  // Globe 최대 높이 (성능 최적화)
+  MIN_WIDTH: 512, // Globe 최소 너비 (모바일 대응)
+  MAX_HEIGHT: 800, // Globe 최대 높이 (성능 최적화)
+} as const;
+// 대륙 클러스터링 관련 상수
+export const CONTINENT_CLUSTERING = {
+  // 대륙-국가 전환 임계값
+  CONTINENT_TO_COUNTRY_THRESHOLD: 1.8,
+
+  // 겹침 감지 관련
+  OVERLAP_DETECTION: {
+    PADDING: 20, // 버블 주변 패딩 (px)
+    MINIMUM_DISTANCE: 10, // 최소 거리 (px)
+    CONTINENT_MERGE_THRESHOLD: 2, // 같은 대륙에서 합칠 최소 국가 수
+  },
+
+  // 대륙 버블 스타일 관련
+  BUBBLE_STYLE: {
+    FONT_SIZE: 16, // 대륙 클러스터 폰트 크기
+    PADDING: 32, // 대륙 클러스터 패딩 (16 * 2)
+    FLAG_WIDTH: 24, // 플래그 너비
+    GAP: 5, // 요소 간 간격
+  },
 } as const;
 
 // 타입 정의

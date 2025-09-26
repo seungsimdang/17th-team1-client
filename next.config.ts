@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Only use standalone output for production Docker builds
+  output: process.env.NODE_ENV === 'production' && process.env.DOCKER_BUILD === 'true' ? 'standalone' : undefined,
   webpack: (config) => {
     config.module.rules.push({
       test: /\.svg$/,

@@ -1,4 +1,4 @@
-import { City } from "@/types/city";
+import type { City } from "@/types/city";
 import { Chip } from "@/components/common/chip";
 
 interface SelectedCitiesProps {
