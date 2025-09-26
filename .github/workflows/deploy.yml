@@ -6,7 +6,7 @@ on:
     branches:
       - main
       - develop
-      - fix/GLB-123
+      - fix/GLB-125
     paths:
       - "src/**"
       - "package.json"
@@ -59,6 +59,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}
             NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+            NEXT_PUBLIC_REDIRECT_ORIGIN=${{ secrets.NEXT_PUBLIC_REDIRECT_ORIGIN }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
