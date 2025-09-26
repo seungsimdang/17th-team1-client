@@ -1,5 +1,5 @@
 import { ZOOM_LEVELS } from "@/constants/zoomLevels";
-import { AUTO_CLUSTER_DELAY, getContinentZoomTarget, isSignificantRotation } from "./clusterLogic";
+import { AUTO_CLUSTER_DELAY, isSignificantRotation } from "./clusterLogic";
 import type { ClusterData, ClusteringState, CountryData } from "./types";
 
 /**
@@ -15,18 +15,11 @@ export const createClusterSelectHandler = (
   setSelectionStack: React.Dispatch<React.SetStateAction<(CountryData[] | null)[]>>,
   setLastRotation: React.Dispatch<React.SetStateAction<{ lat: number; lng: number }>>,
   selectedClusterData: CountryData[] | undefined,
-  onZoomTo?: (targetZoom: number, lat?: number, lng?: number) => void,
 ) => {
   return (cluster: ClusterData) => {
     if (cluster.clusterType === "continent_cluster") {
       // 기획 요구사항: 대륙 클릭 → 줌인하여 국가 클러스터 표시
-      const targetZoom = getContinentZoomTarget(cluster);
-
-      // 줌인 실행
-      if (onZoomTo) {
-        onZoomTo(targetZoom, cluster.lat, cluster.lng);
-      }
-
+      // 자동 줌 기능은 CountryBasedGlobe.tsx에서 처리됨
       return cluster.items;
     }
 

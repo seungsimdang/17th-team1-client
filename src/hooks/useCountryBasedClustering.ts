@@ -91,16 +91,46 @@ export const useCountryBasedClustering = ({
   );
 
   const handleGlobeRotation = useCallback(
-    createGlobeRotationHandler(
-      setState,
-      setSelectionStack,
-      setLastRotation,
-      state.mode,
-      state.selectedCluster,
-      lastRotation,
-      selectionStack.length,
-    ),
-    [],
+    (lat: number, lng: number) => {
+      // 도시 모드에서만 회전 감지하여 국가 클러스터로 복귀
+      if (state.mode === "city" && state.selectedCluster) {
+        const isRotated = Math.abs(lat - lastRotation.lat) > 10 || Math.abs(lng - lastRotation.lng) > 10;
+
+        if (isRotated) {
+          // 기획 요구사항: 지구본 회전 시 자동으로 국가 클러스터 상태로 복귀
+          setTimeout(() => {
+            setState((prev) => ({
+              ...prev,
+              mode: "country",
+              expandedCountry: null,
+              selectedCluster: null,
+              clickBasedExpansion: false,
+              lastInteraction: Date.now(),
+            }));
+
+            // 선택 스택을 한 단계 복원
+            if (selectionStack.length > 0) {
+              setSelectionStack((stack) => stack.slice(0, -1));
+            }
+          }, 200); // AUTO_CLUSTER_DELAY
+
+          // 회전 위치 업데이트
+          setLastRotation({ lat, lng });
+        }
+      } else {
+        // 점진적 위치 업데이트 (노이즈 필터링)
+        const latDiff = Math.abs(lat - lastRotation.lat);
+        const lngDiff = Math.abs(lng - lastRotation.lng);
+
+        if (latDiff > 5 || lngDiff > 5) {
+          setLastRotation((prev) => ({
+            lat: prev.lat + (lat - prev.lat) * 0.3,
+            lng: prev.lng + (lng - prev.lng) * 0.3,
+          }));
+        }
+      }
+    },
+    [state.mode, state.selectedCluster, lastRotation.lat, lastRotation.lng, selectionStack.length],
   );
 
   const resetGlobe = useCallback(() => {
