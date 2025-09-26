@@ -22,7 +22,10 @@ export const getMemberId = async (token: string): Promise<number> => {
 };
 
 // 멤버 여행 데이터 조회 API
-export const getMemberTravels = async (memberId: number, token?: string): Promise<MemberTravelsResponse | null> => {
+export const getMemberTravels = async (
+  memberId: number,
+  token?: string
+): Promise<MemberTravelsResponse | null> => {
   try {
     // 서버 컴포넌트에서 호출 시 token을 파라미터로 전달
     let authToken = token;
@@ -33,9 +36,14 @@ export const getMemberTravels = async (memberId: number, token?: string): Promis
       authToken = clientToken || undefined;
     }
 
-    if (!authToken) throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
+    if (!authToken)
+      throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
 
-    const data = await apiGet<MemberTravelsResponse>(`/api/v1/member-travels/${memberId}`, {}, authToken);
+    const data = await apiGet<MemberTravelsResponse>(
+      `/api/v1/member-travels/${memberId}`,
+      {},
+      authToken
+    );
     return data;
   } catch (error) {
     console.error("Failed to fetch member travels:", error);
@@ -44,7 +52,9 @@ export const getMemberTravels = async (memberId: number, token?: string): Promis
 };
 
 // 멤버 여행 기록 생성 API
-export const createMemberTravels = async (cities: City[]): Promise<CreateTravelRecordsResponse> => {
+export const createMemberTravels = async (
+  cities: City[]
+): Promise<CreateTravelRecordsResponse> => {
   try {
     const { token, memberId } = getAuthInfo();
 
@@ -56,7 +66,7 @@ export const createMemberTravels = async (cities: City[]): Promise<CreateTravelR
     const data = await apiPost<CreateTravelRecordsResponse>(
       `/api/v1/member-travels/${parseInt(memberId, 10)}`,
       travelRecords,
-      token,
+      token
     );
     return data;
   } catch (error) {
@@ -66,7 +76,9 @@ export const createMemberTravels = async (cities: City[]): Promise<CreateTravelR
 };
 
 // 지구본 조회 API
-export const getGlobeData = async (uuid: string): Promise<GlobeResponse | null> => {
+export const getGlobeData = async (
+  uuid: string
+): Promise<GlobeResponse | null> => {
   try {
     const { token } = getAuthInfo();
 
@@ -74,7 +86,11 @@ export const getGlobeData = async (uuid: string): Promise<GlobeResponse | null> 
       throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
     }
 
-    const data = await apiGet<GlobeResponse>(`/api/v1/globes/${uuid}`, {}, token);
+    const data = await apiGet<GlobeResponse>(
+      `/api/v1/globes/${uuid}`,
+      {},
+      token
+    );
     return data;
   } catch (error) {
     console.error("Failed to fetch globe data:", error);
@@ -88,7 +104,11 @@ export const getTravelInsight = async (memberId: number): Promise<string> => {
     const { token } = getAuthInfo();
     if (!token) throw new Error("인증 정보가 없습니다. 다시 로그인해주세요.");
 
-    const data = await apiGet<TravelInsightResponse>(`/api/v1/travel-insights/${memberId}`, {}, token);
+    const data = await apiGet<TravelInsightResponse>(
+      `/api/v1/travel-insights/${memberId}`,
+      {},
+      token
+    );
     return data.data.title;
   } catch (error) {
     console.error("Failed to fetch travel insight:", error);

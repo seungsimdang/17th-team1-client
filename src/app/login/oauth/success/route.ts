@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { getMemberId } from "@/services/memberService";
+import { env } from "@/config/env";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
 
   if (!accessToken) {
     console.error("URL에서 accessToken을 찾을 수 없습니다.");
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/login", env.REDIRECT_ORIGIN));
   }
 
   const cleanToken = accessToken.startsWith("Bearer ")
@@ -30,12 +31,14 @@ export async function GET(request: NextRequest) {
       path: "/",
       maxAge: maxAgeSeconds,
       httpOnly: false,
+      domain: ".globber-fe.store",
     });
 
     cookieStore.set("member_id", memberId.toString(), {
       path: "/",
       maxAge: maxAgeSeconds,
       httpOnly: false,
+      domain: ".globber-fe.store",
     });
 
     if (uuid) {
@@ -43,6 +46,7 @@ export async function GET(request: NextRequest) {
         path: "/",
         maxAge: maxAgeSeconds,
         httpOnly: false,
+        domain: ".globber-fe.store",
       });
     }
 
@@ -52,10 +56,12 @@ export async function GET(request: NextRequest) {
 
     if (firstLogin === "true") {
       // 신규 사용자 - 도시 선택 페이지로 이동
-      return NextResponse.redirect(new URL("/nation-select", request.url));
+      return NextResponse.redirect(
+        new URL("/nation-select", env.REDIRECT_ORIGIN)
+      );
     } else {
       // 기존 사용자 - 홈 페이지로 이동하여 여행 데이터 확인 후 라우팅
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/", env.REDIRECT_ORIGIN));
     }
   } catch (error) {
     console.error("멤버 ID 조회 중 오류:", error);
@@ -67,6 +73,7 @@ export async function GET(request: NextRequest) {
       path: "/",
       maxAge: maxAgeSeconds,
       httpOnly: false,
+      domain: ".globber-fe.store",
     });
 
     if (uuid) {
@@ -74,15 +81,18 @@ export async function GET(request: NextRequest) {
         path: "/",
         maxAge: maxAgeSeconds,
         httpOnly: false,
+        domain: ".globber-fe.store",
       });
     }
 
     if (firstLogin === "true") {
       // 신규 사용자 - 도시 선택 페이지로 이동
-      return NextResponse.redirect(new URL("/nation-select", request.url));
+      return NextResponse.redirect(
+        new URL("/nation-select", env.REDIRECT_ORIGIN)
+      );
     } else {
       // 기존 사용자 - 홈 페이지로 이동하여 여행 데이터 확인 후 라우팅
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/", env.REDIRECT_ORIGIN));
     }
   }
 }
