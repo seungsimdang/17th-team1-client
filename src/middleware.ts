@@ -6,7 +6,6 @@ const PUBLIC_PATHS: readonly string[] = [
   "/login/oauth/success",
   "/_next",
   "/api",
-  "/favicon.ico",
   "/favicon.png",
   "/robots.txt",
   "/sitemap.xml",
@@ -34,8 +33,7 @@ export function middleware(request: NextRequest) {
 
   if (token && pathname === "/login") {
     console.log(
-      `[Middleware] Redirecting authenticated user from /login to /globe (Token: exists, MemberID: ${
-        memberId || "none"
+      `[Middleware] Redirecting authenticated user from /login to /globe (Token: exists, MemberID: ${memberId || "none"
       }, UUID: ${uuid || "none"})`,
     );
     const url = request.nextUrl.clone();
@@ -53,21 +51,19 @@ export function middleware(request: NextRequest) {
   // 토큰이 있고 라우팅이 허용된 경로면 통과 (여행 데이터 확인 후 라우팅)
   if (token && allowRouting(pathname)) {
     console.log(
-      `[Middleware] Allowing routing logic for ${pathname} (Token: exists, MemberID: ${
-        memberId || "none"
+      `[Middleware] Allowing routing logic for ${pathname} (Token: exists, MemberID: ${memberId || "none"
       }, UUID: ${uuid || "none"})`,
     );
     return NextResponse.next();
   }
 
   console.log(
-    `[Middleware] Allowing access to ${pathname} (Token: ${
-      token ? "exists" : "none"
+    `[Middleware] Allowing access to ${pathname} (Token: ${token ? "exists" : "none"
     }, MemberID: ${memberId || "none"}, UUID: ${uuid || "none"})`,
   );
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image).*)"],
 };
