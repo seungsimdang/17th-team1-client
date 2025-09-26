@@ -1,15 +1,8 @@
-import type {
-  CityApiResponse,
-  CityApiParams,
-  City,
-  CitySearchResponse,
-} from "@/types/city";
-import { transformApiDataToCity } from "@/utils/countryFlagMapping";
 import { apiGet } from "@/lib/apiClient";
+import type { City, CityApiParams, CityApiResponse, CitySearchResponse } from "@/types/city";
+import { transformApiDataToCity } from "@/utils/countryFlagMapping";
 
-export const fetchCities = async (
-  params: CityApiParams = {}
-): Promise<City[]> => {
+export const fetchCities = async (params: CityApiParams = {}): Promise<City[]> => {
   try {
     const data = await apiGet<CityApiResponse>("/cities/favorites", params);
     return data.cityResponseList.map(transformApiDataToCity);

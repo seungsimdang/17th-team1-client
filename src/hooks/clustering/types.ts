@@ -41,4 +41,5 @@ export interface UseCountryBasedClusteringProps {
   zoomLevel: number;
   selectedClusterData?: CountryData[];
   globeRef: React.RefObject<GlobeInstance | null>;
+  onSelectionStackChange?: (newStack: (CountryData[] | null)[]) => void;
 }

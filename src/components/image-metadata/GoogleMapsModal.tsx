@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ImageMetadata } from '@/types/imageMetadata';
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ImageMetadata } from "@/types/imageMetadata";
 
 interface GoogleMapsModalProps {
   isOpen: boolean;
@@ -18,23 +18,15 @@ declare global {
   }
 }
 
-export function GoogleMapsModal({
-  isOpen,
-  onClose,
-  imageMetadata,
-  onLocationUpdate,
-}: GoogleMapsModalProps) {
+export function GoogleMapsModal({ isOpen, onClose, imageMetadata, onLocationUpdate }: GoogleMapsModalProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [marker, setMarker] = useState<google.maps.Marker | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<
-    google.maps.places.PlaceResult[]
-  >([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<google.maps.places.PlaceResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [currentAddress, setCurrentAddress] = useState('');
-  const [selectedPlace, setSelectedPlace] =
-    useState<google.maps.places.PlaceResult | null>(null);
+  const [currentAddress, setCurrentAddress] = useState("");
+  const [selectedPlace, setSelectedPlace] = useState<google.maps.places.PlaceResult | null>(null);
   const [_isHovering, setIsHovering] = useState(false);
 
   // 위치에서 주소 업데이트하는 함수
@@ -45,8 +37,8 @@ export function GoogleMapsModal({
     const request: google.maps.places.PlaceSearchRequest = {
       location: new window.google.maps.LatLng(lat, lng),
       radius: 100,
-      type: 'tourist_attraction', // 여러 타입 필요하면 반복 호출
-      language: 'ko',
+      type: "tourist_attraction", // 여러 타입 필요하면 반복 호출
+      language: "ko",
     };
 
     service.nearbySearch(
@@ -54,43 +46,31 @@ export function GoogleMapsModal({
       (
         results: google.maps.places.PlaceResult[] | null,
         status: google.maps.places.PlacesServiceStatus,
-        _pagination: google.maps.places.PlaceSearchPagination | null
+        _pagination: google.maps.places.PlaceSearchPagination | null,
       ) => {
-        if (
-          status === window.google.maps.places.PlacesServiceStatus.OK &&
-          results &&
-          results.length > 0
-        ) {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
           const nearestPlace = results[0];
           const detailsRequest: google.maps.places.PlaceDetailsRequest = {
-            placeId: nearestPlace.place_id || '',
-            fields: ['name', 'formatted_address'],
-            language: 'ko',
-            region: 'kr',
+            placeId: nearestPlace.place_id || "",
+            fields: ["name", "formatted_address"],
+            language: "ko",
+            region: "kr",
           };
 
           service.getDetails(
             detailsRequest,
-            (
-              details: google.maps.places.PlaceResult | null,
-              detailsStatus: google.maps.places.PlacesServiceStatus
-            ) => {
-              if (
-                detailsStatus ===
-                  window.google.maps.places.PlacesServiceStatus.OK &&
-                details &&
-                details.name
-              ) {
+            (details: google.maps.places.PlaceResult | null, detailsStatus: google.maps.places.PlacesServiceStatus) => {
+              if (detailsStatus === window.google.maps.places.PlacesServiceStatus.OK && details && details.name) {
                 setCurrentAddress(details.name);
               } else {
                 fallbackToGeocoding(lat, lng);
               }
-            }
+            },
           );
         } else {
           fallbackToGeocoding(lat, lng);
         }
-      }
+      },
     );
   };
 
@@ -98,27 +78,19 @@ export function GoogleMapsModal({
   const fallbackToGeocoding = (lat: number, lng: number) => {
     const geocoder = new window.google.maps.Geocoder();
     geocoder.geocode(
-      { location: { lat, lng }, language: 'ko', region: 'kr' },
-      (
-        results: google.maps.GeocoderResult[] | null,
-        status: google.maps.GeocoderStatus
-      ) => {
-        if (status === 'OK' && results && results[0]) {
+      { location: { lat, lng }, language: "ko", region: "kr" },
+      (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
+        if (status === "OK" && results && results[0]) {
           const address = results[0].formatted_address;
           setCurrentAddress(address);
         }
-      }
+      },
     );
   };
 
   // 클릭한 위치의 장소 정보 가져오기
-  const getPlaceInfoFromLocation = (
-    lat: number,
-    lng: number,
-    mapInstance?: google.maps.Map
-  ) => {
-    if (!window.google || !window.google.maps || !window.google.maps.places)
-      return;
+  const getPlaceInfoFromLocation = (lat: number, lng: number, mapInstance?: google.maps.Map) => {
+    if (!window.google || !window.google.maps || !window.google.maps.places) return;
 
     const currentMap = mapInstance || map;
     if (!currentMap) {
@@ -149,8 +121,8 @@ export function GoogleMapsModal({
 
         const request: google.maps.places.TextSearchRequest = {
           query: searchQueries[searchIndex],
-          language: 'ko',
-          region: 'kr',
+          language: "ko",
+          region: "kr",
         };
 
         service.textSearch(
@@ -158,13 +130,9 @@ export function GoogleMapsModal({
           (
             results: google.maps.places.PlaceResult[] | null,
             status: google.maps.places.PlacesServiceStatus,
-            _pagination: google.maps.places.PlaceSearchPagination | null
+            _pagination: google.maps.places.PlaceSearchPagination | null,
           ) => {
-            if (
-              status === window.google.maps.places.PlacesServiceStatus.OK &&
-              results &&
-              results.length > 0
-            ) {
+            if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
               const place = results[0];
               if (place.place_id) {
                 getPlaceDetails(place.place_id, place);
@@ -173,7 +141,7 @@ export function GoogleMapsModal({
               searchIndex++;
               tryNextSearch();
             }
-          }
+          },
         );
       };
 
@@ -185,7 +153,7 @@ export function GoogleMapsModal({
       const request: google.maps.places.PlaceSearchRequest = {
         location: new window.google.maps.LatLng(lat, lng),
         radius: 50,
-        language: 'ko',
+        language: "ko",
       };
 
       service.nearbySearch(
@@ -193,52 +161,31 @@ export function GoogleMapsModal({
         (
           results: google.maps.places.PlaceResult[] | null,
           status: google.maps.places.PlacesServiceStatus,
-          _pagination: google.maps.places.PlaceSearchPagination | null
+          _pagination: google.maps.places.PlaceSearchPagination | null,
         ) => {
-          if (
-            status === window.google.maps.places.PlacesServiceStatus.OK &&
-            results &&
-            results.length > 0
-          ) {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && results && results.length > 0) {
             const place = results[0];
             getPlaceDetails(place.place_id!, place);
           } else {
             updateAddressFromLocation(lat, lng);
           }
-        }
+        },
       );
     };
 
     // 장소 상세 정보 가져오기
-    const getPlaceDetails = (
-      placeId: string,
-      originalPlace: google.maps.places.PlaceResult
-    ) => {
+    const getPlaceDetails = (placeId: string, originalPlace: google.maps.places.PlaceResult) => {
       const request: google.maps.places.PlaceDetailsRequest = {
         placeId,
-        fields: [
-          'name',
-          'formatted_address',
-          'rating',
-          'user_ratings_total',
-          'types',
-          'photos',
-          'url',
-        ],
-        language: 'ko',
-        region: 'kr',
+        fields: ["name", "formatted_address", "rating", "user_ratings_total", "types", "photos", "url"],
+        language: "ko",
+        region: "kr",
       };
 
       service.getDetails(
         request,
-        (
-          details: google.maps.places.PlaceResult | null,
-          status: google.maps.places.PlacesServiceStatus
-        ) => {
-          if (
-            status === window.google.maps.places.PlacesServiceStatus.OK &&
-            details
-          ) {
+        (details: google.maps.places.PlaceResult | null, status: google.maps.places.PlacesServiceStatus) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && details) {
             const koreanName = details.name;
             const koreanAddress = details.formatted_address;
             if (koreanName) {
@@ -251,13 +198,13 @@ export function GoogleMapsModal({
               setCurrentAddress(koreanName);
             } else {
               setSelectedPlace(originalPlace);
-              setCurrentAddress(originalPlace.name || '');
+              setCurrentAddress(originalPlace.name || "");
             }
           } else {
             setSelectedPlace(originalPlace);
-            setCurrentAddress(originalPlace.name || '');
+            setCurrentAddress(originalPlace.name || "");
           }
-        }
+        },
       );
     };
 
@@ -277,17 +224,17 @@ export function GoogleMapsModal({
       streetViewControl: true,
       fullscreenControl: true,
       clickableIcons: true,
-      gestureHandling: 'greedy',
+      gestureHandling: "greedy",
     });
 
     const markerInstance = new window.google.maps.Marker({
       position: { lat: initialLat, lng: initialLng },
       map: mapInstance,
       draggable: true,
-      title: '사진 촬영 위치',
+      title: "사진 촬영 위치",
     });
 
-    markerInstance.addListener('dragend', () => {
+    markerInstance.addListener("dragend", () => {
       const position = markerInstance.getPosition();
       if (!position) return;
       const lat = position.lat();
@@ -295,7 +242,7 @@ export function GoogleMapsModal({
       getPlaceInfoFromLocation(lat, lng, mapInstance);
     });
 
-    mapInstance.addListener('click', (event: google.maps.MapMouseEvent) => {
+    mapInstance.addListener("click", (event: google.maps.MapMouseEvent) => {
       if (!event.latLng) return;
       const lat = event.latLng.lat();
       const lng = event.latLng.lng();
@@ -303,11 +250,11 @@ export function GoogleMapsModal({
       getPlaceInfoFromLocation(lat, lng, mapInstance);
     });
 
-    mapInstance.addListener('mousemove', () => {
+    mapInstance.addListener("mousemove", () => {
       setIsHovering(true);
     });
 
-    mapInstance.addListener('mouseout', () => {
+    mapInstance.addListener("mouseout", () => {
       setIsHovering(false);
     });
 
@@ -350,7 +297,7 @@ export function GoogleMapsModal({
 
     const request: google.maps.places.TextSearchRequest = {
       query: searchQuery,
-      language: 'ko',
+      language: "ko",
     };
 
     service.textSearch(
@@ -358,18 +305,15 @@ export function GoogleMapsModal({
       (
         results: google.maps.places.PlaceResult[] | null,
         status: google.maps.places.PlacesServiceStatus,
-        _pagination: google.maps.places.PlaceSearchPagination | null
+        _pagination: google.maps.places.PlaceSearchPagination | null,
       ) => {
         setIsSearching(false);
-        if (
-          status === window.google.maps.places.PlacesServiceStatus.OK &&
-          results
-        ) {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
           setSearchResults(results.slice(0, 5));
         } else {
           setSearchResults([]);
         }
-      }
+      },
     );
   };
 
@@ -387,35 +331,29 @@ export function GoogleMapsModal({
     const service = new window.google.maps.places.PlacesService(map);
     const request: google.maps.places.PlaceDetailsRequest = {
       placeId: place.place_id!,
-      fields: ['name', 'formatted_address', 'types'],
-      language: 'ko',
-      region: 'kr',
+      fields: ["name", "formatted_address", "types"],
+      language: "ko",
+      region: "kr",
     };
 
     service.getDetails(
       request,
-      (
-        details: google.maps.places.PlaceResult | null,
-        status: google.maps.places.PlacesServiceStatus
-      ) => {
-        if (
-          status === window.google.maps.places.PlacesServiceStatus.OK &&
-          details
-        ) {
+      (details: google.maps.places.PlaceResult | null, status: google.maps.places.PlacesServiceStatus) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && details) {
           const koreanName = details.name;
           if (koreanName) {
             setCurrentAddress(koreanName);
           } else {
-            setCurrentAddress(place.name || place.formatted_address || '');
+            setCurrentAddress(place.name || place.formatted_address || "");
           }
         } else {
-          setCurrentAddress(place.name || place.formatted_address || '');
+          setCurrentAddress(place.name || place.formatted_address || "");
         }
-      }
+      },
     );
 
     setSearchResults([]);
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   // 위치 저장
@@ -455,7 +393,7 @@ export function GoogleMapsModal({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               placeholder="장소를 검색하세요..."
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
             />
@@ -464,7 +402,7 @@ export function GoogleMapsModal({
               disabled={isSearching}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 font-medium"
             >
-              {isSearching ? '검색중...' : '검색'}
+              {isSearching ? "검색중..." : "검색"}
             </button>
           </div>
 
@@ -478,9 +416,7 @@ export function GoogleMapsModal({
                   className="p-2 hover:bg-gray-100 rounded cursor-pointer"
                 >
                   <div className="font-medium text-black">{place.name}</div>
-                  <div className="text-sm text-gray-600">
-                    {place.formatted_address}
-                  </div>
+                  <div className="text-sm text-gray-600">{place.formatted_address}</div>
                 </div>
               ))}
             </div>

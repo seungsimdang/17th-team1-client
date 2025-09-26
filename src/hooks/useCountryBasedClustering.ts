@@ -23,6 +23,7 @@ export const useCountryBasedClustering = ({
   zoomLevel,
   selectedClusterData,
   globeRef,
+  onSelectionStackChange,
 }: UseCountryBasedClusteringProps) => {
   // State management - 기획에 맞게 업데이트
   const [state, setState] = useState<ClusteringState>({
@@ -83,26 +84,35 @@ export const useCountryBasedClustering = ({
   // 핸들러 생성 - 기획 요구사항에 맞게 업데이트
   const handleClusterSelect = useCallback(
     createClusterSelectHandler(setState, setSelectionStack, setLastRotation, selectedClusterData),
-    [setState, setSelectionStack, setLastRotation, selectedClusterData],
+    [selectedClusterData],
   );
 
-  const handleZoomChange = useCallback(
-    createZoomChangeHandler(setState, setZoomStack, setSelectionStack, state.mode),
-    [setState, setZoomStack, setSelectionStack, state.mode],
-  );
+  const handleZoomChange = useCallback(createZoomChangeHandler(setState, setZoomStack, setSelectionStack, state.mode), [
+    state.mode,
+  ]);
 
   const handleGlobeRotation = useCallback(
-    createGlobeRotationHandler(
-      setState,
-      setSelectionStack,
-      setLastRotation,
+    (lat: number, lng: number) => {
+      const rotationHandler = createGlobeRotationHandler(
+        setState,
+        setSelectionStack,
+        setLastRotation,
+        state.mode,
+        state.selectedCluster,
+        lastRotation,
+        state.isZoomAnimating,
+        onSelectionStackChange, // 콜백 전달
+      );
+      rotationHandler(lat, lng);
+    },
+    [
       state.mode,
       state.selectedCluster,
+      state.isZoomAnimating,
       lastRotation,
       selectionStack.length,
-      state.isZoomAnimating, // 줌 애니메이션 상태 전달
-    ),
-    [state.mode, state.selectedCluster, state.isZoomAnimating, lastRotation.lat, lastRotation.lng, selectionStack.length],
+      onSelectionStackChange,
+    ],
   );
 
   const resetGlobe = useCallback(() => {

@@ -8,13 +8,12 @@ import type { CountryData } from "@/data/travelPatterns";
 // 두 지점 간의 거리를 계산하는 함수 (구면 거리)
 export const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
   const R = 6371; // 지구 반지름 (km)
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
   const a =
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng/2) * Math.sin(dLng/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
 
@@ -22,9 +21,14 @@ export const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2
 export const calculateBoundingBox = (cities: CountryData[]) => {
   if (cities.length === 0) {
     return {
-      minLat: 0, maxLat: 0, minLng: 0, maxLng: 0,
-      centerLat: 0, centerLng: 0,
-      latRange: 0, lngRange: 0
+      minLat: 0,
+      maxLat: 0,
+      minLng: 0,
+      maxLng: 0,
+      centerLat: 0,
+      centerLng: 0,
+      latRange: 0,
+      lngRange: 0,
     };
   }
 
@@ -45,9 +49,9 @@ export const calculateBoundingBox = (cities: CountryData[]) => {
   if (lngRange > 180) {
     // 경도가 180도를 넘어가는 경우 (예: 일본-미국 서부)
     // 더 짧은 경로를 찾기 위해 음수 경도를 양수로 변환
-    const adjustedCities = cities.map(city => ({
+    const adjustedCities = cities.map((city) => ({
       ...city,
-      adjustedLng: city.lng < 0 ? city.lng + 360 : city.lng
+      adjustedLng: city.lng < 0 ? city.lng + 360 : city.lng,
     }));
 
     let adjustedMinLng = adjustedCities[0].adjustedLng;
@@ -87,7 +91,7 @@ export const calculateBoundingBox = (cities: CountryData[]) => {
 export const calculateOptimalZoom = (
   boundingBox: ReturnType<typeof calculateBoundingBox>,
   _viewportWidth: number = 512,
-  _viewportHeight: number = 512
+  _viewportHeight: number = 512,
 ): number => {
   const { latRange, lngRange } = boundingBox;
 
@@ -168,7 +172,7 @@ export const calculateAnimationDuration = (
   currentAltitude: number,
   targetLat: number,
   targetLng: number,
-  targetAltitude: number
+  targetAltitude: number,
 ): number => {
   // 거리 기반으로 애니메이션 시간 계산
   const distance = calculateDistance(currentLat, currentLng, targetLat, targetLng);

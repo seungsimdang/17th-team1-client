@@ -23,9 +23,7 @@ export const PopularCitiesList = ({
   hasSearched = false,
 }: PopularCitiesListProps) => {
   const selectedCities = cities.filter((city) => selectedCityIds.has(city.id));
-  const availableCities = cities.filter(
-    (city) => !selectedCityIds.has(city.id)
-  );
+  const availableCities = cities.filter((city) => !selectedCityIds.has(city.id));
 
   if (cities.length === 0 && !isLoading && !isSearching && hasSearched) {
     return (
@@ -48,9 +46,7 @@ export const PopularCitiesList = ({
           isSelected={true}
           onAdd={onAddCity}
           onRemove={onRemoveCity}
-          showDivider={
-            index < selectedCities.length - 1 || availableCities.length > 0
-          }
+          showDivider={index < selectedCities.length - 1 || availableCities.length > 0}
         />
       ))}
 

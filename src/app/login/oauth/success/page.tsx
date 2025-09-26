@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import LoadingUI from "@/components/login/LoadingUI";
 
 const OauthSuccessContent = () => {

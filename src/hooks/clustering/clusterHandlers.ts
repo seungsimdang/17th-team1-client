@@ -67,8 +67,8 @@ export const createGlobeRotationHandler = (
   mode: string,
   selectedCluster: string | null,
   lastRotation: { lat: number; lng: number },
-  selectionStackLength: number,
   isZoomAnimating: boolean, // 줌 애니메이션 상태 추가
+  onSelectionStackChange?: (newStack: (CountryData[] | null)[]) => void, // 선택 스택 변경 콜백 추가
 ) => {
   return (lat: number, lng: number) => {
     // 줌 애니메이션 중에는 회전 로직 비활성화
@@ -92,10 +92,18 @@ export const createGlobeRotationHandler = (
             lastInteraction: Date.now(),
           }));
 
-          // 선택 스택을 한 단계 복원
-          if (selectionStackLength > 0) {
-            setSelectionStack((stack) => stack.slice(0, -1));
-          }
+          // selectionStack의 마지막 항목만 제거하여 이전 상태로 복원
+          // 완전 초기화하지 않고 한 단계 상위로 복원
+          setSelectionStack((stack) => {
+            const newStack = stack.length === 0 ? stack : stack.slice(0, -1);
+
+            // 선택 스택 변경을 부모에게 알림
+            if (onSelectionStackChange) {
+              onSelectionStackChange(newStack);
+            }
+
+            return newStack;
+          });
         }, AUTO_CLUSTER_DELAY);
 
         // 회전 위치 업데이트

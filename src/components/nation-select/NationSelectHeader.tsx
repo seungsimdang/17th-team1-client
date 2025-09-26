@@ -5,10 +5,7 @@ interface NationSelectHeaderProps {
   onSearchChange: (value: string) => void;
 }
 
-export const NationSelectHeader = ({
-  searchValue,
-  onSearchChange,
-}: NationSelectHeaderProps) => {
+export const NationSelectHeader = ({ searchValue, onSearchChange }: NationSelectHeaderProps) => {
   return (
     <div className="mb-8">
       <h1 className="text-text-primary text-2xl font-bold leading-[31px] mb-10">

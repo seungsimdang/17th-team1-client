@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 const KakaoLoginButton = () => {
   const router = useRouter();
 
   const handleLogin = () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
     const envRedirect = process.env.NEXT_PUBLIC_REDIRECT_ORIGIN;
     const redirectOrigin = envRedirect ?? origin;
 
-    const url = 'https://globber.store/oauth2/authorization/kakao';
+    const url = "https://globber.store/oauth2/authorization/kakao";
     const finalUrl = `${url}?redirect=${encodeURIComponent(redirectOrigin)}`;
     router.push(finalUrl);
   };
@@ -23,7 +23,10 @@ const KakaoLoginButton = () => {
       aria-label="카카오로 로그인"
     >
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-        <path fill="#000" d="M12 3C6.477 3 2 6.477 2 10.769c0 2.63 1.816 4.94 4.54 6.258-.158.552-.57 1.995-.653 2.309-.103.402.147.395.31.287.128-.083 2.03-1.381 2.846-1.936.329.047.667.072 1.013.072 5.523 0 10-3.477 10-7.759C20.056 6.477 17.523 3 12 3z" />
+        <path
+          fill="#000"
+          d="M12 3C6.477 3 2 6.477 2 10.769c0 2.63 1.816 4.94 4.54 6.258-.158.552-.57 1.995-.653 2.309-.103.402.147.395.31.287.128-.083 2.03-1.381 2.846-1.936.329.047.667.072 1.013.072 5.523 0 10-3.477 10-7.759C20.056 6.477 17.523 3 12 3z"
+        />
       </svg>
       카카오로 시작하기
     </button>
