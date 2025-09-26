@@ -52,13 +52,13 @@ await apiDelete("/globe/123", token);
 
 ### 도시 서비스
 ```typescript
-import { fetchCities, getCitiesForSSR } from "@/services/cityService";
+import { fetchCities } from "@/services/cityService";
 
 // 클라이언트에서 사용
 const cities = await fetchCities({ limit: 20, offset: 0 });
 
 // SSR에서 사용
-const initialCities = await getCitiesForSSR(20);
+const initialCities = await fetchCities({ limit: 20 });
 ```
 
 ### 인증 서비스
