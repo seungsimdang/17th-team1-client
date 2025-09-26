@@ -9,7 +9,7 @@ import { GlobeHeader } from "@/components/globe/GlobeHeader";
 import { GlobeLoading } from "@/components/loading/GlobeLoading";
 import type { CountryBasedGlobeRef } from "@/components/react-globe/CountryBasedGlobe";
 import { useGlobeState } from "@/hooks/useGlobeState";
-import { getGlobeData } from "@/services/memberService";
+import { getGlobeData, getTravelInsight } from "@/services/memberService";
 import type { TravelPattern } from "@/types/travelPatterns";
 import { getAuthInfo } from "@/utils/cookies";
 import { mapGlobeDataToTravelPatterns } from "@/utils/globeDataMapper";
@@ -25,6 +25,7 @@ const GlobePrototype = () => {
   const globeRef = useRef<CountryBasedGlobeRef>(null);
   const [travelPatterns, setTravelPatterns] = useState<TravelPattern[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [travelInsight, setTravelInsight] = useState<string>("");
 
   // Globe 상태 관리
   const { isZoomed, selectedClusterData, handleClusterSelect, handleZoomChange, resetGlobe } =
@@ -32,25 +33,31 @@ const GlobePrototype = () => {
 
   // 실제 API 데이터 로드
   useEffect(() => {
-    const loadGlobeData = async () => {
+    const loadData = async () => {
       try {
-        const { uuid } = getAuthInfo();
-        if (!uuid) {
+        const { uuid, memberId } = getAuthInfo();
+        if (!uuid || !memberId) {
           return;
         }
 
-        const globeResponse = await getGlobeData(uuid);
+        const [globeResponse, insightResponse] = await Promise.all([
+          getGlobeData(uuid),
+          getTravelInsight(parseInt(memberId, 10)),
+        ]);
+
         if (globeResponse?.data) {
           const mappedPatterns = mapGlobeDataToTravelPatterns(globeResponse.data);
           setTravelPatterns(mappedPatterns);
         }
+
+        setTravelInsight(insightResponse || "");
       } catch {
         // 에러 처리
       }
     };
 
-    // API 데이터만 먼저 로드
-    loadGlobeData();
+    // API 데이터 로드
+    loadData();
   }, []);
 
   const hasBackButton = isZoomed || selectedClusterData !== null;
@@ -85,7 +92,7 @@ const GlobePrototype = () => {
     >
       {/* 상단 헤더 - position absolute */}
       <div className="absolute top-0 left-0 right-0 z-10 px-4">
-        <GlobeHeader isZoomed={isZoomed || selectedClusterData !== null} />
+        <GlobeHeader isZoomed={isZoomed || selectedClusterData !== null} travelInsight={travelInsight} />
       </div>
 
       {/* Country Based Globe 컴포넌트 - 전체 화면 사용 */}
