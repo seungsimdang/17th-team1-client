@@ -3,7 +3,7 @@
  * 나라 클러스터 클릭 시 해당 국가의 모든 도시들이 화면에 fit되도록 계산
  */
 
-import type { CountryData } from "@/data/travelPatterns";
+import type { CountryData } from "@/types/travelPatterns";
 
 // 두 지점 간의 거리를 계산하는 함수 (구면 거리)
 export const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {

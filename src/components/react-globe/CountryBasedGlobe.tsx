@@ -6,9 +6,9 @@ import type React from "react";
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { ANIMATION_DURATION, COLORS, EXTERNAL_URLS, GLOBE_CONFIG } from "@/constants/globe";
 import { VIEWPORT_DEFAULTS } from "@/constants/zoomLevels";
-import type { TravelPattern } from "@/data/travelPatterns";
 import { type ClusterData, useCountryBasedClustering } from "@/hooks/useCountryBasedClustering";
 import { useGlobeState } from "@/hooks/useGlobeState";
+import type { TravelPattern } from "@/types/travelPatterns";
 
 // 타입 정의
 interface PointOfView {
@@ -62,7 +62,7 @@ export interface CountryBasedGlobeRef {
 }
 
 const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProps>(
-  ({ travelPatterns, currentGlobeIndex, onClusterSelect, onZoomChange }, ref) => {
+  ({ travelPatterns, currentGlobeIndex: _, onClusterSelect, onZoomChange }, ref) => {
     const globeRef = useRef<GlobeInstance | null>(null);
     const [globeLoading, setGlobeLoading] = useState(true);
     const [globeError, setGlobeError] = useState<string | null>(null);
@@ -80,14 +80,10 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
       currentPattern,
       handleZoomChange: globalHandleZoomChange,
       handleClusterSelect: globalHandleClusterSelect,
-      handlePatternChange: localHandlePatternChange, // 이름 변경
       resetGlobe,
     } = useGlobeState(travelPatterns);
 
-    // 부모로부터 받은 currentGlobeIndex를 내부 상태에 동기화
-    useEffect(() => {
-      localHandlePatternChange(currentGlobeIndex);
-    }, [currentGlobeIndex, localHandlePatternChange]);
+    // currentGlobeIndex는 항상 0이므로 동기화 불필요
 
     // selectionStack 변경 시 selectedClusterData 업데이트 콜백
     const handleSelectionStackChange = useCallback(
@@ -163,6 +159,7 @@ const CountryBasedGlobe = forwardRef<CountryBasedGlobeRef, CountryBasedGlobeProp
           }
 
           const countriesData = await response.json();
+          console.log("countriesData", countriesData);
           const features = countriesData?.features || [];
           setCountriesData(features);
           setGlobeLoading(false);
