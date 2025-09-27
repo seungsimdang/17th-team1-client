@@ -1,5 +1,5 @@
-import { fetchCities } from "@/services/cityService";
 import { NationSelectClient } from "@/components/nation-select/NationSelectClient";
+import { fetchCities } from "@/services/cityService";
 
 export const dynamic = "force-dynamic";
 
