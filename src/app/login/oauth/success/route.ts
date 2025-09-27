@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-import { getMemberId } from "@/services/memberService";
+import { type NextRequest, NextResponse } from "next/server";
 import { env } from "@/config/env";
+import { getMemberId } from "@/services/memberService";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -14,9 +14,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", env.REDIRECT_ORIGIN));
   }
 
-  const cleanToken = accessToken.startsWith("Bearer ")
-    ? accessToken.substring(7)
-    : accessToken;
+  const cleanToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
 
   try {
     // 멤버 ID 조회 API 호출
@@ -50,15 +48,11 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    console.log(
-      `멤버 ID 저장 완료: ${memberId}${uuid ? `, UUID: ${uuid}` : ""}`
-    );
+    console.log(`멤버 ID 저장 완료: ${memberId}${uuid ? `, UUID: ${uuid}` : ""}`);
 
     if (firstLogin === "true") {
       // 신규 사용자 - 도시 선택 페이지로 이동
-      return NextResponse.redirect(
-        new URL("/nation-select", env.REDIRECT_ORIGIN)
-      );
+      return NextResponse.redirect(new URL("/nation-select", env.REDIRECT_ORIGIN));
     } else {
       // 기존 사용자 - 홈 페이지로 이동하여 여행 데이터 확인 후 라우팅
       return NextResponse.redirect(new URL("/", env.REDIRECT_ORIGIN));
@@ -87,9 +81,7 @@ export async function GET(request: NextRequest) {
 
     if (firstLogin === "true") {
       // 신규 사용자 - 도시 선택 페이지로 이동
-      return NextResponse.redirect(
-        new URL("/nation-select", env.REDIRECT_ORIGIN)
-      );
+      return NextResponse.redirect(new URL("/nation-select", env.REDIRECT_ORIGIN));
     } else {
       // 기존 사용자 - 홈 페이지로 이동하여 여행 데이터 확인 후 라우팅
       return NextResponse.redirect(new URL("/", env.REDIRECT_ORIGIN));

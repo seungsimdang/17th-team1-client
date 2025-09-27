@@ -106,14 +106,15 @@ export const createCountryClusterHTML = (
         ${countryName}
       </span>
       <!-- 기획서에 맞는 도시 개수 원형 배지 (복수개일 경우만) -->
-      ${cityCount >= 1
-      ? `<div style="${styles.countBadge}">
+      ${
+        cityCount >= 1
+          ? `<div style="${styles.countBadge}">
         <span>
           ${cityCount}
         </span>
       </div>`
-      : ""
-    }
+          : ""
+      }
     </div>
   `;
 };
@@ -133,7 +134,7 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
 };
 
 // 도시 클릭 핸들러 (일시적으로 비활성화)
-export const createCityClickHandler = (cityName: string) => {
+export const createCityClickHandler = (_cityName: string) => {
   return (
     // biome-ignore lint/suspicious/noExplicitAny: Event handler type
     event: any,
