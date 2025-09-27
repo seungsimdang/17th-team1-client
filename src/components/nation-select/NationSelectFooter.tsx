@@ -1,5 +1,5 @@
-import type { City } from "@/types/city";
 import { Button } from "@/components/common/button";
+import type { City } from "@/types/city";
 import { SelectedCities } from "./SelectedCities";
 
 interface NationSelectFooterProps {
@@ -8,20 +8,13 @@ interface NationSelectFooterProps {
   onCreateGlobe: () => void;
 }
 
-export const NationSelectFooter = ({
-  selectedCities,
-  onRemoveCity,
-  onCreateGlobe,
-}: NationSelectFooterProps) => {
+export const NationSelectFooter = ({ selectedCities, onRemoveCity, onCreateGlobe }: NationSelectFooterProps) => {
   const isButtonEnabled = selectedCities.length > 0;
 
   return (
-    <div className="sticky bottom-0">
-      <div className="bg-surface-thirdly mx-auto w-full max-w-[512px] px-4 py-6">
-        <SelectedCities
-          selectedCities={selectedCities}
-          onRemoveCity={onRemoveCity}
-        />
+    <div className="sticky bottom-0 flex justify-center px-4">
+      <div className="bg-surface-thirdly w-full max-w-[512px] px-4 py-6">
+        <SelectedCities selectedCities={selectedCities} onRemoveCity={onRemoveCity} />
 
         <Button
           variant={isButtonEnabled ? "primary" : "disabled"}

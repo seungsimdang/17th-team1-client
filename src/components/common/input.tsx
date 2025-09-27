@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { Search, Upload } from "lucide-react";
-import SearchIcon from "@/assets/icons/search.svg";
+import { Upload } from "lucide-react";
+import { useState } from "react";
+import { CloseIcon, SearchIcon } from "@/assets/icons";
 import { cn } from "@/utils/cn";
 
 const inputVariants = cva(
@@ -33,16 +34,43 @@ export const Input = ({
   );
 };
 
-export const SearchInput = ({ className, ...props }: React.ComponentProps<"input">) => {
+export const SearchInput = ({ className, value, onChange, ...props }: React.ComponentProps<"input">) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleClear = () => {
+    if (onChange) {
+      const event = {
+        target: { value: "" }
+      } as React.ChangeEvent<HTMLInputElement>;
+      onChange(event);
+    }
+  };
+
+  const hasValue = typeof value === 'string' && value.length > 0;
+
   return (
     <div className={cn("relative", className)}>
       <div className="bg-surface-thirdly border border-surface-placeholder--4 rounded-2xl p-4 flex items-center gap-3">
-        <Search className="w-6 h-6 text-text-thirdly" />
+        <SearchIcon className="w-6 h-6 transition-colors" color={isFocused ? "white" : "#778A9B"} />
         <input
           type="text"
           className="flex-1 bg-transparent text-text-primary placeholder-text-thirdly text-base font-medium outline-none"
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          value={value}
+          onChange={onChange}
           {...props}
         />
+        {hasValue && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="flex-shrink-0 p-1 cursor-pointer flex items-center justify-center"
+            aria-label="검색어 지우기"
+          >
+            <CloseIcon color="#778A9B" className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );

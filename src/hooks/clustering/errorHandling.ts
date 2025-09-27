@@ -10,8 +10,7 @@ export class ClusteringError extends Error {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const withErrorHandling = <T extends (...args: any[]) => any>(fn: T, errorMessage: string): T => {
+export const withErrorHandling = <T extends (...args: unknown[]) => unknown>(fn: T, errorMessage: string): T => {
   return ((...args: Parameters<T>) => {
     try {
       return fn(...args);
@@ -24,8 +23,7 @@ export const withErrorHandling = <T extends (...args: any[]) => any>(fn: T, erro
   }) as T;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const safeCallback = <T extends (...args: any[]) => any>(
+export const safeCallback = <T extends (...args: unknown[]) => unknown>(
   callback: T | undefined,
   fallback?: T,
 ): T | (() => void) => {

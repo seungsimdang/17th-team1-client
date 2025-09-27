@@ -15,7 +15,6 @@ import {
   createZoomChangeHandler,
 } from "./clustering/clusterHandlers";
 import { clusterLocations, getClusterDistance } from "./clustering/clusterLogic";
-import { withErrorHandling } from "./clustering/errorHandling";
 import type { ClusterData, ClusteringState, CountryData, UseCountryBasedClusteringProps } from "./clustering/types";
 
 export const useCountryBasedClustering = ({
@@ -23,6 +22,7 @@ export const useCountryBasedClustering = ({
   zoomLevel,
   selectedClusterData,
   globeRef,
+  onSelectionStackChange,
 }: UseCountryBasedClusteringProps) => {
   // State management - 기획에 맞게 업데이트
   const [state, setState] = useState<ClusteringState>({
@@ -56,7 +56,7 @@ export const useCountryBasedClustering = ({
       if (!dataToCluster || dataToCluster.length === 0) return [];
 
       const clusterDistance = getClusterDistance(zoomLevel);
-      return withErrorHandling(clusterLocations, "Failed to cluster locations")(
+      return clusterLocations(
         dataToCluster,
         clusterDistance,
         zoomLevel,
@@ -83,26 +83,29 @@ export const useCountryBasedClustering = ({
   // 핸들러 생성 - 기획 요구사항에 맞게 업데이트
   const handleClusterSelect = useCallback(
     createClusterSelectHandler(setState, setSelectionStack, setLastRotation, selectedClusterData),
-    [setState, setSelectionStack, setLastRotation, selectedClusterData],
+    [],
   );
 
   const handleZoomChange = useCallback(
     createZoomChangeHandler(setState, setZoomStack, setSelectionStack, state.mode),
-    [setState, setZoomStack, setSelectionStack, state.mode],
+    [],
   );
 
   const handleGlobeRotation = useCallback(
-    createGlobeRotationHandler(
-      setState,
-      setSelectionStack,
-      setLastRotation,
-      state.mode,
-      state.selectedCluster,
-      lastRotation,
-      selectionStack.length,
-      state.isZoomAnimating, // 줌 애니메이션 상태 전달
-    ),
-    [state.mode, state.selectedCluster, state.isZoomAnimating, lastRotation.lat, lastRotation.lng, selectionStack.length],
+    (lat: number, lng: number) => {
+      const rotationHandler = createGlobeRotationHandler(
+        setState,
+        setSelectionStack,
+        setLastRotation,
+        state.mode,
+        state.selectedCluster,
+        lastRotation,
+        state.isZoomAnimating,
+        onSelectionStackChange, // 콜백 전달
+      );
+      rotationHandler(lat, lng);
+    },
+    [state.mode, state.selectedCluster, state.isZoomAnimating, lastRotation, onSelectionStackChange],
   );
 
   const resetGlobe = useCallback(() => {

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import Image from "next/image";
+import { useCallback, useId, useMemo, useState } from "react";
 import { processSingleFile } from "@/lib/processFile";
 import type { ImageMetadata } from "@/types/imageMetadata";
 import { FixedSaveButton } from "./FixedSaveButton";
@@ -12,11 +13,12 @@ interface ImageMetadataProps {
   initialCity?: string;
 }
 
-export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
+export default function ImageMetadataComponent({ initialCity }: ImageMetadataProps) {
   const [metadataList, setMetadataList] = useState<ImageMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedImage, setSelectedImage] = useState<ImageMetadata | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const fileUploadId = useId();
   const [_keyword, _setKeyword] = useState("");
   const [isMapsModalOpen, setIsMapsModalOpen] = useState(false);
   const [selectedImageForMaps, setSelectedImageForMaps] = useState<ImageMetadata | null>(null);
@@ -97,7 +99,15 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
           <div className="bg-[#0f1012] rounded-[28px] text-center border border-[#1f2023] min-h-[50vh] flex flex-col justify-center relative overflow-hidden">
             <div className="mb-6 pointer-events-none">
               <div className="w-20 h-20 bg-[#1e1f22] rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-10 h-10 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  role="img"
+                  aria-hidden="true"
+                >
+                  <title>Upload image icon</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -116,9 +126,11 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
               accept="image/*,image/heic"
               onChange={handleFileUpload}
               className="hidden"
-              id="file-upload"
+              id={fileUploadId}
             />
-            <label htmlFor="file-upload" className="absolute inset-0 cursor-pointer" />
+            <label htmlFor={fileUploadId} className="absolute inset-0 cursor-pointer">
+              <span className="sr-only">이미지 파일 선택</span>
+            </label>
           </div>
         </div>
         <FixedSaveButton disabled />
@@ -134,16 +146,23 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
         <div className="px-6 mb-6">
           <div className="grid grid-cols-3 gap-3">
             {metadataList.map((metadata) => (
-              <div
+              <button
+                type="button"
                 key={metadata.id}
                 onClick={() => handleImageSelect(metadata)}
-                className="aspect-square bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors relative"
+                className="aspect-square bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors relative border-0 p-0 w-full"
               >
-                <img src={metadata.imagePreview} alt={metadata.fileName} className="w-full h-full object-cover" />
+                <Image
+                  src={metadata.imagePreview}
+                  alt={metadata.fileName}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
                 {metadata.status === "completed" && (
                   <div className="absolute top-2 right-2 w-3 h-3 bg-green-500 rounded-full"></div>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -178,11 +197,13 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
                   style={{ transform: `translateX(-${currentIndex * 100}%)` }}
                 >
                   {images.map((img) => (
-                    <div key={img.id} className="w-full h-[50vh] flex-shrink-0 bg-black">
-                      <img
+                    <div key={img.id} className="w-full h-[50vh] flex-shrink-0 bg-black relative">
+                      <Image
                         src={img.imagePreview}
                         alt={img.fileName}
-                        className="w-full h-full object-cover object-center"
+                        fill
+                        className="object-cover object-center"
+                        sizes="100vw"
                       />
                     </div>
                   ))}
@@ -191,7 +212,8 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
               {shown.timestamp && (
                 <div className="absolute top-3 left-3">
                   <div className="bg-black/70 text-white px-3 py-1 rounded-full text-xs flex items-center">
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" role="img" aria-hidden="true">
+                      <title>Calendar icon</title>
                       <path
                         fillRule="evenodd"
                         d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
@@ -203,11 +225,14 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
                 </div>
               )}
               <div className="absolute top-3 left-28">
-                <div
-                  className="bg-black/70 text-white px-3 py-1 rounded-full text-xs flex items-center cursor-pointer hover:bg-black/80 transition-colors"
+                <button
+                  type="button"
+                  className="bg-black/70 text-white px-3 py-1 rounded-full text-xs flex items-center cursor-pointer hover:bg-black/80 transition-colors focus:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white border-0"
                   onClick={() => handleLocationClick(shown)}
+                  aria-label="Open location in maps"
                 >
-                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" role="img" aria-hidden="true">
+                    <title>Location icon</title>
                     <path
                       fillRule="evenodd"
                       d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
@@ -215,7 +240,7 @@ export default function ImageMetadata({ initialCity }: ImageMetadataProps) {
                     />
                   </svg>
                   {displayLocation || "정보 없음"}
-                </div>
+                </button>
               </div>
               {images.length > 1 && (
                 <>

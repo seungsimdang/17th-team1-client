@@ -107,7 +107,7 @@ export const createCountryClusterHTML = (
       </span>
       <!-- 기획서에 맞는 도시 개수 원형 배지 (복수개일 경우만) -->
       ${
-        cityCount > 1
+        cityCount >= 1
           ? `<div style="${styles.countBadge}">
         <span>
           ${cityCount}
@@ -133,8 +133,8 @@ export const createClusterClickHandler = (clusterId: string, onClusterClick: (cl
   };
 };
 
-// 도시 클릭 핸들러 (기존 로직 유지)
-export const createCityClickHandler = (cityName: string) => {
+// 도시 클릭 핸들러 (일시적으로 비활성화)
+export const createCityClickHandler = (_cityName: string) => {
   return (
     // biome-ignore lint/suspicious/noExplicitAny: Event handler type
     event: any,
@@ -142,8 +142,8 @@ export const createCityClickHandler = (cityName: string) => {
     event.preventDefault();
     event.stopPropagation();
 
-    // 개별 도시 클릭 시 image-metadata로 이동
-    const q = encodeURIComponent(cityName.split(",")[0]);
-    window.location.href = `/image-metadata?city=${q}`;
+    // 도시 클릭 비활성화 - image-metadata 이동 막음
+    // const q = encodeURIComponent(cityName.split(",")[0]);
+    // window.location.href = `/image-metadata?city=${q}`;
   };
 };

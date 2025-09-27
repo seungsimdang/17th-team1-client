@@ -58,6 +58,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}
             NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
+            NEXT_PUBLIC_REDIRECT_ORIGIN=${{ secrets.NEXT_PUBLIC_REDIRECT_ORIGIN }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -95,7 +96,6 @@ jobs:
               --ip 172.28.0.2 \
               -p 3000:80 \
               -e TZ=Asia/Seoul \
-              -e NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL_PROD }} \
               -e GOOGLE_MAPS_SERVER_API_KEY=${{ secrets.GOOGLE_MAPS_SERVER_API_KEY }} \
               jiohjung/globber-fe:latest
           EOF

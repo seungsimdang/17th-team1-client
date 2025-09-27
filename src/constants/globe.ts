@@ -36,8 +36,10 @@ export const COLORS = {
   ATMOSPHERE: "#4a90e2", // 대기권 색상 (파란색)
   CLUSTER: "#4a90e2", // 클러스터 마커 색상
   CLUSTER_BG: "#2c3e50", // 클러스터 배경 색상 (어두운 회색)
-  POLYGON_SIDE: "rgba(100,100,100, 0.1)", // 폴리곤 측면 색상
-  POLYGON_STROKE: "gray", // 국경선 색상 (흰색 10%와 유사)
+  // POLYGON_SIDE: "rgba(100,100,100, 0.1)", // 폴리곤 측면 색상
+  // POLYGON_STROKE: "gray", // 국경선 색상 (흰색 10%와 유사)
+  POLYGON_SIDE: "rgba(105,105,105, 0.1)", // 폴리곤 측면 색상 (dimgray와 동일한 색상)
+  POLYGON_STROKE: "dimgray", // 국경선 색상 (흰색 10%와 유사)
   INACTIVE_POLYGON: "#94cbff33", // 비활성 폴리곤 색상 (매우 연한 회색)
   GLOBE_LV1: "#0084b0", // 지구본 레벨 1 색상
   GLOBE_LV2: "#00caed", // 지구본 레벨 2 색상

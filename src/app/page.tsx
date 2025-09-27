@@ -1,27 +1,32 @@
-"use client";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { getMemberTravels } from "@/services/memberService";
+import type { MemberTravelsResponse } from "@/types/member";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+export default async function Home() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("kakao_access_token")?.value;
+  const memberId = cookieStore.get("member_id")?.value;
 
-export default function Home() {
-  const router = useRouter();
-  // TODO: API 연동 시 실제 hasGlobe 상태를 가져오는 로직으로 변경
-  const [hasGlobe, _setHasGlobe] = useState(true);
+  if (token && memberId) {
+    let travelData: MemberTravelsResponse | null = null;
 
-  useEffect(() => {
-    if (hasGlobe) {
-      router.push("/globe");
-    } else {
-      router.push("/nation-select");
+    try {
+      // 멤버 여행 데이터 조회
+      travelData = await getMemberTravels(parseInt(memberId, 10), token);
+    } catch {
+      // API 호출 실패 시 국가 선택 페이지로 이동
+      redirect("/nation-select");
     }
-  }, [router, hasGlobe]);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 text-white flex flex-col items-center justify-center px-5 py-10 min-w-[512px] mx-auto w-full">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Globber</h1>
-        <p className="text-xl text-slate-300">로딩 중...</p>
-      </div>
-    </div>
-  );
+    // 여행 데이터 유무에 따른 라우팅
+    if (travelData?.data?.travels && travelData.data.travels.length > 0) {
+      redirect("/globe");
+    } else {
+      redirect("/nation-select");
+    }
+  } else {
+    // 토큰이 없으면 로그인 페이지로 이동
+    redirect("/login");
+  }
 }
