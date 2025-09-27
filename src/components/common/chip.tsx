@@ -72,10 +72,10 @@ export const Chip = ({
         <button
           type="button"
           onClick={handleRemove}
-          className="flex-shrink-0 rounded-full hover:bg-black/10 focus:bg-black/10 transition-colors p-1 -mr-1"
+          className="flex-shrink-0 rounded-full hover:bg-black/10 focus:bg-black/10 transition-colors p-1.5 -mr-1 flex items-center justify-center"
           aria-label="칩 삭제"
         >
-          <CloseIcon width={12} height={12} />
+          <CloseIcon width={8} height={8} />
         </button>
       )}
     </Comp>
