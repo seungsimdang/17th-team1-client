@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Globber",
   description: "Depromeet 17th Team 1 Project",
   icons: {
-    icon: "assets/globe.png",
+    icon: "/assets/globe.png",
   },
 };
 
