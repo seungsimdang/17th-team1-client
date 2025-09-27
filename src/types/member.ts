@@ -17,7 +17,10 @@ export interface TravelRecord {
 export interface CreateTravelRecordsResponse {
   status: string;
   message: string;
-  data?: any;
+  data?: {
+    recordsCreated?: number;
+    [key: string]: unknown;
+  };
 }
 
 // 지구본 조회 API 응답

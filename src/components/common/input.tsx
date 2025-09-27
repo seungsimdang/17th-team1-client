@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { Upload } from "lucide-react";
 import { useState } from "react";
-import { SearchIcon } from "@/assets/icons";
+import { CloseIcon, SearchIcon } from "@/assets/icons";
 import { cn } from "@/utils/cn";
 
 const inputVariants = cva(
@@ -34,8 +34,19 @@ export const Input = ({
   );
 };
 
-export const SearchInput = ({ className, ...props }: React.ComponentProps<"input">) => {
+export const SearchInput = ({ className, value, onChange, ...props }: React.ComponentProps<"input">) => {
   const [isFocused, setIsFocused] = useState(false);
+
+  const handleClear = () => {
+    if (onChange) {
+      const event = {
+        target: { value: "" }
+      } as React.ChangeEvent<HTMLInputElement>;
+      onChange(event);
+    }
+  };
+
+  const hasValue = typeof value === 'string' && value.length > 0;
 
   return (
     <div className={cn("relative", className)}>
@@ -46,8 +57,20 @@ export const SearchInput = ({ className, ...props }: React.ComponentProps<"input
           className="flex-1 bg-transparent text-text-primary placeholder-text-thirdly text-base font-medium outline-none"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          value={value}
+          onChange={onChange}
           {...props}
         />
+        {hasValue && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="flex-shrink-0 p-1 cursor-pointer flex items-center justify-center"
+            aria-label="검색어 지우기"
+          >
+            <CloseIcon color="#778A9B" className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );

@@ -33,10 +33,7 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
     [patterns],
   );
 
-  const currentPattern = useMemo(
-    () => travelPatternsWithFlags[currentGlobeIndex],
-    [travelPatternsWithFlags],
-  );
+  const currentPattern = useMemo(() => travelPatternsWithFlags[currentGlobeIndex], [travelPatternsWithFlags]);
 
   // 핸들러 함수들
   const handleCountrySelect = useCallback((countryId: string | null) => {
@@ -129,7 +126,6 @@ export const useGlobeState = (patterns: TravelPattern[]) => {
       return () => clearTimeout(t);
     }
   }, [snapZoomTo]);
-
 
   const resetGlobe = useCallback(() => {
     setSelectedClusterData(null);

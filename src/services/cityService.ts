@@ -4,10 +4,7 @@ import { transformApiDataToCity } from "@/utils/countryFlagMapping";
 
 export const fetchCities = async (params: CityApiParams = {}): Promise<City[]> => {
   try {
-    const data = await apiGet<CityApiResponse>(
-      "/api/v1/cities/favorites",
-      params
-    );
+    const data = await apiGet<CityApiResponse>("/api/v1/cities/favorites", params);
     return data.cityResponseList.map(transformApiDataToCity);
   } catch (error) {
     console.error("Failed to fetch cities:", error);
